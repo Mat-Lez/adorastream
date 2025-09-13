@@ -5,10 +5,13 @@ A comprehensive REST API for managing movies, series, and episodes in a streamin
 ## Features
 
 - **Full CRUD Operations** for movies, series, and episodes
+- **External Rating Integration** with OMDb (IMDb) and TMDB APIs
+- **Automatic Rating Fetching** during content creation
 - **Advanced Filtering** by type, genre, rating, year, and search terms
 - **Input Validation** with comprehensive error handling
 - **RESTful API Design** following best practices
 - **In-Memory Storage** with sample data included
+- **Caching System** for external API responses
 - **Security Middleware** with Helmet and CORS
 - **Request Logging** with Morgan
 - **Health Monitoring** endpoints
@@ -21,6 +24,10 @@ A comprehensive REST API for managing movies, series, and episodes in a streamin
 # Install dependencies
 npm install
 
+# Copy environment file and configure API keys
+cp env.example .env
+# Edit .env file with your API keys
+
 # Start the server
 npm start
 
@@ -29,6 +36,19 @@ npm run dev
 ```
 
 The API will be available at `http://localhost:3000`
+
+### API Keys Setup
+
+To enable external rating fetching, you need to obtain API keys:
+
+1. **OMDb API (IMDb data)**: Get free API key from [http://www.omdbapi.com/apikey.aspx](http://www.omdbapi.com/apikey.aspx)
+2. **TMDB API**: Get free API key from [https://www.themoviedb.org/settings/api](https://www.themoviedb.org/settings/api)
+
+Add your API keys to the `.env` file:
+```env
+OMDB_API_KEY=your_omdb_api_key_here
+TMDB_API_KEY=your_tmdb_api_key_here
+```
 
 ### Health Check
 
@@ -176,6 +196,46 @@ Content-Type: application/json
 DELETE /api/content/:id
 ```
 
+#### Fetch External Rating
+```http
+POST /api/content/:id/fetch-rating
+```
+
+**Example:**
+```bash
+curl -X POST http://localhost:3000/api/content/123e4567-e89b-12d3-a456-426614174000/fetch-rating
+```
+
+#### Get Rating Service Status
+```http
+GET /api/content/rating-service/status
+```
+
+**Example:**
+```bash
+curl http://localhost:3000/api/content/rating-service/status
+```
+
+#### Clear Rating Cache
+```http
+DELETE /api/content/rating-service/cache
+```
+
+**Example:**
+```bash
+curl -X DELETE http://localhost:3000/api/content/rating-service/cache
+```
+
+#### Get Rating Cache Statistics
+```http
+GET /api/content/rating-service/cache/stats
+```
+
+**Example:**
+```bash
+curl http://localhost:3000/api/content/rating-service/cache/stats
+```
+
 ### Statistics
 
 #### Get API Statistics
@@ -193,6 +253,58 @@ GET /api/stats
     "series": 1,
     "episodes": 2,
     "averageRating": 8.78
+  }
+}
+```
+
+## External Rating Integration
+
+The API automatically fetches ratings from external sources when creating content without a rating. This feature integrates with:
+
+### Supported APIs
+
+1. **OMDb API (IMDb)**
+   - Provides IMDb ratings, Metascore, Rotten Tomatoes scores
+   - Includes detailed metadata (plot, cast, director, etc.)
+   - Free tier available
+
+2. **The Movie Database (TMDB)**
+   - Provides TMDB ratings and popularity scores
+   - Includes comprehensive metadata
+   - Free tier available
+
+### How It Works
+
+1. **Automatic Fetching**: When creating content without a rating, the system automatically queries external APIs
+2. **Rating Priority**: IMDb rating > TMDB rating > Metascore > Default (7.0)
+3. **Caching**: External data is cached for 24 hours to avoid repeated API calls
+4. **Fallback**: If external APIs fail, a default rating of 7.0 is used
+5. **Manual Fetching**: You can manually fetch ratings for existing content
+
+### External Rating Data Structure
+
+When external rating data is fetched, it includes:
+
+```json
+{
+  "externalRating": {
+    "source": "OMDb (IMDb)",
+    "imdbRating": 8.8,
+    "imdbVotes": 2500000,
+    "metascore": 84,
+    "rottenTomatoes": "87%",
+    "plot": "Movie description...",
+    "director": "Director Name",
+    "cast": ["Actor 1", "Actor 2"],
+    "genre": ["Action", "Drama"],
+    "runtime": "152 min",
+    "year": "2008",
+    "rated": "PG-13",
+    "language": "English",
+    "country": "USA",
+    "awards": "Won 2 Oscars",
+    "poster": "https://...",
+    "imdbID": "tt0468569"
   }
 }
 ```

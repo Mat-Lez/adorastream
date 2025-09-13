@@ -23,4 +23,10 @@ router.patch('/:id', idValidation, handleValidationErrors, contentController.pat
 // Delete content
 router.delete('/:id', idValidation, handleValidationErrors, contentController.deleteContent.bind(contentController));
 
+// Rating-related endpoints
+router.post('/:id/fetch-rating', idValidation, handleValidationErrors, contentController.fetchExternalRating.bind(contentController));
+router.get('/rating-service/status', contentController.getRatingServiceStatus.bind(contentController));
+router.delete('/rating-service/cache', contentController.clearRatingCache.bind(contentController));
+router.get('/rating-service/cache/stats', contentController.getRatingCacheStats.bind(contentController));
+
 module.exports = router;

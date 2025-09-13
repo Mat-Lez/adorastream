@@ -111,6 +111,54 @@ class ContentController {
       res.status(500).json(errorResponse);
     }
   }
+
+  // Fetch external rating for existing content
+  async fetchExternalRating(req, res) {
+    try {
+      const updatedContent = await this.contentService.fetchExternalRating(req.params.id);
+      const response = this.contentView.renderContent(updatedContent, 'External rating fetched and updated successfully');
+      res.json(response);
+    } catch (error) {
+      const errorResponse = this.contentView.renderError('Failed to fetch external rating', error.message);
+      res.status(500).json(errorResponse);
+    }
+  }
+
+  // Get rating service status
+  async getRatingServiceStatus(req, res) {
+    try {
+      const status = this.contentService.getRatingServiceStatus();
+      const response = this.contentView.renderContent(status, 'Rating service status retrieved');
+      res.json(response);
+    } catch (error) {
+      const errorResponse = this.contentView.renderError('Failed to get rating service status', error.message);
+      res.status(500).json(errorResponse);
+    }
+  }
+
+  // Clear rating cache
+  async clearRatingCache(req, res) {
+    try {
+      const result = this.contentService.clearRatingCache();
+      const response = this.contentView.renderContent(result, 'Rating cache cleared successfully');
+      res.json(response);
+    } catch (error) {
+      const errorResponse = this.contentView.renderError('Failed to clear rating cache', error.message);
+      res.status(500).json(errorResponse);
+    }
+  }
+
+  // Get rating cache statistics
+  async getRatingCacheStats(req, res) {
+    try {
+      const stats = this.contentService.getRatingCacheStats();
+      const response = this.contentView.renderContent(stats, 'Rating cache statistics retrieved');
+      res.json(response);
+    } catch (error) {
+      const errorResponse = this.contentView.renderError('Failed to get rating cache statistics', error.message);
+      res.status(500).json(errorResponse);
+    }
+  }
 }
 
 module.exports = ContentController;

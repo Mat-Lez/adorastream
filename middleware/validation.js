@@ -31,6 +31,11 @@ const contentValidation = [
     .isFloat({ min: 0, max: 10 })
     .withMessage('Rating must be between 0 and 10'),
   
+  body('externalRating')
+    .optional()
+    .isObject()
+    .withMessage('External rating must be an object'),
+  
   // Movie-specific validations
   body('duration')
     .if(body('type').equals('movie'))
