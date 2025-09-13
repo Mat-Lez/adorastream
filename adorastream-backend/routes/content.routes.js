@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const Content = require('../models/Content');
+const Content = require('../models/content');
 
 
 // POST create new content

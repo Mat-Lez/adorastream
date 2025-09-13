@@ -1,5 +1,5 @@
 const { Schema, model, Types } = require('mongoose');
-const cleanMongoResponse = require('./utils/responseHelper');
+const cleanMongoResponse = require('../utils/responseHelper');
 
 const WatchHistorySchema = new Schema(
   {

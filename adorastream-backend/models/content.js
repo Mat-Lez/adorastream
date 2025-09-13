@@ -41,5 +41,6 @@ const ContentSchema = new Schema(
 
 // search index
 ContentSchema.index({ title: 'text' });
+ContentSchema.index({ genres: 1 });
 ContentSchema.plugin(cleanMongoResponse);
 module.exports = model('Content', ContentSchema);

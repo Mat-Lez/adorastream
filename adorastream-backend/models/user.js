@@ -1,5 +1,5 @@
 const { Schema, model } = require('mongoose');
-const cleanMongoResponse = require('./utils/responseHelper');
+const cleanMongoResponse = require('../utils/responseHelper');
 
 const ProfileSchema = new Schema(
   {
