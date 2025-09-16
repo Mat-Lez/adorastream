@@ -35,8 +35,8 @@ exports.toggleLike = async (req, res) => {
 };
 
 
-exports.listProfileHistory = async (req, res) => {
-  const userId = req.session.user.id;
+exports.listMine = async (req, res) => {
+  const userId = req.session.user._id;
   const { profileId, completed, withContent, withProfiles } = req.query;
 
   const filter = { userId };
@@ -54,12 +54,12 @@ exports.listProfileHistory = async (req, res) => {
   }
 
   const userIds = [...new Set(histories.map(h => String(h.userId)))];
-  const users = await User.find({ id: { $in: userIds } }).select('profiles').lean();
-  const userMap = new Map(users.map(u => [String(u.id), u]));
+  const users = await User.find({ _id: { $in: userIds } }).select('profiles').lean();
+  const userMap = new Map(users.map(u => [String(u._id), u]));
 
   const rows = histories.map(h => {
     const u = userMap.get(String(h.userId));
-    const p = u?.profiles?.find(p => String(p.id) === String(h.profileId));
+    const p = u?.profiles?.find(p => String(p._id) === String(h.profileId));
     return { ...h, profileName: p?.name || '', profileAvatar: p?.avatarUrl || '' };
   });
 

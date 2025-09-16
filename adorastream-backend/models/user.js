@@ -8,6 +8,7 @@ const ProfileSchema = new Schema(
   },
   { _id: true }
 );
+ProfileSchema.plugin(cleanMongoResponse);
 
 const UserSchema = new Schema(
   {

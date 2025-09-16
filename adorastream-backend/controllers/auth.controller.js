@@ -37,6 +37,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   const email = normEmail(req.body.email);
   const password = String(req.body.password || '');
+  console.log(email, password);
 
   if (!email || !password) {
     const e = new Error('Email and password are required'); e.status = 400; throw e;
