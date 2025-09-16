@@ -1,9 +1,11 @@
 const Content = require('../models/content');
-
+const { enrichMovieRatings } = require('../services/rating.service');
 
 // POST create new content
 exports.create = async (req, res) => {
   const content = await Content.create(req.body);
+    // Fire-and-forget enrichment; do not block API response
+    enrichMovieRatings(content).catch(() => {});
   res.status(201).set('Location', `/api/content/${content.id}`).json(content);
 };
 
