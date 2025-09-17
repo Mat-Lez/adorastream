@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const User = require('../adorastream-backend/models/user');
 const Content = require('../adorastream-backend/models/content');
 const WatchHistory = require('../adorastream-backend/models/watchHistory');
+const Log = require('../adorastream-backend/models/auditLog');
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/streaming_app';
 
@@ -17,7 +18,9 @@ async function main() {
     await Promise.all([
         User.deleteMany({}),
         Content.deleteMany({}),
-        WatchHistory.deleteMany({})
+        WatchHistory.deleteMany({}),
+        Log.deleteMany({})
+
     ]);
 
     // create one user with two profiles
@@ -25,7 +28,7 @@ async function main() {
     const user = await User.create({
         email: 'alice@example.com',
         passwordHash,
-        roles: ['user'],
+        roles: ['user', 'admin'],
         profiles: [
         { name: 'Alice', avatarUrl: '/img/alice.png' },
         { name: 'Bob', avatarUrl: '/img/bob.png' }
