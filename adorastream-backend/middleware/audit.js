@@ -1,4 +1,4 @@
-const AuditLog = require('../models/AuditLog');
+const AuditLog = require('../models/auditLog');
 
 async function audit(req, res, next) {
   const started = Date.now();
