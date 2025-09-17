@@ -1,4 +1,5 @@
 const { Schema, model } = require('mongoose');
+
 const AuditLogSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User' },
   method: String,
