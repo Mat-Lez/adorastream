@@ -13,6 +13,7 @@ const historyRoutes = require('./routes/watchHistory.routes');
 
 const app = express();
 app.use(express.json());
+app.use(express.static('public'));
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/streaming_app';
 app.use(session({
