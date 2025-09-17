@@ -3,6 +3,7 @@ const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const { connectDB } = require('./db');
+const { ensureAdminFromEnv } = require('./utils/adminSeed');
 const { notFound, errorHandler } = require('./middleware/error');
 const { audit } = require('./middleware/audit');
 
@@ -36,6 +37,7 @@ app.use(errorHandler);
 
 (async () => {
   await connectDB();
+  try { await ensureAdminFromEnv(); } catch (e) { console.warn('Admin seed skipped:', e.message); }
   const port = process.env.PORT || 3000;
   app.listen(port, () => console.log(`http://localhost:${port}`));
 })();

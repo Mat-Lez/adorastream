@@ -11,10 +11,10 @@ async function api(path, method, body){
 async function onLoginSubmit(e){
   e.preventDefault();
   setMsg();
-  const email = document.getElementById('email').value.trim();
+  const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
   try {
-    await api('/api/auth/login', 'POST', { email, password });
+    await api('/api/auth/login', 'POST', { username, password });
     setMsg('Logged in successfully', 'success');
     // navigate to content listing placeholder
     setTimeout(() => location.href = '/login.html', 800);
@@ -26,10 +26,10 @@ async function onLoginSubmit(e){
 async function onRegisterSubmit(e){
   e.preventDefault();
   setMsg();
-  const email = document.getElementById('email').value.trim();
+  const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
   try {
-    await api('/api/auth/register', 'POST', { email, password });
+    await api('/api/auth/register', 'POST', { username, password });
     setMsg('Account created. You are now logged in.', 'success');
     setTimeout(() => location.href = '/login.html', 800);
   } catch (err) {

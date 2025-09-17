@@ -24,9 +24,9 @@ exports.get = async (req, res) => {
 
 // PATCH update user by ID
 exports.update = async (req, res) => {
-  const { email, roles } = req.body;
+  const { username, roles } = req.body;
   const update = {};
-  if (email) update.email = email;
+  if (username) update.username = username;
   if (roles && (req.session.user.roles || []).includes('admin')) update.roles = roles;
   const user = await User.findByIdAndUpdate(req.params.id, update, { new: true });
   if (!user) { const e = new Error('User not found'); e.status = 404; throw e; }
