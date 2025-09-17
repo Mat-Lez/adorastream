@@ -1,2 +1,3 @@
 node_modules
-cookie.txt
+package-lock.
+.env
