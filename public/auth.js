@@ -17,7 +17,7 @@ async function onLoginSubmit(e){
     await api('/api/auth/login', 'POST', { username, password });
     setMsg('Logged in successfully', 'success');
     // navigate to content listing placeholder
-    setTimeout(() => location.href = '/login.html', 800);
+    setTimeout(() => location.href = '/add_content.html', 800);
   } catch (err) {
     setMsg(err.message, 'error');
   }

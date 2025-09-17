@@ -6,17 +6,19 @@ const { connectDB } = require('./db');
 const { ensureAdminFromEnv } = require('./utils/adminSeed');
 const { notFound, errorHandler } = require('./middleware/error');
 const { audit } = require('./middleware/audit');
-
+const path = require('path');
 const authRoutes = require('./routes/auth.routes');
 const usersRoutes = require('./routes/user.routes');
 const contentRoutes = require('./routes/content.routes');
 const historyRoutes = require('./routes/watchHistory.routes');
 
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/streaming_app';
 const app = express();
+
 app.use(express.json());
 app.use(express.static('public'));
+app.use('/static', express.static(path.join(__dirname, 'public')));
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/streaming_app';
 app.use(session({
   secret: process.env.SESSION_SECRET || 'dev-secret',
   resave: false,
