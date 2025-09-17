@@ -26,7 +26,7 @@ async function main() {
     // create one user with two profiles
     const passwordHash = await bcrypt.hash('test123', 10);
     const user = await User.create({
-        email: 'alice@example.com',
+        username: 'alice',
         passwordHash,
         roles: ['user', 'admin'],
         profiles: [
@@ -37,7 +37,7 @@ async function main() {
 
     const passwordHash2 = await bcrypt.hash('test123', 10);
     const user2 = await User.create({
-        email: 'alice2@example.com',
+        username: 'matanel',
         passwordHash,
         roles: ['user', 'admin'],
         profiles: [
