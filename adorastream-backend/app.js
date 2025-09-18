@@ -6,6 +6,8 @@ const { connectDB } = require('./db');
 const { ensureAdminFromEnv } = require('./utils/adminSeed');
 const { notFound, errorHandler } = require('./middleware/error');
 const { audit } = require('./middleware/audit');
+const { requireLogin } = require('./middleware/auth');
+const path = require('path');
 
 const authRoutes = require('./routes/auth.routes');
 const usersRoutes = require('./routes/user.routes');
@@ -14,7 +16,6 @@ const historyRoutes = require('./routes/watchHistory.routes');
 
 const app = express();
 app.use(express.json());
-app.use(express.static('public'));
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/streaming_app';
 app.use(session({
@@ -26,6 +27,17 @@ app.use(session({
 }));
 
 app.use(audit);
+
+// Guarded pages (must be authenticated) - after session middleware
+app.get('/profile-selection.html', requireLogin, (_req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'profile-selection.html'));
+});
+app.get('/add-profile.html', requireLogin, (_req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'add-profile.html'));
+});
+
+// Static files (after guarded routes to avoid public access bypass)
+app.use(express.static('public'));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
