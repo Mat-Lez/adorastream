@@ -16,8 +16,12 @@ async function onLoginSubmit(e){
   try {
     const data = await api('/api/auth/login', 'POST', { username, password });
     setMsg('Logged in successfully', 'success');
+
     const userId = data?.user?.id;
     setTimeout(() => location.href = `/profile-selection.html?userId=${encodeURIComponent(userId)}`, 300);
+
+    // navigate to content listing placeholder
+
   } catch (err) {
     setMsg(err.message, 'error');
   }

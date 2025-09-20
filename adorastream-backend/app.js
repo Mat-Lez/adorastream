@@ -8,16 +8,17 @@ const { notFound, errorHandler } = require('./middleware/error');
 const { audit } = require('./middleware/audit');
 const { requireLogin } = require('./middleware/auth');
 const path = require('path');
-
 const authRoutes = require('./routes/auth.routes');
 const usersRoutes = require('./routes/user.routes');
 const contentRoutes = require('./routes/content.routes');
 const historyRoutes = require('./routes/watchHistory.routes');
 
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/streaming_app';
 const app = express();
+
 app.use(express.json());
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/streaming_app';
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'dev-secret',
   resave: false,
@@ -38,6 +39,8 @@ app.get('/add-profile.html', requireLogin, (_req, res) => {
 
 // Static files (after guarded routes to avoid public access bypass)
 app.use(express.static('public'));
+app.use('/static', express.static(path.join(__dirname, 'public')));
+
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
