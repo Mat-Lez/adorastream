@@ -1,9 +1,52 @@
 const Content = require('../models/content');
 const { enrichMovieRatings } = require('../services/rating.service');
+const upload = require('../services/videoUpload.services');
 
 // POST create new content
 exports.create = async (req, res) => {
-  const content = await Content.create(req.body);
+   // Extract and parse fields
+  const {
+    title,
+    type,
+    year,
+    genres,
+    cast,
+    description
+  } = req.body;
+
+  // Parse genres and cast
+  const genresArr = typeof genres === 'string'
+    ? genres.split(',').map(g => g.trim()).filter(Boolean)
+    : [];
+  const actorsArr = typeof cast === 'string'
+    ? cast.split(',').map(pair => {
+        const [name, role] = pair.split(' as ').map(s => s.trim());
+        return name ? { name, role } : null;
+      }).filter(Boolean)
+    : [];
+
+  // Handle files
+  let posterUrl = '';
+  let videoUrl = '';
+  if (req.files && req.files.poster && req.files.poster[0]) {
+    posterUrl = `/public/posters/${req.files.poster[0].filename}`;
+  }
+  if (req.files && req.files.video && req.files.video[0]) {
+    videoUrl = `/public/videos/${req.files.video[0].filename}`;
+  }
+
+  // Create content
+  const content = await Content.create({
+    title,
+    type,
+    year,
+    genres: genresArr,
+    actors: actorsArr,
+    synopsis: description,
+    posterUrl,
+    videoUrl
+  });
+
   // Fire-and-forget enrichment; do not block API response
   enrichMovieRatings(content).catch(() => {});
   res.status(201).set('Location', `/api/content/${content.id}`).json(content);

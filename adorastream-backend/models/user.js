@@ -12,7 +12,7 @@ ProfileSchema.plugin(cleanMongoResponse);
 
 const UserSchema = new Schema(
   {
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    username: { type: String, required: true, unique: true, lowercase: true, trim: true, maxlength: 120 },
     passwordHash: { type: String, required: true },
     roles: { type: [String], default: ['user'], enum: ['user', 'admin'] },
     profiles: {

@@ -1,0 +1,28 @@
+<!doctype html><meta charset="utf-8">
+<h2>Add Content (Admin)</h2>
+<form id="f">
+  <input name="title" placeholder="Title" required><br>
+  <select name="type"><option>movie</option><option>series</option></select><br>
+  <input name="year" type="number" placeholder="Year"><br>
+  <input name="genres" placeholder="Genres (comma separated)"><br>
+  <input name="cast" placeholder="Cast: Actor as Role, ..."><br>
+  <textarea name="description" placeholder="Description"></textarea><br>
+  Poster: <input type="file" name="poster" accept="image/*"><br>
+  Video (mp4): <input type="file" name="video" accept="video/mp4"><br>
+  <button>Add</button>
+</form>
+<pre id="out"></pre>
+<script>
+const BASE = 'http://localhost:3000';
+async function apiForm(path, form) {
+  const res = await fetch(BASE+path, { method:'POST', body: form, credentials:'include' });
+  const txt = await res.text(); try { return JSON.parse(txt) } catch { return txt }
+}
+document.querySelector('#f').onsubmit = async (e)=>{
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  console.log([...fd.entries()]);
+  const data = await apiForm('/api/content', fd);
+  document.querySelector('#out').textContent = JSON.stringify(data, null, 2);
+};
+</script>

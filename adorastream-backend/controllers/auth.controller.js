@@ -1,26 +1,24 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
 
-function normEmail(email = '') {
-  return String(email).trim().toLowerCase();
-}
+function norm(v = '') { return String(v).trim().toLowerCase(); }
 
 exports.register = async (req, res) => {
   try {
-    const email = normEmail(req.body.email);
+    const username = norm(req.body.username);
     const password = String(req.body.password || '');
 
-    if (!email || !password) {
-      const e = new Error('Email and password are required'); e.status = 400; throw e;
+    if (!username || !password) {
+      const e = new Error('username and password are required'); e.status = 400; throw e;
     }
 
-    const exists = await User.findOne({ email }).lean();
+    const exists = await User.findOne({ username }).lean();
     if (exists) {
-      const e = new Error('Email already registered'); e.status = 400; throw e;
+      const e = new Error('Identifier already registered'); e.status = 400; throw e;
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = await User.create({ email, passwordHash, roles: ['user'] });
+    const user = await User.create({ username, passwordHash, roles: ['user'] });
 
     req.session.user = { id: user.id, roles: user.roles };
 
@@ -28,22 +26,21 @@ exports.register = async (req, res) => {
   } catch (err) {
     // Safety net if two users try to register with the same email at the same time
     if (err && err.code === 11000) {
-      err = new Error('Email already registered'); err.status = 400;
+      err = new Error('Username already registered'); err.status = 400;
     }
     throw err;
   }
 };
 
 exports.login = async (req, res) => {
-  const email = normEmail(req.body.email);
+  const username = norm(req.body.username);
   const password = String(req.body.password || '');
-  console.log(email, password);
 
-  if (!email || !password) {
-    const e = new Error('Email and password are required'); e.status = 400; throw e;
+  if (!username || !password) {
+    const e = new Error('username and password are required'); e.status = 400; throw e;
   }
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ username });
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
     const e = new Error('Invalid credentials'); e.status = 401; throw e;
   }
