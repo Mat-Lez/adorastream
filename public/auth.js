@@ -14,10 +14,14 @@ async function onLoginSubmit(e){
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
   try {
-    await api('/api/auth/login', 'POST', { username, password });
+    const data = await api('/api/auth/login', 'POST', { username, password });
     setMsg('Logged in successfully', 'success');
+
+    const userId = data?.user?.id;
+    setTimeout(() => location.href = `/profile-selection.html?userId=${encodeURIComponent(userId)}`, 300);
+
     // navigate to content listing placeholder
-    setTimeout(() => location.href = '/add_content.html', 800);
+
   } catch (err) {
     setMsg(err.message, 'error');
   }
@@ -29,9 +33,10 @@ async function onRegisterSubmit(e){
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
   try {
-    await api('/api/auth/register', 'POST', { username, password });
+    const data = await api('/api/auth/register', 'POST', { username, password });
     setMsg('Account created. You are now logged in.', 'success');
-    setTimeout(() => location.href = '/login.html', 800);
+    const userId = data?.user?.id;
+    setTimeout(() => location.href = `/profile-selection.html?userId=${encodeURIComponent(userId)}`, 300);
   } catch (err) {
     setMsg(err.message, 'error');
   }

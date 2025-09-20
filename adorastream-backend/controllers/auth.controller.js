@@ -14,13 +14,19 @@ exports.register = async (req, res) => {
 
     const exists = await User.findOne({ username }).lean();
     if (exists) {
-      const e = new Error('Identifier already registered'); e.status = 400; throw e;
+      const e = new Error('Username already registered'); e.status = 400; throw e;
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await User.create({ username, passwordHash, roles: ['user'] });
 
-    req.session.user = { id: user.id, roles: user.roles };
+    await new Promise((resolve, reject) => {
+      req.session.regenerate(err => {
+        if (err) return reject(err);
+        req.session.user = { id: user.id, roles: user.roles };
+        req.session.save(saveErr => (saveErr ? reject(saveErr) : resolve()));
+      });
+    });
 
     res.status(201).json({ user: req.session.user });
   } catch (err) {
@@ -45,10 +51,23 @@ exports.login = async (req, res) => {
     const e = new Error('Invalid credentials'); e.status = 401; throw e;
   }
 
-  req.session.user = { id: user.id, roles: user.roles };
+  await new Promise((resolve, reject) => {
+    req.session.regenerate(err => {
+      if (err) return reject(err);
+      req.session.user = { id: user.id, roles: user.roles };
+      req.session.save(saveErr => (saveErr ? reject(saveErr) : resolve()));
+    });
+  });
+
   res.json({ user: req.session.user });
 };
 
 exports.logout = (req, res) => {
   req.session.destroy(() => res.json({ ok: true }));
+};
+
+// GET current authenticated user (from session)
+exports.me = (req, res) => {
+  if (!req.session?.user?.id) { const e = new Error('Unauthorized'); e.status = 401; throw e; }
+  res.json({ user: req.session.user });
 };
