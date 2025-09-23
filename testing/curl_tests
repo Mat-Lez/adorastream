@@ -1,0 +1,34 @@
+# set your API base once
+BASE=http://localhost:3000
+
+# 1) login (saves session cookie to cookie.txt)
+curl -i -c cookie.txt -H "Content-Type: application/json" \
+  -d '{"email":"alice@example.com","password":"test123"}' \
+  $BASE/api/auth/login
+
+# 2) list content
+curl -b cookie.txt $BASE/api/content
+
+# (optional) search by title or genre
+curl -b cookie.txt "$BASE/api/content?q=inception"
+curl -b cookie.txt "$BASE/api/content?genres=Sci-Fi,Thriller"
+
+# 3) get Alice profileId from seed response or DB, then:
+PROFILE_ID=<paste_profile_id>
+CONTENT_ID=<paste_content_id>
+
+# update progress
+curl -b cookie.txt -H "Content-Type: application/json" \
+  -d "{\"profileId\":\"$PROFILE_ID\",\"contentId\":\"$CONTENT_ID\",\"positionSec\":120}" \
+  $BASE/api/history/progress
+
+# like/unlike
+curl -b cookie.txt -H "Content-Type: application/json" \
+  -d "{\"profileId\":\"$PROFILE_ID\",\"contentId\":\"$CONTENT_ID\",\"liked\":true}" \
+  $BASE/api/history/like
+
+# 4) list my history (with content + profile info)
+curl -b cookie.txt "$BASE/api/history?profileId=$PROFILE_ID&withContent=true&withProfiles=true"
+
+# 5) logout
+curl -b cookie.txt -X POST $BASE/api/auth/logout

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>API Test</title>
+</head>
+<body>
+  <h1>API Test Page</h1>
+  <button id="login">Login</button>
+  <button id="content">List Content</button>
+  <button id="history">List History</button>
+  <pre id="output"></pre>
+
+  <script>
+        const BASE = "http://localhost:3000";
+
+        async function api(path, options = {}) {
+            const res = await fetch(BASE + path, {
+            credentials: "include",  // keep session cookies!
+            headers: { "Content-Type": "application/json" },
+            ...options
+            });
+            return res.json();
+        }
+
+        document.getElementById("login").onclick = async () => {
+            const data = await api("/api/auth/login", {
+            method: "POST",
+            body: JSON.stringify({ email: "alice@example.com", password: "test123" })
+            });
+            // document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+        };
+
+        document.getElementById("content").onclick = async () => {
+            const data = await api("/api/content");
+            document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+        };
+
+        document.getElementById("history").onclick = async () => {
+            const PROFILE_ID = "PASTE_PROFILE_ID";   // put Alice's profileId here
+            const data = await api(`/api/history?profileId=${PROFILE_ID}&withContent=true&withProfiles=true`);
+            document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+        };
+  </script>
+</body>
+</html>
