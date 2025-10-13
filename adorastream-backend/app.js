@@ -6,7 +6,7 @@ const { connectDB } = require('./db');
 const { ensureAdminFromEnv } = require('./utils/adminSeed');
 const { notFound, errorHandler } = require('./middleware/error');
 const { audit } = require('./middleware/audit');
-const { requireLogin } = require('./middleware/auth');
+const { requireLogin, requireAdmin } = require('./middleware/auth');
 const path = require('path');
 const pagesRouter = require('./routes/pages.routes');
 const authRoutes = require('./routes/auth.routes');
@@ -36,6 +36,11 @@ app.get('/profile-selection.html', requireLogin, (_req, res) => {
 });
 app.get('/add-profile.html', requireLogin, (_req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'add-profile.html'));
+});
+
+// Admin-only page
+app.get('/add-content.html', requireLogin, requireAdmin, (_req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'add-content.html'));
 });
 
 // Static files (after guarded routes to avoid public access bypass)

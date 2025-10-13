@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add Content • AdoraStream</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <main class="container" style="max-width:680px">
+    <h1 class="title">Add Content (Admin)</h1>
+    <p class="subtitle">Create a movie or series entry</p>
+    <form id="f" enctype="multipart/form-data">
+      <div class="field">
+        <label class="label">Title</label>
+        <input name="title" class="input" placeholder="Title" required>
+      </div>
+      <div class="field">
+        <label class="label">Type</label>
+        <select name="type" class="input"><option>movie</option><option>series</option></select>
+      </div>
+      <div class="field">
+        <label class="label">Year</label>
+        <input name="year" class="input" type="number" placeholder="Year">
+      </div>
+      <div class="field">
+        <label class="label">Genres</label>
+        <input name="genres" class="input" placeholder="e.g. Action, Sci-Fi">
+      </div>
+      <div class="field">
+        <label class="label">Cast</label>
+        <input name="cast" class="input" placeholder="Actor as Role, ...">
+      </div>
+      <div class="field">
+        <label class="label">Description</label>
+        <textarea name="description" class="input" placeholder="Description"></textarea>
+      </div>
+      <div class="field">
+        <label class="label">Poster image</label>
+        <input class="input" type="file" name="poster" accept="image/*">
+      </div>
+      <div class="field">
+        <label class="label">Video (MP4)</label>
+        <input class="input" type="file" name="video" accept="video/mp4">
+      </div>
+      <button class="btn">Add</button>
+      <div id="msg"></div>
+    </form>
+    <pre id="out"></pre>
+  </main>
+  <script>
+  async function apiForm(path, form){
+    const res = await fetch(path, { method:'POST', body: form, credentials:'include' });
+    if (!res.ok) { let m='Request failed'; try{const j=await res.json(); m=j.error||j.message||m}catch{} throw new Error(m); }
+    return res.json();
+  }
+  document.querySelector('#f').onsubmit = async (e)=>{
+    e.preventDefault();
+    const f = e.target;
+    const fd = new FormData();
+    fd.append('title', f.title.value);
+    fd.append('type', f.type.value);
+    if (f.year.value) fd.append('year', f.year.value);
+    if (f.genres.value) fd.append('genres', f.genres.value);
+    if (f.cast.value) fd.append('cast', f.cast.value);
+    if (f.description.value) fd.append('description', f.description.value);
+    if (f.poster.files[0]) fd.append('poster', f.poster.files[0]);
+    if (f.video.files[0]) fd.append('video', f.video.files[0]);
+    try {
+      const data = await apiForm('/api/content', fd);
+      document.querySelector('#msg').textContent = 'Added successfully';
+      document.querySelector('#msg').className = 'success';
+      document.querySelector('#out').textContent = JSON.stringify(data, null, 2);
+    } catch (err) {
+      document.querySelector('#msg').textContent = err.message;
+      document.querySelector('#msg').className = 'error';
+    }
+  };
+  </script>
+  </body>
+  </html>
