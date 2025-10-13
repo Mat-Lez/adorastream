@@ -44,8 +44,9 @@
         <label class="label">Video (MP4)</label>
         <input class="input" type="file" name="video" accept="video/mp4">
       </div>
-      <button class="btn">Add</button>
+      <button class="btn" id="submitBtn">Add</button>
       <div id="msg"></div>
+      <button class="btn" id="addAnotherBtn" style="display:none;margin-top:10px">Add another</button>
     </form>
     <pre id="out"></pre>
   </main>
@@ -72,6 +73,18 @@
       document.querySelector('#msg').textContent = 'Added successfully';
       document.querySelector('#msg').className = 'success';
       document.querySelector('#out').textContent = JSON.stringify(data, null, 2);
+      // Show Add another button
+      const addAnother = document.getElementById('addAnotherBtn');
+      addAnother.style.display = 'block';
+      addAnother.onclick = () => {
+        // reset form for another entry
+        f.reset();
+        document.querySelector('#msg').textContent = '';
+        document.querySelector('#msg').className = '';
+        document.querySelector('#out').textContent = '';
+        addAnother.style.display = 'none';
+        f.title.focus();
+      };
     } catch (err) {
       document.querySelector('#msg').textContent = err.message;
       document.querySelector('#msg').className = 'error';
