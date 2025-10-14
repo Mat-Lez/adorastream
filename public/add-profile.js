@@ -24,7 +24,7 @@ async function onSubmit(e){
     const me = await api('/api/auth/me', 'GET');
     userId = me?.user?.id || null;
   } catch (e) {
-    location.href = '/login.html';
+  location.href = '/login';
     return;
   }
   const name = document.getElementById('name').value.trim();
@@ -32,7 +32,7 @@ async function onSubmit(e){
   try {
     await api(`/api/users/${encodeURIComponent(userId)}/profiles`, 'POST', { name, avatarUrl });
     setMsg('Profile created', 'success');
-    setTimeout(() => location.href = `/profile-selection.html?userId=${encodeURIComponent(userId)}`, 600);
+    setTimeout(() => location.href = `/profile-selection?userId=${encodeURIComponent(userId)}`, 600);
   } catch (err) {
     setMsg(err.message, 'error');
   }

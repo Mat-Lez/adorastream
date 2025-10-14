@@ -34,7 +34,7 @@ async function loadProfiles(){
     userId = me?.user?.id || null;
   } catch (e) {
     // Not authenticated
-    location.href = '/login.html';
+    location.href = '/login';
     return;
   }
 
@@ -62,7 +62,7 @@ async function loadProfiles(){
   if ((user.profiles || []).length < 5) {
     const add = card(`<div style="height:90px;display:flex;align-items:center;justify-content:center;font-size:42px">+</div><div style="margin-top:8px">Add profile</div>`);
     add.style.cursor = 'pointer';
-    add.onclick = () => { location.href = `/add-profile.html?userId=${encodeURIComponent(user.id)}`; };
+    add.onclick = () => { location.href = `/add-profile?userId=${encodeURIComponent(user.id)}`; };
     container.appendChild(add);
   }
 }
