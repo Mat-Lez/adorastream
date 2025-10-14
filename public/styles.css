@@ -14,3 +14,49 @@
 .error{margin-top:10px;color:var(--danger);font-size:14px}
 .success{margin-top:10px;color:#3fb950;font-size:14px}
 
+/* Actor field styles */
+.actor-field {
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  background: #0b0f14;
+}
+
+.field-row {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+}
+
+.field-row .field {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.btn-secondary {
+  background: #6e7681;
+  color: #fff;
+  padding: 8px 12px;
+  font-size: 12px;
+  margin: 0;
+  width: auto;
+}
+
+.btn-secondary:hover {
+  background: #8b949e;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+  padding: 8px 12px;
+  font-size: 12px;
+  margin: 0;
+  width: auto;
+}
+
+.btn-danger:hover {
+  background: #f85149;
+}
+
