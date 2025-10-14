@@ -10,20 +10,26 @@ exports.create = async (req, res) => {
     type,
     year,
     genres,
-    cast,
+    director,
+    actors,
     description
   } = req.body;
 
-  // Parse genres and cast
+  // Parse genres
   const genresArr = typeof genres === 'string'
     ? genres.split(',').map(g => g.trim()).filter(Boolean)
     : [];
-  const actorsArr = typeof cast === 'string'
-    ? cast.split(',').map(pair => {
-        const [name, role] = pair.split(' as ').map(s => s.trim());
-        return name ? { name, role } : null;
-      }).filter(Boolean)
-    : [];
+
+  // Parse actors (now comes as JSON string from frontend)
+  let actorsArr = [];
+  if (actors) {
+    try {
+      actorsArr = JSON.parse(actors);
+    } catch (e) {
+      // Fallback to empty array if parsing fails
+      actorsArr = [];
+    }
+  }
 
   // Handle files
   let posterUrl = '';
@@ -41,6 +47,7 @@ exports.create = async (req, res) => {
     type,
     year,
     genres: genresArr,
+    director,
     actors: actorsArr,
     synopsis: description,
     posterUrl,

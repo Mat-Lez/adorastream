@@ -4,6 +4,7 @@ const cleanMongoResponse = require('../utils/responseHelper');
 const ActorSchema = new Schema(
   {
     name: { type: String, required: true, trim: true },
+    role: { type: String, required: true, trim: true },
     wikipedia: { type: String, default: '' }
   },
   { _id: false }

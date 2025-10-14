@@ -11,7 +11,7 @@
   <main class="container" style="max-width:680px">
     <h1 class="title">Add Content (Admin)</h1>
     <p class="subtitle">Create a movie or series entry</p>
-    <form id="f" enctype="multipart/form-data">
+    <form id="add-content-form" enctype="multipart/form-data">
       <div class="field">
         <label class="label">Title</label>
         <input name="title" class="input" placeholder="Title" required>
@@ -29,8 +29,15 @@
         <input name="genres" class="input" placeholder="e.g. Action, Sci-Fi">
       </div>
       <div class="field">
-        <label class="label">Cast</label>
-        <input name="cast" class="input" placeholder="Actor as Role, ...">
+        <label class="label">Director</label>
+        <input name="director" class="input" placeholder="e.g., Christopher Nolan">
+      </div>
+      <div class="field">
+        <label class="label">Actors</label>
+        <div id="actors-container">
+          <!-- Actor fields will be added here dynamically -->
+        </div>
+        <button type="button" class="btn btn-secondary" onclick="addActor()" style="margin-top: 10px;">Add Actor</button>
       </div>
       <div class="field">
         <label class="label">Description</label>
@@ -48,48 +55,8 @@
       <div id="msg"></div>
       <button class="btn" id="addAnotherBtn" style="display:none;margin-top:10px">Add another</button>
     </form>
-    <pre id="out"></pre>
+    <pre id="response-output"></pre>
   </main>
-  <script>
-  async function apiForm(path, form){
-    const res = await fetch(path, { method:'POST', body: form, credentials:'include' });
-    if (!res.ok) { let m='Request failed'; try{const j=await res.json(); m=j.error||j.message||m}catch{} throw new Error(m); }
-    return res.json();
-  }
-  document.querySelector('#f').onsubmit = async (e)=>{
-    e.preventDefault();
-    const f = e.target;
-    const fd = new FormData();
-    fd.append('title', f.title.value);
-    fd.append('type', f.type.value);
-    if (f.year.value) fd.append('year', f.year.value);
-    if (f.genres.value) fd.append('genres', f.genres.value);
-    if (f.cast.value) fd.append('cast', f.cast.value);
-    if (f.description.value) fd.append('description', f.description.value);
-    if (f.poster.files[0]) fd.append('poster', f.poster.files[0]);
-    if (f.video.files[0]) fd.append('video', f.video.files[0]);
-    try {
-      const data = await apiForm('/api/content', fd);
-      document.querySelector('#msg').textContent = 'Added successfully';
-      document.querySelector('#msg').className = 'success';
-      document.querySelector('#out').textContent = JSON.stringify(data, null, 2);
-      // Show Add another button
-      const addAnother = document.getElementById('addAnotherBtn');
-      addAnother.style.display = 'block';
-      addAnother.onclick = () => {
-        // reset form for another entry
-        f.reset();
-        document.querySelector('#msg').textContent = '';
-        document.querySelector('#msg').className = '';
-        document.querySelector('#out').textContent = '';
-        addAnother.style.display = 'none';
-        f.title.focus();
-      };
-    } catch (err) {
-      document.querySelector('#msg').textContent = err.message;
-      document.querySelector('#msg').className = 'error';
-    }
-  };
-  </script>
+  <script type="module" src="/add-content.js"></script>
   </body>
   </html>
