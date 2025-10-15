@@ -8,6 +8,7 @@ const { notFound, errorHandler } = require('./middleware/error');
 const { audit } = require('./middleware/audit');
 const { requireLogin, requireAdmin } = require('./middleware/auth');
 const path = require('path');
+const pagesRouter = require('./routes/pages.routes');
 const authRoutes = require('./routes/auth.routes');
 const usersRoutes = require('./routes/user.routes');
 const contentRoutes = require('./routes/content.routes');
@@ -46,7 +47,7 @@ app.get('/add-content.html', requireLogin, requireAdmin, (_req, res) => {
 app.use(express.static('public'));
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
-
+app.use('/', pagesRouter);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/content', contentRoutes);

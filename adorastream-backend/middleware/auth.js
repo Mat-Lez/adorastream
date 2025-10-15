@@ -7,8 +7,8 @@ function requireAdmin(req, _res, next) {
   const roles = req.session?.user?.roles || [];
   if (!roles.includes('admin')) { const e = new Error('Forbidden'); e.status = 403; throw e; }
   next();
-
 }
+
 function requireSelfOrAdmin(param = 'id') {
   return (req, _res, next) => {
     const me = String(req.session.user.id);
