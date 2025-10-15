@@ -46,14 +46,32 @@ async function loadProfiles(){
     const avatarBlock = p.avatarUrl
       ? `<div style="height:100px;width:100px;margin:0 auto;border-radius:50%;background:#111;background-size:cover;background-position:center;background-image:url('${encodeURI(p.avatarUrl)}')"></div>`
       : `<div style="height:100px;width:100px;margin:0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#111;font-size:42px">👤</div>`;
-    const el = card(`${avatarBlock}<div style="margin-top:8px">${p.name}</div>`);
-    el.style.cursor = 'pointer';
-    el.onclick = async () => {
-      // Store selected profile in session (optional: call a backend endpoint if you prefer)
+
+    const el = card(`${avatarBlock}
+      <div style="margin-top:8px">${p.name}</div>
+      <div style="margin-top:8px;display:flex;gap:8px;justify-content:center">
+        <button data-action="select" style="padding:6px 10px;border:none;border-radius:6px;background:#238636;color:#fff;cursor:pointer">Select</button>
+        <button data-action="delete" style="padding:6px 10px;border:1px solid #30363d;border-radius:6px;background:#0b0f14;color:#e6edf3;cursor:pointer">Delete</button>
+      </div>`);
+
+    // Click handlers
+    el.querySelector('button[data-action="select"]').onclick = async () => {
       sessionStorage.setItem('profileId', p.id);
       sessionStorage.setItem('userId', user.id);
-      location.href = '/'; // go to your main app entry
+      location.href = '/';
     };
+
+    el.querySelector('button[data-action="delete"]').onclick = async () => {
+      const ok = confirm(`Delete profile "${p.name}"? This cannot be undone.`);
+      if (!ok) return;
+      try {
+        await api(`/api/users/${user.id}/profiles/${p.id}`, 'DELETE');
+        await loadProfiles();
+      } catch (e) {
+        setMsg(e.message, 'error');
+      }
+    };
+
     container.appendChild(el);
   }
 
