@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const router = express.Router();
+const { requireAdmin } = require('../middleware/auth');
 
 // Resolve static HTML files, for example page(login) --> <path>/login.html
 const page = (name) => path.join(__dirname, '../..', 'public', `${name}.html`);
@@ -32,6 +33,10 @@ router.get('/login', (req, res) => {
 // No login check here, public page
 router.get('/register', (req, res) => {
   res.sendFile(page('register'));
+});
+
+router.get('/add-content', requireLogin, requireAdmin, (req, res) => {
+  res.sendFile(page('add-content'));
 });
 
 module.exports = router;
