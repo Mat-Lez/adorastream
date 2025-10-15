@@ -32,7 +32,7 @@ async function loadProfiles(){
   try {
     const me = await api('/api/auth/me', 'GET');
     const userId = me?.user?.id;
-    if (!userId) throw new Error('No session');
+    if (!userId) { location.href = '/login'; return; }
     user = await api(`/api/users/${userId}`, 'GET');
   } catch (e) {
     location.href = '/login';
