@@ -14,7 +14,7 @@
     <form id="add-content-form" enctype="multipart/form-data">
       <div class="field">
         <label class="label">Title</label>
-        <input name="title" class="input" placeholder="Title" required>
+        <input id="title" name="title" class="input" placeholder="Title" required>
       </div>
       <div class="field">
         <label class="label">Type</label>
@@ -37,7 +37,7 @@
         <div id="actors-container">
           <!-- Actor fields will be added here dynamically -->
         </div>
-        <button type="button" class="btn btn-secondary" onclick="addActor()" style="margin-top: 10px;">Add Actor</button>
+        <button type="button" id="add-actor-btn" class="btn btn-secondary" style="margin-top: 10px;">Add Actor</button>
       </div>
       <div class="field">
         <label class="label">Description</label>
