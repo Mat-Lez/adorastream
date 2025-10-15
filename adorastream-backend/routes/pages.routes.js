@@ -29,4 +29,9 @@ router.get('/login', (req, res) => {
   res.sendFile(page('login'));
 });
 
+// No login check here, public page
+router.get('/register', (req, res) => {
+  res.sendFile(page('register'));
+});
+
 module.exports = router;
