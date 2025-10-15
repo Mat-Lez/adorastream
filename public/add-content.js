@@ -27,7 +27,7 @@ function addActor() {
         <label class="label">Role</label>
         <input name="actorRole_${actorCount}" class="input" type="text" placeholder="e.g., Bane" required />
       </div>
-      <button type="button" class="btn btn-danger" onclick="removeActor(this)">Remove</button>
+      <button type="button" class="btn btn-danger" data-action="remove-actor">Remove</button>
     </div>
   `;
   
@@ -38,8 +38,12 @@ function addActor() {
  * Remove an actor input field
  * @param {HTMLElement} button - The remove button that was clicked
  */
-function removeActor(button) {
-  button.closest('.actor-field').remove();
+function handleActorsContainerClick(e) {
+  const target = e.target;
+  if (target && target.matches('button[data-action="remove-actor"]')) {
+    const wrapper = target.closest('.actor-field');
+    if (wrapper) wrapper.remove();
+  }
 }
 
 /**
@@ -121,6 +125,16 @@ function init() {
   const form = document.getElementById('add-content-form');
   if (form) {
     form.addEventListener('submit', handleFormSubmit);
+  }
+  
+  const addActorBtn = document.getElementById('add-actor-btn');
+  if (addActorBtn) {
+    addActorBtn.addEventListener('click', addActor);
+  }
+  
+  const actorsContainer = document.getElementById('actors-container');
+  if (actorsContainer) {
+    actorsContainer.addEventListener('click', handleActorsContainerClick);
   }
   
   // Add initial actor field
