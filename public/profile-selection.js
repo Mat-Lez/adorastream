@@ -1,12 +1,4 @@
-async function api(path, method='GET', body){
-  const res = await fetch(path, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: body ? JSON.stringify(body) : undefined });
-  if (!res.ok) {
-    let msg = 'Request failed';
-    try { const j = await res.json(); msg = j.error || j.message || msg; } catch {}
-    throw new Error(msg);
-  }
-  return res.json();
-}
+import { apiRequest as api } from '/utils/api-utils.js';
 
 function setMsg(text='', type=''){
   const el = document.getElementById('msg');
