@@ -1,7 +1,7 @@
 const router = require('express').Router();
-const Content = require('../controllers/content.controller');
-const { requireLogin, requireAdmin } = require('../middleware/auth');
-const upload = require('../services/videoUpload.services');
+const Content = require('../../controllers/content.controller');
+const { requireLogin, requireAdmin } = require('../../middleware/auth');
+const upload = require('../../services/videoUpload.services');
 
 router.get('/',      (req, res, next) => Content.list(req, res).catch(next));
 router.get('/:id',   (req, res, next) => Content.get(req, res).catch(next));
