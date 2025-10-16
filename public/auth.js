@@ -17,8 +17,7 @@ async function onLoginSubmit(e){
     const data = await api('/api/auth/login', 'POST', { username, password });
     setMsg('Logged in successfully', 'success');
 
-    const userId = data?.user?.id;
-    setTimeout(() => location.href = `/profile-selection?userId=${encodeURIComponent(userId)}`, 300);
+    setTimeout(() => location.href = `/profile-selection`, 300);
 
     // navigate to content listing placeholder
 
@@ -35,8 +34,7 @@ async function onRegisterSubmit(e){
   try {
     const data = await api('/api/auth/register', 'POST', { username, password });
     setMsg('Account created. You are now logged in.', 'success');
-    const userId = data?.user?.id;
-  setTimeout(() => location.href = `/profile-selection?userId=${encodeURIComponent(userId)}`, 300);
+    setTimeout(() => location.href = `/profile-selection`, 300);
   } catch (err) {
     setMsg(err.message, 'error');
   }

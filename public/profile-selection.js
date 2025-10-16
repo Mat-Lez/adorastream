@@ -28,17 +28,16 @@ function card(html){
 
 async function loadProfiles(){
   // Must be authenticated
-  let userId = null;
+  let user = null;
   try {
     const me = await api('/api/auth/me', 'GET');
-    userId = me?.user?.id || null;
+    const userId = me?.user?.id;
+    if (!userId) { location.href = '/login'; return; }
+    user = await api(`/api/users/${userId}`, 'GET');
   } catch (e) {
-    // Not authenticated
     location.href = '/login';
     return;
   }
-
-  const user = await api(`/api/users/${userId}`, 'GET');
   const container = document.getElementById('profiles');
   container.innerHTML = '';
 
@@ -62,7 +61,7 @@ async function loadProfiles(){
   if ((user.profiles || []).length < 5) {
     const add = card(`<div style="height:90px;display:flex;align-items:center;justify-content:center;font-size:42px">+</div><div style="margin-top:8px">Add profile</div>`);
     add.style.cursor = 'pointer';
-    add.onclick = () => { location.href = `/add-profile?userId=${encodeURIComponent(user.id)}`; };
+    add.onclick = () => { location.href = `/add-profile`; };
     container.appendChild(add);
   }
 }
