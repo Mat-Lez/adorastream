@@ -66,6 +66,38 @@ exports.logout = (req, res) => {
   req.session.destroy(() => res.json({ ok: true }));
 };
 
+// Post request to select a profile for the current session
+// (profileId in body)
+exports.selectProfile = async (req, res) => {
+  try {
+    // require an authenticated session user
+    if (!req.session?.user?.id) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const { profileId } = req.body;
+    if (!profileId) {
+      return res.status(400).json({ error: 'profileId is required' });
+    }
+
+    // Validate that the profile belongs to the session user
+    const user = await User.findOne({ userId: req.session.user.id }).populate('profiles').lean();
+    if (!user || !user.profiles.find(p => String(p._id) === String(profileId))) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+
+    // Save it in the session and persist
+    req.session.profileId = profileId;
+    await new Promise((resolve, reject) => {
+      req.session.save(err => (err ? reject(err) : resolve()));
+    });
+
+    res.json({ message: 'Profile selected', profileId });
+  } catch (err) {
+    throw err;
+  }
+};
+
 // GET current authenticated user (from session)
 exports.me = (req, res) => {
   if (!req.session?.user?.id) { const e = new Error('Unauthorized'); e.status = 401; throw e; }
