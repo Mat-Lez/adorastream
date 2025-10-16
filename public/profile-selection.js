@@ -1,12 +1,4 @@
-async function api(path, method='GET', body){
-  const res = await fetch(path, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: body ? JSON.stringify(body) : undefined });
-  if (!res.ok) {
-    let msg = 'Request failed';
-    try { const j = await res.json(); msg = j.error || j.message || msg; } catch {}
-    throw new Error(msg);
-  }
-  return res.json();
-}
+import { apiRequest as api } from '/utils/api-utils.js';
 
 function setMsg(text='', type=''){
   const el = document.getElementById('msg');
@@ -17,11 +9,7 @@ function setMsg(text='', type=''){
 
 function card(html){
   const d = document.createElement('div');
-  d.style.border = '1px solid #30363d';
-  d.style.borderRadius = '10px';
-  d.style.padding = '16px';
-  d.style.background = '#0b0f14';
-  d.style.textAlign = 'center';
+  d.className = 'profile-card';
   d.innerHTML = html;
   return d;
 }
@@ -44,16 +32,34 @@ async function loadProfiles(){
   // Render existing profiles
   for (const p of (user.profiles || [])) {
     const avatarBlock = p.avatarUrl
-      ? `<div style="height:100px;width:100px;margin:0 auto;border-radius:50%;background:#111;background-size:cover;background-position:center;background-image:url('${encodeURI(p.avatarUrl)}')"></div>`
-      : `<div style="height:100px;width:100px;margin:0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#111;font-size:42px">👤</div>`;
-    const el = card(`${avatarBlock}<div style="margin-top:8px">${p.name}</div>`);
-    el.style.cursor = 'pointer';
-    el.onclick = async () => {
-      // Store selected profile in session (optional: call a backend endpoint if you prefer)
+      ? `<div class="profile-avatar" style="background-image:url('${encodeURI(p.avatarUrl)}')"></div>`
+      : `<div class="profile-avatar">👤</div>`;
+
+    const el = card(`${avatarBlock}
+      <div class="profile-name">${p.name}</div>
+      <div class="profile-actions">
+        <button data-action="select" class="btn-select">Select</button>
+        <button data-action="delete" class="btn-delete">Delete</button>
+      </div>`);
+
+    // Click handlers
+    el.querySelector('button[data-action="select"]').onclick = async () => {
       sessionStorage.setItem('profileId', p.id);
       sessionStorage.setItem('userId', user.id);
-      location.href = '/'; // go to your main app entry
+      location.href = '/';
     };
+
+    el.querySelector('button[data-action="delete"]').onclick = async () => {
+      const ok = confirm(`Delete profile "${p.name}"? This cannot be undone.`);
+      if (!ok) return;
+      try {
+        await api(`/api/users/${user.id}/profiles/${p.id}`, 'DELETE');
+        await loadProfiles();
+      } catch (e) {
+        setMsg(e.message, 'error');
+      }
+    };
+
     container.appendChild(el);
   }
 
