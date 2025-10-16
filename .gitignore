@@ -3,7 +3,6 @@ package-lock.
 .env
 cookie.txt
 adorastream-backend/public/videos/*
-adorastream-backend/public/profile-photos/*
 adorastream-backend/public/posters/*
 !adorastream-backend/public/videos/.gitkeep
 !adorastream-backend/public/posters/.gitkeep
