@@ -42,13 +42,44 @@ exports.remove = async (req, res) => {
 };
 
 
-// POST add profile to user
+// POST add profile to user (supports avatar image upload)
 exports.addProfile = async (req, res) => {
-  const { name, avatarUrl } = req.body;
+  const { name } = req.body;
+  const file = req.file; // multer single('avatar')
+  if (!name || !String(name).trim()) { const e = new Error('Name is required'); e.status = 400; throw e; }
+
   const user = await User.findById(req.params.id);
   if (!user) { const e = new Error('User not found'); e.status = 404; throw e; }
   if (user.profiles.length >= 5) { const e = new Error('Max 5 profiles'); e.status = 400; throw e; }
-  user.profiles.push({ name, avatarUrl: avatarUrl || '' });
+
+  // Create profile first to get its ID
+  user.profiles.push({ name: String(name).trim(), avatarPath: '' });
+  const newProfile = user.profiles[user.profiles.length - 1];
+
+  // If an avatar file was uploaded, persist to public/<userId>/<profileId>/avatar.ext
+  if (file && file.buffer && file.originalname) {
+    const path = require('path');
+    const fs = require('fs');
+    const safeUserId = String(user._id);
+    const safeProfileId = String(newProfile._id);
+
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    const allowedExt = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp']);
+    const useExt = allowedExt.has(ext) ? ext : '.png';
+
+    // Store under adorastream-backend/public/profile-photos/<userId>/<profileId>/
+    const backendPublic = path.join(__dirname, '..', 'public');
+    const dir = path.join(backendPublic, 'profile-photos', safeUserId, safeProfileId);
+    await fs.promises.mkdir(dir, { recursive: true });
+    const filename = `avatar${useExt}`;
+    const absPath = path.join(dir, filename);
+    await fs.promises.writeFile(absPath, file.buffer);
+
+    // Save relative path from backend public/
+    const relPath = path.join('profile-photos', safeUserId, safeProfileId, filename).replace(/\\/g, '/');
+    newProfile.avatarPath = relPath;
+  }
+
   await user.save();
   res.status(201).json(user);
 };
