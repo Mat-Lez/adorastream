@@ -7,3 +7,4 @@ adorastream-backend/public/profile-photos/*
 adorastream-backend/public/posters/*
 !adorastream-backend/public/videos/.gitkeep
 !adorastream-backend/public/posters/.gitkeep
+adorastream-backend/public/profile-photos/.gitkeep
