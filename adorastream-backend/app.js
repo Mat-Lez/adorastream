@@ -8,16 +8,19 @@ const { notFound, errorHandler } = require('./middleware/error');
 const { audit } = require('./middleware/audit');
 const { requireLogin, requireAdmin } = require('./middleware/auth');
 const path = require('path');
-const pagesRouter = require('./routes/pages.routes');
-const authRoutes = require('./routes/auth.routes');
-const usersRoutes = require('./routes/user.routes');
-const contentRoutes = require('./routes/content.routes');
-const historyRoutes = require('./routes/watchHistory.routes');
+const pagesRoutes = require('./routes/views/pages.routes');
+const authRoutes = require('./routes/api/auth.routes');
+const usersRoutes = require('./routes/api/user.routes');
+const contentRoutes = require('./routes/api/content.routes');
+const historyRoutes = require('./routes/api/watchHistory.routes');
+
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/streaming_app';
 const app = express();
 
 app.use(express.json());
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '..', 'views'));
 
 
 app.use(session({
@@ -45,13 +48,13 @@ app.get('/add-content.html', requireLogin, requireAdmin, (_req, res) => {
 
 // Static files (after guarded routes to avoid public access bypass)
 app.use(express.static('public'));
-app.use('/static', express.static(path.join(__dirname, 'public')));
+app.use('/static', express.static(path.join(__dirname, '..', 'public')));
 
-app.use('/', pagesRouter);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/history', historyRoutes);
+app.use('/', pagesRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
