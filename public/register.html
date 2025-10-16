@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register • AdoraStream</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="data:,">
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta http-equiv="Permissions-Policy" content="interest-cohort=()" />
+</head>
+<body>
+  <main class="container">
+    <h1 class="title">Create your account</h1>
+    <p class="subtitle">Sign up to get started</p>
+    <form data-auth="register">
+      <div class="field">
+        <label class="label" for="username">Username</label>
+        <input id="username" class="input" type="text" required autocomplete="username" />
+      </div>
+      <div class="field">
+        <label class="label" for="password">Password</label>
+        <input id="password" class="input" type="password" required autocomplete="new-password" />
+      </div>
+      <button class="btn" type="submit">Create account</button>
+      <div id="msg"></div>
+      <p class="alt">Already have an account? <a href="/login">Sign in</a></p>
+    </form>
+  </main>
+  <script src="/auth.js" defer></script>
+</body>
+</html>
+
+

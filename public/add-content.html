@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add Content • AdoraStream</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/add-content.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <main class="container" style="max-width:680px">
+    <h1 class="title">Add Content (Admin)</h1>
+    <p class="subtitle">Create a movie or series entry</p>
+    <form id="add-content-form" enctype="multipart/form-data">
+      <div class="field">
+        <label class="label">Title</label>
+        <input id="title" name="title" class="input" placeholder="Title" required>
+      </div>
+      <div class="field">
+        <label class="label">Type</label>
+        <select name="type" class="input"><option>movie</option><option>series</option></select>
+      </div>
+      <div class="field">
+        <label class="label">Year</label>
+        <input name="year" class="input" type="number" placeholder="Year">
+      </div>
+      <div class="field">
+        <label class="label">Genres</label>
+        <input name="genres" class="input" placeholder="e.g. Action, Sci-Fi">
+      </div>
+      <div class="field">
+        <label class="label">Director</label>
+        <input name="director" class="input" placeholder="e.g., Christopher Nolan">
+      </div>
+      <div class="field">
+        <label class="label">Actors</label>
+        <div id="actors-container">
+          <!-- Actor fields will be added here dynamically -->
+        </div>
+        <button type="button" id="add-actor-btn" class="btn btn-secondary" style="margin-top: 10px;">Add Actor</button>
+      </div>
+      <div class="field">
+        <label class="label">Description</label>
+        <textarea name="description" class="input" placeholder="Description"></textarea>
+      </div>
+      <div class="field">
+        <label class="label">Poster image</label>
+        <input class="input" type="file" name="poster" accept="image/*">
+      </div>
+      <div class="field">
+        <label class="label">Video (MP4)</label>
+        <input class="input" type="file" name="video" accept="video/mp4">
+      </div>
+      <button class="btn" id="submitBtn">Add</button>
+      <div id="msg"></div>
+      <button class="btn" id="addAnotherBtn" style="display:none;margin-top:10px">Add another</button>
+    </form>
+    <pre id="response-output"></pre>
+  </main>
+  <script type="module" src="/add-content.js"></script>
+  </body>
+  </html>

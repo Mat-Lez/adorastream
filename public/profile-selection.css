@@ -1,0 +1,69 @@
+/* Profile Selection page styles */
+
+.profiles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.profile-card {
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  padding: 16px;
+  background: #0b0f14;
+  text-align: center;
+}
+
+.profile-avatar {
+  height: 100px;
+  width: 100px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: #111;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+}
+
+.profile-name {
+  margin-top: 8px;
+}
+
+.profile-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+/* Add-profile card */
+.add-profile-card { cursor: pointer; }
+.add-profile-plus {
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+}
+.add-profile-label { margin-top: 8px; }
+
+.btn-select {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: #238636;
+  color: #fff;
+  cursor: pointer;
+}
+
+.btn-delete {
+  padding: 6px 10px;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  background: #0b0f14;
+  color: #e6edf3;
+  cursor: pointer;
+}

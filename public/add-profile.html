@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add Profile • AdoraStream</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <main class="container" style="max-width:520px">
+    <h1 class="title">Add Profile</h1>
+    <p class="subtitle">Create a new profile for this account</p>
+    <form id="addProfileForm" enctype="multipart/form-data">
+      <div class="field">
+        <label class="label" for="name">Profile name</label>
+        <input id="name" class="input" type="text" required maxlength="30" />
+      </div>
+      <div class="field">
+        <label class="label" for="avatar">Avatar image (optional)</label>
+        <input id="avatar" name="avatar" class="input" type="file" accept="image/*" />
+        <small>Max 5MB. PNG, JPG, JPEG, GIF, WEBP.</small>
+      </div>
+      <button class="btn" type="submit">Create profile</button>
+      <div id="msg"></div>
+    </form>
+  </main>
+  <script src="/add-profile.js" defer></script>
+</body>
+</html>
+
+
