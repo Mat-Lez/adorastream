@@ -45,4 +45,8 @@ router.get('/add-content', requireLogin, requireAdmin, (req, res) => {
   res.sendFile(page('add-content'));
 });
 
+router.get('/content-main', requireLogin, (req, res) => {
+  res.sendFile(page('content-main'));
+});
+
 module.exports = router;
