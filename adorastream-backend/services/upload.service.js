@@ -7,11 +7,11 @@ const uploadDir = path.join(__dirname, '..', 'public', 'tmp-uploads');
 try {
   fs.mkdirSync(uploadDir, { recursive: true });
 } catch (err) {
-  console.error('Failed to initialize upload temp directory', {
+  // Avatar uploads will be skipped; profiles will still be created without avatars
+  console.warn('Temp upload dir init failed; avatar uploads will be skipped; profiles will be created without avatars', {
     dir: uploadDir,
     error: err?.message || String(err)
   });
-  throw err;
 }
 
 const storage = multer.diskStorage({
@@ -35,6 +35,20 @@ const fileFilter = function (_req, file, cb) {
 
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 }, fileFilter });
 
-module.exports = { upload };
+// Friendly middleware wrapper for single avatar uploads
+function uploadAvatar(req, res, next) {
+  upload.single('avatar')(req, res, (err) => {
+    if (!err) return next();
+    // Convert upload errors into a warning so controller can continue without avatar
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      req.uploadError = 'Image is too large. Max size is 5MB.';
+    } else {
+      req.uploadError = err.message || 'Avatar upload failed';
+    }
+    return next();
+  });
+}
+
+module.exports = { upload, uploadAvatar };
 
 

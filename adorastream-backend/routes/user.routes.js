@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { upload } = require('../services/upload.service');
+const { uploadAvatar } = require('../services/upload.service');
 const Users = require('../controllers/user.controller');
 const { requireLogin, requireAdmin, requireSelfOrAdmin } = require('../middleware/auth');
 
@@ -11,7 +11,7 @@ router.patch('/:id',   requireLogin, requireSelfOrAdmin('id'), (req, res, next) 
 router.delete('/:id',  requireLogin, requireSelfOrAdmin('id'), (req, res, next) => Users.remove(req, res).catch(next));
 
 // profiles under the same user
-router.post('/:id/profiles',                   requireLogin, requireSelfOrAdmin('id'), upload.single('avatar'), (req, res, next) => Users.addProfile(req, res).catch(next));
+router.post('/:id/profiles',                   requireLogin, requireSelfOrAdmin('id'), uploadAvatar, (req, res, next) => Users.addProfile(req, res).catch(next));
 router.delete('/:id/profiles/:profileId',      requireLogin, requireSelfOrAdmin('id'), (req, res, next) => Users.removeProfile(req, res).catch(next));
 
 module.exports = router;

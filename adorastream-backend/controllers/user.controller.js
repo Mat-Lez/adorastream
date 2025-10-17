@@ -57,7 +57,7 @@ exports.addProfile = async (req, res) => {
   const newProfile = user.profiles[user.profiles.length - 1];
 
   // If an avatar file was uploaded, persist to public/<userId>/<profileId>/avatar.ext
-  if (file && file.path && file.originalname) {
+  if (!req.uploadError && file && file.path && file.originalname) {
     const path = require('path');
     const fs = require('fs');
     const safeUserId = String(user._id);
@@ -82,7 +82,11 @@ exports.addProfile = async (req, res) => {
   }
 
   await user.save();
-  res.status(201).json(user);
+  const response = user.toObject ? user.toObject() : user;
+  if (req.uploadError) {
+    response.warnings = [req.uploadError];
+  }
+  res.status(201).json(response);
 };
 
 
