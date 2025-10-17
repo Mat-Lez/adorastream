@@ -44,7 +44,7 @@ async function onSubmit(e){
 
     await apiForm(`/api/users/${encodeURIComponent(userId)}/profiles`, formData);
     setMsg('Profile created', 'success');
-    setTimeout(() => location.href = `/profile-selection?userId=${encodeURIComponent(userId)}`, 600);
+    setTimeout(() => location.href = '/profile-selection', 600);
   } catch (err) {
     setMsg(err.message, 'error');
   }
