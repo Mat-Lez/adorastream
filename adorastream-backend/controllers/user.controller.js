@@ -57,7 +57,7 @@ exports.addProfile = async (req, res) => {
   const newProfile = user.profiles[user.profiles.length - 1];
 
   // If an avatar file was uploaded, persist to public/<userId>/<profileId>/avatar.ext
-  if (file && file.buffer && file.originalname) {
+  if (file && file.path && file.originalname) {
     const path = require('path');
     const fs = require('fs');
     const safeUserId = String(user._id);
@@ -73,7 +73,8 @@ exports.addProfile = async (req, res) => {
     await fs.promises.mkdir(dir, { recursive: true });
     const filename = `avatar${useExt}`;
     const absPath = path.join(dir, filename);
-    await fs.promises.writeFile(absPath, file.buffer);
+    // Move from multer temp path to final path (rename acts like move on same disk)
+    await fs.promises.rename(file.path, absPath);
 
     // Save relative path from backend public/
     const relPath = path.join('profile-photos', safeUserId, safeProfileId, filename).replace(/\\/g, '/');
@@ -89,9 +90,21 @@ exports.addProfile = async (req, res) => {
 exports.removeProfile = async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) { const e = new Error('User not found'); e.status = 404; throw e; }
+  const profileId = String(req.params.profileId);
   const before = user.profiles.length;
-  user.profiles = user.profiles.filter(p => String(p._id) !== String(req.params.profileId));
+  const toRemove = user.profiles.find(p => String(p._id) === profileId);
+  user.profiles = user.profiles.filter(p => String(p._id) !== profileId);
   if (user.profiles.length === before) { const e = new Error('Profile not found'); e.status = 404; throw e; }
   await user.save();
+  // Best-effort delete avatar folder under backend public/profile-photos/<userId>/<profileId>
+  try {
+    const path = require('path');
+    const fs = require('fs');
+    const backendPublic = path.join(__dirname, '..', 'public');
+    const dir = path.join(backendPublic, 'profile-photos', String(user._id), profileId);
+    await fs.promises.rm(dir, { recursive: true, force: true });
+  } catch (_) {
+    // ignore cleanup failures
+  }
   res.json(user);
 };

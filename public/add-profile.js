@@ -1,12 +1,4 @@
-async function api(path, method='GET', body){
-  const res = await fetch(path, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: body ? JSON.stringify(body) : undefined });
-  if (!res.ok) {
-    let msg = 'Request failed';
-    try { const j = await res.json(); msg = j.error || j.message || msg; } catch {}
-    throw new Error(msg);
-  }
-  return res.json();
-}
+import { apiForm, apiRequest as api } from '/utils/api-utils.js';
 
 function setMsg(text='', type=''){
   const el = document.getElementById('msg');
@@ -50,17 +42,7 @@ async function onSubmit(e){
     formData.set('name', name);
     if (file) formData.set('avatar', file);
 
-    const res = await fetch(`/api/users/${encodeURIComponent(userId)}/profiles`, {
-      method: 'POST',
-      body: formData,
-      credentials: 'include'
-    });
-    if (!res.ok) {
-      let msg = 'Request failed';
-      try { const j = await res.json(); msg = j.error || j.message || msg; } catch {}
-      throw new Error(msg);
-    }
-    await res.json();
+    await apiForm(`/api/users/${encodeURIComponent(userId)}/profiles`, formData);
     setMsg('Profile created', 'success');
     setTimeout(() => location.href = `/profile-selection?userId=${encodeURIComponent(userId)}`, 600);
   } catch (err) {
