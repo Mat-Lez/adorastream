@@ -76,6 +76,21 @@ async function loadProfiles(){
   }
 }
 
-document.addEventListener('DOMContentLoaded', loadProfiles);
+function logoutEventListener(){
+    const logout = document.getElementById('logout-btn');
+    if (logout) {
+        logout.addEventListener('click', () => {
+            // navigate to /logout route which will destroy the session
+            window.location.href = '/logout';
+        });
+    }
+}
+
+function onDOMContentLoaded(){
+    loadProfiles();
+    logoutEventListener();
+}
+
+document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
 
 
