@@ -4,7 +4,15 @@ const multer = require('multer');
 
 // Configure temp upload directory under backend public
 const uploadDir = path.join(__dirname, '..', 'public', 'tmp-uploads');
-try { fs.mkdirSync(uploadDir, { recursive: true }); } catch {}
+try {
+  fs.mkdirSync(uploadDir, { recursive: true });
+} catch (err) {
+  console.error('Failed to initialize upload temp directory', {
+    dir: uploadDir,
+    error: err?.message || String(err)
+  });
+  throw err;
+}
 
 const storage = multer.diskStorage({
   destination: function (_req, _file, cb) {
