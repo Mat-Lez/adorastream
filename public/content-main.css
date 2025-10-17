@@ -177,7 +177,7 @@ body {
 .action-btn {
   position: absolute;
   top: 50%;
-  right: 12px;                /* profile sits at right:12 */
+  right: 12px;
   transform: translateY(-50%);
   width: 44px;
   height: 44px;
@@ -192,16 +192,68 @@ body {
   align-items: center;
   justify-content: center;
   transition: background 0.12s, transform 0.12s;
+  z-index: 5; /* keep above content */
 }
 
 /* logout button sits to the left of profile */
-#logout-btn {
-  right: 64px; /* 12px + 44px + ~8px gap */
-}
+#logout-btn { right: 64px; }
 
+/* Hover for simple icon buttons */
 .action-btn:hover {
   background: var(--panel);
   transform: translateY(-50%) scale(1.03);
+}
+
+/* ===== span.action-btn (logout with text) ===== */
+span.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  background: transparent;     /* no bg until hover */
+  height: auto;                /* allow content height when absolute or static */
+  width: auto;
+  z-index: 6;
+  transition: background 0.12s, transform 0.12s, color 0.12s;
+}
+
+/* inner icon: no background, no outline, centered */
+span.action-btn > button {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 20px;
+  color: var(--text);
+  cursor: pointer;
+  background: transparent;
+  border-radius: 6px;
+}
+
+/* Logout text next to icon */
+span.action-btn > p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text);
+  user-select: none;
+}
+
+/* Hover: whole span gets the background and color accent */
+span.action-btn:hover {
+  background: var(--panel);
+  transform: translateY(-50%) scale(1.03);
+}
+span.action-btn:hover p,
+span.action-btn:hover > button {
+  color: var(--primary);
+}
+
+span.action-btn:active {
+  transform: translateY(-50%) scale(0.98);
 }
 
 /* ====== Category Sections ====== */
@@ -314,14 +366,44 @@ body {
     max-width: none;
   }
 
-  /* allow buttons to flow inline on small screens */
   .action-btn {
     position: static;
     transform: none;
     margin-left: 8px;
     right: auto;
+
+    /* force a fixed square */
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    flex: 0 0 44px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
+
   .action-btn:hover {
     transform: scale(1.03);
   }
+
+  span.action-btn {
+    position: static;
+    transform: none;
+    margin-left: 8px;
+    right: auto;
+    padding: 6px 10px;
+    width: auto;
+    height: auto;
+    flex: 0 0 auto;
+  }
+
+  span.action-btn:hover {
+    transform: scale(1.03);
+  }
+
+  span.action-btn > p { font-size: 14px; }
+  span.action-btn > button { font-size: 18px; width:28px; height:28px; }
 }
