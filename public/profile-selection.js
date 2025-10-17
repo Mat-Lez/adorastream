@@ -31,8 +31,9 @@ async function loadProfiles(){
 
   // Render existing profiles
   for (const p of (user.profiles || [])) {
-    const avatarBlock = p.avatarUrl
-      ? `<div class="profile-avatar" style="background-image:url('${encodeURI(p.avatarUrl)}')"></div>`
+    const avatarPath = p.avatarPath ? `/static/${p.avatarPath}` : '';
+    const avatarBlock = p.avatarPath
+      ? `<div class="profile-avatar" style="background-image:url('${encodeURI(avatarPath)}')"></div>`
       : `<div class="profile-avatar">👤</div>`;
 
     const el = card(`${avatarBlock}
@@ -69,8 +70,8 @@ async function loadProfiles(){
 
   // Render add button if fewer than 5 profiles
   if ((user.profiles || []).length < 5) {
-    const add = card(`<div style="height:90px;display:flex;align-items:center;justify-content:center;font-size:42px">+</div><div style="margin-top:8px">Add profile</div>`);
-    add.style.cursor = 'pointer';
+    const add = card(`<div class="add-profile-plus">+</div><div class="add-profile-label">Add profile</div>`);
+    add.classList.add('add-profile-card');
     add.onclick = () => { location.href = `/add-profile`; };
     container.appendChild(add);
   }

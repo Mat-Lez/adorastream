@@ -39,6 +39,17 @@
   justify-content: center;
 }
 
+/* Add-profile card */
+.add-profile-card { cursor: pointer; }
+.add-profile-plus {
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+}
+.add-profile-label { margin-top: 8px; }
+
 .btn-select {
   padding: 6px 10px;
   border: none;
