@@ -103,8 +103,13 @@ exports.removeProfile = async (req, res) => {
     const backendPublic = path.join(__dirname, '..', 'public');
     const dir = path.join(backendPublic, 'profile-photos', String(user._id), profileId);
     await fs.promises.rm(dir, { recursive: true, force: true });
-  } catch (_) {
-    // ignore cleanup failures
+  } catch (err) {
+    // Log cleanup failure for observability; profile already deleted in DB
+    console.warn('Avatar cleanup failed', {
+      userId: String(user._id),
+      profileId,
+      error: err?.message || String(err)
+    });
   }
   res.json(user);
 };
