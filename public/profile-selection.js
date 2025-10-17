@@ -44,9 +44,13 @@ async function loadProfiles(){
 
     // Click handlers
     el.querySelector('button[data-action="select"]').onclick = async () => {
-      sessionStorage.setItem('profileId', p.id);
-      sessionStorage.setItem('userId', user.id);
-      location.href = '/';
+      try {
+        // Call API to select profile (store the profileId in session)
+        await api('/api/auth/select-profile', 'POST', { profileId: p.id });
+        location.href = '/content-main';
+      } catch (e) {
+        setMsg(e.message, 'error');
+      }
     };
 
     el.querySelector('button[data-action="delete"]').onclick = async () => {
