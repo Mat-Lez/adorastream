@@ -1,8 +1,28 @@
+// init functions
 (async () => {
-  const res = await fetch('/api/auth/me', { credentials: 'include' });
-  if (!res.ok) return location.href = '/login';
+    // Check if the user is authenticated
+    const res = await fetch('/api/auth/me', { credentials: 'include' });
+    if (!res.ok) {
+    location.href = '/login'
+    return;
+    }
 })();
 
+document.addEventListener('DOMContentLoaded', 
+    logoutEventListener
+);
+
+function logoutEventListener(){
+    const logout = document.getElementById('logout-btn');
+    if (logout) {
+        logout.addEventListener('click', () => {
+            // navigate to /logout route which will destroy the session
+            window.location.href = '/logout';
+        });
+    }
+}
+
+// TO BE REMOVED ...
 const mockData = [
   { title: "Parasite", posterUrl: "/public/posters/parasite.jpg" },
   { title: "American Psycho", posterUrl: "/public/posters/psycho.jpg" },

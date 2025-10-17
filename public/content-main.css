@@ -173,11 +173,11 @@ body {
   transition: background 0.12s, box-shadow 0.12s;
 }
 
-/* Profile button placed at the top-right of the topbar */
-#profile-btn {
+/* Shared action buttons (profile / logout) */
+.action-btn {
   position: absolute;
-  right: 12px;
   top: 50%;
+  right: 12px;                /* profile sits at right:12 */
   transform: translateY(-50%);
   width: 44px;
   height: 44px;
@@ -194,8 +194,12 @@ body {
   transition: background 0.12s, transform 0.12s;
 }
 
-/* hover uses the same light-black panel color */
-#profile-btn:hover {
+/* logout button sits to the left of profile */
+#logout-btn {
+  right: 64px; /* 12px + 44px + ~8px gap */
+}
+
+.action-btn:hover {
   background: var(--panel);
   transform: translateY(-50%) scale(1.03);
 }
@@ -299,7 +303,7 @@ body {
     gap: 16px;
   }
 
-  /* make search wider and let the profile button flow after it to avoid overlap */
+  /* make search wider and let the action buttons flow after it to avoid overlap */
   .topbar {
     padding-right: 0;
     justify-content: center;
@@ -309,14 +313,15 @@ body {
     width: 90%;
     max-width: none;
   }
-  #profile-btn {
+
+  /* allow buttons to flow inline on small screens */
+  .action-btn {
     position: static;
     transform: none;
     margin-left: 8px;
+    right: auto;
   }
-
-  /* when position is static we can't use translateY(-50%), so only scale on hover to avoid jumps */
-  #profile-btn:hover {
+  .action-btn:hover {
     transform: scale(1.03);
   }
 }
