@@ -57,8 +57,8 @@
   cursor: pointer;
 }
 
-/* ===== Logout Nav ===== */
-nav.action-btn {
+/* ===== Logout span ===== */
+span.action-btn {
   position: absolute;
   top: 16px;
   right: 16px;
@@ -76,17 +76,17 @@ nav.action-btn {
 }
 
 /* Hover/active states for visibility */
-nav.action-btn:hover {
+span.action-btn:hover {
   background: #1f242c;
   transform: scale(1.03);
 }
 
-nav.action-btn:active {
+span.action-btn:active {
   transform: scale(0.98);
 }
 
 /* The inner button (icon) */
-nav.action-btn button {
+span.action-btn button {
   all: unset;
   display: flex;
   align-items: center;
@@ -99,7 +99,7 @@ nav.action-btn button {
 }
 
 /* Logout text next to icon */
-nav.action-btn p {
+span.action-btn p {
   margin: 0;
   font-size: 15px;
   color: var(--text);
@@ -107,22 +107,22 @@ nav.action-btn p {
 }
 
 /* Optional: subtle glow on hover */
-nav.action-btn:hover p,
-nav.action-btn:hover button {
+span.action-btn:hover p,
+span.action-btn:hover button {
   color: var(--primary);
 }
 
 /* Mobile adjustment */
 @media (max-width: 900px) {
-  nav.action-btn {
+  span.action-btn {
     top: 12px;
     right: 12px;
     padding: 6px 12px;
   }
-  nav.action-btn p {
+  span.action-btn p {
     font-size: 14px;
   }
-  nav.action-btn button {
+  span.action-btn button {
     font-size: 18px;
   }
 }
