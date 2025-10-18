@@ -1,3 +1,5 @@
+import { logoutEventListener } from './utils/reuseableEventListeners.js';
+
 // init functions
 (async () => {
     // Check if the user is authenticated
@@ -9,18 +11,8 @@
 })();
 
 document.addEventListener('DOMContentLoaded', 
-    logoutEventListener
+    logoutEventListener('logout-btn'),
 );
-
-function logoutEventListener(){
-    const logout = document.getElementById('logout-btn');
-    if (logout) {
-        logout.addEventListener('click', () => {
-            // navigate to /logout route which will destroy the session
-            window.location.href = '/logout';
-        });
-    }
-}
 
 // TO BE REMOVED ...
 const mockData = [
