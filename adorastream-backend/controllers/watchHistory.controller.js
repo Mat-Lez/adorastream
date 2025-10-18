@@ -60,7 +60,7 @@ exports.listMine = async (req, res) => {
   const rows = histories.map(h => {
     const u = userMap.get(String(h.userId));
     const p = u?.profiles?.find(p => String(p._id) === String(h.profileId));
-    return { ...h, profileName: p?.name || '', profileAvatar: p?.avatarUrl || '' };
+    return { ...h, profileName: p?.name || '', profileAvatar: p?.avatarPath || '' };
   });
 
   res.json({ histories: rows, total: rows.length });

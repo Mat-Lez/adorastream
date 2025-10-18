@@ -4,7 +4,8 @@ const cleanMongoResponse = require('../utils/responseHelper');
 const ProfileSchema = new Schema(
   {
     name: { type: String, required: true, trim: true, maxlength: 30 },
-    avatarUrl: { type: String, default: '' }
+    // Store only relative path under backend public/ (e.g., "profile-photos/<userId>/<profileId>/avatar.png")
+    avatarPath: { type: String, default: '' }
   },
   { _id: true }
 );
