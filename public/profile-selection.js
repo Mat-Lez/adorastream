@@ -1,4 +1,5 @@
 import { apiRequest as api } from '/utils/api-utils.js';
+import { logoutEventListener } from '/utils/reuseableEventListeners.js';
 
 function setMsg(text='', type=''){
   const el = document.getElementById('msg');
@@ -77,19 +78,9 @@ async function loadProfiles(){
   }
 }
 
-function logoutEventListener(){
-    const logout = document.getElementById('logout-btn');
-    if (logout) {
-        logout.addEventListener('click', () => {
-            // navigate to /logout route which will destroy the session
-            window.location.href = '/logout';
-        });
-    }
-}
-
 function onDOMContentLoaded(){
     loadProfiles();
-    logoutEventListener();
+    logoutEventListener('logout-btn');
 }
 
 document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
