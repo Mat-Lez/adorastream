@@ -87,7 +87,7 @@ exports.selectProfile = async (req, res) => {
     }
 
     // Save it in the session and persist
-    req.session.profileId = profileId;
+    req.session.user.profileId = profileId;
     await new Promise((resolve, reject) => {
       req.session.save(err => (err ? reject(err) : resolve()));
     });

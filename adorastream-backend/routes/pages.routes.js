@@ -11,6 +11,11 @@ function requireLogin(req, res, next) {
   return res.redirect('/login');
 }
 
+function requireProfileSelection(req, res, next) {
+  if (req.session?.user?.profileId) return next();
+  return res.redirect('/profile-selection');
+}
+
 router.get('/', requireLogin, (req, res) => {
   return res.redirect('/profile-selection');
 });
@@ -45,7 +50,7 @@ router.get('/add-content', requireLogin, requireAdmin, (req, res) => {
   res.sendFile(page('add-content'));
 });
 
-router.get('/content-main', requireLogin, (req, res) => {
+router.get('/content-main', requireLogin, requireProfileSelection, (req, res) => {
   res.sendFile(page('content-main'));
 });
 
