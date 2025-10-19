@@ -11,9 +11,10 @@
 }
 
 .regular-btn {
-  /* transform: translateY(-50%); */
+  box-sizing: border-box;
   width: var(--regular-btn-width);
   height: var(--btn-height);
+  flex: 0 0 var(--regular-btn-width);
   margin: 0;
   border: 1px solid var(--button-border);
   border-radius: 10px;
@@ -88,24 +89,6 @@ span.action-btn:hover button {
 
 /* Mobile adjustment */
 @media (max-width: 900px) {
-  .regular-btn {
-    /* force a fixed square */
-    box-sizing: border-box;
-    width: var(--regular-btn-width);
-    height: var(--btn-height);
-    min-width: var(--regular-btn-width);
-    min-height: var(--btn-height);
-    flex: 0 0 var(--regular-btn-width);
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .regular-btn:hover {
-    transform: scale(1.03);
-  }
-
   span.action-btn p {
     font-size: var(--button-font-size-media);
   }
