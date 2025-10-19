@@ -63,7 +63,14 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = (req, res) => {
-  req.session.destroy(() => res.json({ ok: true }));
+  req.session.destroy((err) => {
+    if (err) { 
+      return res.status(500).json({ error: 'Failed to log out' });
+    }
+  
+    res.clearCookie('connect.sid', {path: '/'});
+    res.json({ ok: true });
+  });
 };
 
 // Post request to select a profile for the current session
@@ -81,7 +88,7 @@ exports.selectProfile = async (req, res) => {
     }
 
     // Validate that the profile belongs to the session user
-    const user = await User.findOne({ userId: req.session.user.id }).populate('profiles').lean();
+    const user = await User.findOne({ _id: req.session.user.id }).lean();
     if (!user || !user.profiles.find(p => String(p._id) === String(profileId))) {
       return res.status(404).json({ error: 'Profile not found' });
     }

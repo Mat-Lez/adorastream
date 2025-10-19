@@ -1,10 +1,18 @@
+import { apiRequest as api } from './api-utils.js';
+
 // Reuseable event listener for logout button - by default looks for element with id 'logout-btn'
 function logoutEventListener(btnId = 'logout-btn') {
     const logout = document.getElementById(btnId);
     if (logout) {
-        logout.addEventListener('click', () => {
-            // navigate to /logout route which will destroy the session
-            window.location.href = '/logout';
+        logout.addEventListener('click', async () => {
+            try {
+                const response = await api('/api/auth/logout', 'POST');
+                // Redirect to login after logout
+                window.location.href = '/login';
+            } catch (err) {
+                console.error('Logout failed:', err);
+                window.location.href = '/login';
+            }
         });
     }
 }
