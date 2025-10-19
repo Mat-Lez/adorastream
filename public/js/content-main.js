@@ -1,4 +1,4 @@
-import { logoutEventListener } from './utils/reuseableEventListeners.js';
+import { logoutEventListener } from '../utils/reuseableEventListeners.js';
 
 // init functions
 (async () => {

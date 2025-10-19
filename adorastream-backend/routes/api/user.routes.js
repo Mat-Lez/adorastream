@@ -1,7 +1,7 @@
 const router = require('express').Router();
-const { uploadAvatar } = require('../services/upload.service');
-const Users = require('../controllers/user.controller');
-const { requireLogin, requireAdmin, requireSelfOrAdmin } = require('../middleware/auth');
+const { uploadAvatar } = require('../../services/upload.service');
+const Users = require('../../controllers/user.controller');
+const { requireLogin, requireAdmin, requireSelfOrAdmin } = require('../../middleware/auth');
 
 // admin-only list
 router.get('/',        requireLogin, requireAdmin,           (req, res, next) => Users.list(req, res).catch(next));
