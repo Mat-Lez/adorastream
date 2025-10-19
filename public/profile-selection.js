@@ -1,4 +1,5 @@
 import { apiRequest as api } from '/utils/api-utils.js';
+import { logoutEventListener } from '/utils/reuseableEventListeners.js';
 
 function setMsg(text='', type=''){
   const el = document.getElementById('msg');
@@ -77,6 +78,11 @@ async function loadProfiles(){
   }
 }
 
-document.addEventListener('DOMContentLoaded', loadProfiles);
+function onDOMContentLoaded(){
+    loadProfiles();
+    logoutEventListener('logout-btn');
+}
+
+document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
 
 

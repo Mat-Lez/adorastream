@@ -67,3 +67,10 @@
   color: #e6edf3;
   cursor: pointer;
 }
+
+/* ===== Logout span ===== */
+span.action-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
