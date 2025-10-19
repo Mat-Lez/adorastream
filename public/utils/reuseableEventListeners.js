@@ -1,14 +1,12 @@
+import { apiRequest as api } from './api-utils.js';
+
 // Reuseable event listener for logout button - by default looks for element with id 'logout-btn'
 function logoutEventListener(btnId = 'logout-btn') {
     const logout = document.getElementById(btnId);
     if (logout) {
         logout.addEventListener('click', async () => {
             try {
-                const response = await fetch('/api/auth/logout', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+                const response = await api('/api/auth/logout', 'POST');
                 // Redirect to login after logout
                 window.location.href = '/login';
             } catch (err) {
