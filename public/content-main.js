@@ -10,7 +10,6 @@ import { logoutEventListener } from './utils/reuseableEventListeners.js';
     }
 
     const session = await res.json();
-    console.log(session);
     if (!session?.user?.profileId) {
       location.href = '/profile-selection';
       return;
