@@ -6,6 +6,7 @@
   <title>Browse • AdoraStream</title>
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/content-main.css">
+  <link rel="stylesheet" href="/buttons.css">
   <link rel="icon" href="data:,">
 </head>
 <body>
@@ -28,15 +29,17 @@
       <header class="topbar">
         <input type="text" id="search" placeholder="Search..." />
 
-        <!-- logout button -->
-        <span id="logout-btn" class="action-btn">
-            <button title="Logout">🚶</button>
-            <p>Logout</p>
-        </span>
+          <div class="topbar-actions">
+            <!-- logout button -->
+            <span id="logout-btn" class="action-btn">
+                <button title="Logout">🚶</button>
+                <p>Logout</p>
+            </span>
 
-        <!-- profile button -->
-        <button id="profile-btn" class="action-btn" title="Profile">👤</button>
-      </header>
+            <!-- profile button -->
+            <button id="profile-btn" class="regular-btn" title="Profile">👤</button>
+          </div>
+        </header>
 
       <section class="category">
         <h2>Continue Watching</h2>
