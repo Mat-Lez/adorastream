@@ -30,12 +30,6 @@ router.get('/login', (req, res) => {
   res.sendFile(page('login'));
 });
 
-router.get('/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.redirect('/login');
-  });
-});
-
 // No login check here, public page
 router.get('/register', (req, res) => {
   res.sendFile(page('register'));
