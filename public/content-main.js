@@ -8,6 +8,13 @@ import { logoutEventListener } from './utils/reuseableEventListeners.js';
     location.href = '/login'
     return;
     }
+
+    const session = await res.json();
+    console.log(session);
+    if (!session?.user?.profileId) {
+      location.href = '/profile-selection';
+      return;
+    }
 })();
 
 document.addEventListener('DOMContentLoaded', 
