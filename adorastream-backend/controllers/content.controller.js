@@ -1,4 +1,5 @@
 const Content = require('../models/content');
+const { Series } = require('../models/content');
 const { enrichMovieRatings } = require('../services/rating.service');
 const upload = require('../services/videoUpload.services');
 
@@ -9,10 +10,14 @@ exports.create = async (req, res) => {
     title,
     type,
     year,
+    yearStart,
+    yearEnd,
     genres,
     director,
     actors,
-    description
+    description,
+    totalSeasons,
+    episodes
   } = req.body;
 
   // Parse genres
@@ -31,6 +36,16 @@ exports.create = async (req, res) => {
     }
   }
 
+  // Parse episodes for series
+  let episodesArr = [];
+  if (type === 'series' && episodes) {
+    try {
+      episodesArr = JSON.parse(episodes);
+    } catch (e) {
+      episodesArr = [];
+    }
+  }
+
   // Handle files
   let posterUrl = '';
   let videoUrl = '';
@@ -41,18 +56,95 @@ exports.create = async (req, res) => {
     videoUrl = `/public/videos/${req.files.video[0].filename}`;
   }
 
-  // Create content
-  const content = await Content.create({
-    title,
-    type,
-    year,
-    genres: genresArr,
-    director,
-    actors: actorsArr,
-    synopsis: description,
-    posterUrl,
-    videoUrl
-  });
+  // Create content based on type
+  let content;
+  if (type === 'movie') {
+    content = await Content.create({
+      title,
+      type: 'movie',
+      year,
+      genres: genresArr,
+      director,
+      actors: actorsArr,
+      synopsis: description,
+      posterUrl,
+      videoUrl
+    });
+  } else if (type === 'series') {
+    // Group episodes by season
+    const seasonsMap = new Map();
+    episodesArr.forEach(episodeData => {
+      const seasonNum = episodeData.seasonNumber;
+      if (!seasonsMap.has(seasonNum)) {
+        seasonsMap.set(seasonNum, []);
+      }
+      seasonsMap.get(seasonNum).push(episodeData);
+    });
+
+    // Create series first
+    const series = await Series.create({
+      title,
+      synopsis: description,
+      yearStart: parseInt(yearStart) || null,
+      yearEnd: parseInt(yearEnd) || null,
+      genres: genresArr,
+      posterUrl,
+      totalSeasons: seasonsMap.size,
+      totalEpisodes: episodesArr.length,
+      seasons: []
+    });
+
+    // Create seasons and episodes
+    const seasons = [];
+    for (const [seasonNumber, seasonEpisodes] of seasonsMap) {
+      const season = {
+        seasonNumber: parseInt(seasonNumber),
+        episodes: []
+      };
+
+      // Create episodes for this season
+      for (let i = 0; i < seasonEpisodes.length; i++) {
+        const episodeData = seasonEpisodes[i];
+        const episodeIndex = episodesArr.findIndex(ep => ep === episodeData);
+        
+        // Handle episode files
+        let episodePosterUrl = '';
+        let episodeVideoUrl = '';
+        
+        if (req.files && req.files[`episodePoster_${episodeIndex}`] && req.files[`episodePoster_${episodeIndex}`][0]) {
+          episodePosterUrl = `/public/posters/${req.files[`episodePoster_${episodeIndex}`][0].filename}`;
+        }
+        if (req.files && req.files[`episodeVideo_${episodeIndex}`] && req.files[`episodeVideo_${episodeIndex}`][0]) {
+          episodeVideoUrl = `/public/videos/${req.files[`episodeVideo_${episodeIndex}`][0].filename}`;
+        }
+
+        const episode = await Content.create({
+          title: episodeData.title,
+          type: 'episode',
+          year: episodeData.year,
+          genres: genresArr,
+          director: episodeData.director,
+          actors: episodeData.actors || [],
+          synopsis: episodeData.description || '',
+          posterUrl: episodePosterUrl,
+          videoUrl: episodeVideoUrl,
+          seriesId: series._id,
+          seasonNumber: episodeData.seasonNumber,
+          episodeNumber: episodeData.episodeNumber
+        });
+
+        season.episodes.push(episode._id);
+      }
+
+      seasons.push(season);
+    }
+
+    // Update series with seasons
+    series.seasons = seasons;
+    await series.save();
+
+    content = series;
+  }
 
   // Fire-and-forget enrichment; do not block API response
   enrichMovieRatings(content).catch(() => {});

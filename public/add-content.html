@@ -19,26 +19,14 @@
       </div>
       <div class="field">
         <label class="label">Type</label>
-        <select name="type" class="input"><option>movie</option><option>series</option></select>
-      </div>
-      <div class="field">
-        <label class="label">Year</label>
-        <input name="year" class="input" type="number" placeholder="Year">
+        <select id="content-type" name="type" class="input" onchange="toggleContentFields()">
+          <option value="movie">Movie</option>
+          <option value="series">Series</option>
+        </select>
       </div>
       <div class="field">
         <label class="label">Genres</label>
         <input name="genres" class="input" placeholder="e.g. Action, Sci-Fi">
-      </div>
-      <div class="field">
-        <label class="label">Director</label>
-        <input name="director" class="input" placeholder="e.g., Christopher Nolan">
-      </div>
-      <div class="field">
-        <label class="label">Actors</label>
-        <div id="actors-container">
-          <!-- Actor fields will be added here dynamically -->
-        </div>
-        <button type="button" id="add-actor-btn" class="btn btn-secondary" style="margin-top: 10px;">Add Actor</button>
       </div>
       <div class="field">
         <label class="label">Description</label>
@@ -48,9 +36,55 @@
         <label class="label">Poster image</label>
         <input class="input" type="file" name="poster" accept="image/*">
       </div>
-      <div class="field">
-        <label class="label">Video (MP4)</label>
-        <input class="input" type="file" name="video" accept="video/mp4">
+      <!-- Movie-specific fields -->
+      <div id="movie-fields">
+        <div class="field">
+          <label class="label">Year</label>
+          <input name="year" class="input" type="number" placeholder="Year">
+        </div>
+        <div class="field">
+          <label class="label">Director</label>
+          <input name="director" class="input" placeholder="e.g., Christopher Nolan">
+        </div>
+        <div class="field">
+          <label class="label">Actors</label>
+          <div id="actors-container">
+            <!-- Actor fields will be added here dynamically -->
+          </div>
+          <button type="button" id="add-actor-btn" class="btn btn-secondary" style="margin-top: 10px;">Add Actor</button>
+        </div>
+        <div class="field">
+          <label class="label">Video (MP4)</label>
+          <input class="input" type="file" name="video" accept="video/mp4">
+        </div>
+      </div>
+
+      <!-- Series-specific fields -->
+      <div id="series-fields" style="display:none">
+        <div class="field">
+          <label class="label">Year Range</label>
+          <div class="field-row">
+            <div class="field">
+              <label class="label">Start Year</label>
+              <input name="yearStart" class="input" type="number" placeholder="Start year">
+            </div>
+            <div class="field">
+              <label class="label">End Year</label>
+              <input name="yearEnd" class="input" type="number" placeholder="End year">
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Total Seasons</label>
+          <input id="total-seasons" name="totalSeasons" class="input" type="number" min="1" placeholder="Number of seasons">
+        </div>
+        <div class="field">
+          <label class="label">Episodes</label>
+          <div id="episodes-container">
+            <!-- Episode fields will be added here dynamically -->
+          </div>
+          <button type="button" id="add-episode-btn" class="btn btn-secondary" style="margin-top: 10px;">Add Episode</button>
+        </div>
       </div>
       <button class="btn" id="submitBtn">Add</button>
       <div id="msg"></div>

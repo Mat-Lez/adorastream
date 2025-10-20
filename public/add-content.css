@@ -44,3 +44,35 @@
 .btn-danger:hover {
   background: #f85149;
 }
+
+/* Episode field styles */
+.episode-field {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  background: #0b0f14;
+}
+
+.episode-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #30363d;
+}
+
+.episode-header h4 {
+  margin: 0;
+  color: #e6edf3;
+  font-size: 16px;
+}
+
+.episode-field .field-row {
+  margin-bottom: 15px;
+}
+
+.episode-field .field-row:last-child {
+  margin-bottom: 0;
+}
