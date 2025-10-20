@@ -8,14 +8,17 @@
   <% if (typeof additional_css !== 'undefined' && additional_css.includes('profileSelection')) { %>
     <link rel="stylesheet" href="/css/profile-selection.css">
   <% } %>
-
   <% if (typeof additional_css !== 'undefined' && additional_css.includes('addContent')) { %>
     <link rel="stylesheet" href="/css/add-content.css">
   <% } %>
-
   <% if (typeof additional_css !== 'undefined' && additional_css.includes('contentMain')) { %>
     <link rel="stylesheet" href="/css/content-main.css">
   <% } %>
+  <% if (typeof additional_css !== 'undefined' && additional_css.includes('buttons')) { %>
+    <link rel="stylesheet" href="/css/buttons.css">
+  <% } %>
+
+
 
   <% if (typeof scripts !== 'undefined' && scripts.includes('auth')) { %>
     <script src="/js/auth.js" defer></script>

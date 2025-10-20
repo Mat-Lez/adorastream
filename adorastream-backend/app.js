@@ -33,22 +33,9 @@ app.use(session({
 
 app.use(audit);
 
-// Guarded pages (must be authenticated) - after session middleware
-app.get('/profile-selection.html', requireLogin, (_req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'profile-selection.html'));
-});
-app.get('/add-profile.html', requireLogin, (_req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'add-profile.html'));
-});
-
-// Admin-only page
-app.get('/add-content.html', requireLogin, requireAdmin, (_req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'add-content.html'));
-});
-
 // Static files (after guarded routes to avoid public access bypass)
 app.use(express.static('public'));
-app.use('/static', express.static(path.join(__dirname, '..', 'public')));
+app.use('/static', express.static(path.join(__dirname, 'adorastream-backend', 'assets')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);

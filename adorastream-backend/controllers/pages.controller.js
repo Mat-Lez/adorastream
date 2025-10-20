@@ -9,9 +9,6 @@ exports.showLoginPage = (req, res) => {
 }
 
 exports.showRegisterPage = (req, res) => {
-  if (req.session?.user?.id) {
-    return res.redirect('/profile-selection');
-  }
   res.render('pages/register', {
     title: 'Login - AdoraStream',
     scripts: ['auth'] 
@@ -21,8 +18,8 @@ exports.showRegisterPage = (req, res) => {
 exports.showProfilesPage = (req, res) => {    
   res.render('pages/profile-selection', {
     title: 'Profiles - AdoraStream',
-   // scripts: ['profileSelection'],
-    additional_css: ['profileSelection']
+    scripts: ['profileSelection'],
+    additional_css: ['profileSelection', 'buttons']
   });
 }
 
@@ -43,12 +40,6 @@ exports.showAddContentPage = (req, res) => {
 exports.showContentMainPage = (req, res) => {    
   res.render('pages/content-main', {
     title: 'Main - AdoraStream',
-    scripts: ['contentMain, buttonCss'],
-    additional_css: ['contenttMain']  });
+    scripts: ['contentMain'],
+    additional_css: ['contentMain', 'buttons']  });
 }
-
-exports.logout = (req, res) => {
-  req.session.destroy(() => {
-    res.redirect('/login');
-  });
-};
