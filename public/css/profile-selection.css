@@ -1,5 +1,11 @@
 /* Profile Selection page styles */
 
+.container {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
 .profiles-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -39,8 +45,11 @@
   justify-content: center;
 }
 
-/* Add-profile card */
-.add-profile-card { cursor: pointer; }
+
+.add-profile-card { 
+  cursor: pointer;
+ }
+ 
 .add-profile-plus {
   height: 90px;
   display: flex;

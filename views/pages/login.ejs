@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <%- include('../partials/head') %>
+  <body>
+    <main class="container">
+      <h1 class="title">Welcome back</h1>
+      <p class="subtitle">Sign in to your account</p>
+      <form data-auth="login">
+        <div class="field">
+          <label class="label" for="username">Username</label>
+          <input id="username" class="input" type="text" required autocomplete="username" />
+        </div>
+        <div class="field">
+          <label class="label" for="password">Password</label>
+          <input id="password" class="input" type="password" required autocomplete="current-password" />
+        </div>
+        <button class="btn" type="submit">Sign in</button>
+        <div id="msg"></div>
+        <p class="alt">No account? <a href="/register">Create one</a></p>
+      </form>
+    </main>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-import { logoutEventListener } from './utils/reuseableEventListeners.js';
+import { logoutEventListener } from '../utils/reuseableEventListeners.js';
 
 // init functions
 (async () => {
@@ -22,10 +22,10 @@ document.addEventListener('DOMContentLoaded',
 
 // TO BE REMOVED ...
 const mockData = [
-  { title: "Parasite", posterUrl: "/public/posters/parasite.jpg" },
-  { title: "American Psycho", posterUrl: "/public/posters/psycho.jpg" },
-  { title: "The Terminator", posterUrl: "/public/posters/terminator.jpg" },
-  { title: "Snowfall", posterUrl: "/public/posters/snowfall.jpg" },
+  { title: "Parasite", posterUrl: "/assets/posters/parasite.jpg" },
+  { title: "American Psycho", posterUrl: "/assets/posters/psycho.jpg" },
+  { title: "The Terminator", posterUrl: "/assets/posters/terminator.jpg" },
+  { title: "Snowfall", posterUrl: "/assets/posters/snowfall.jpg" },
 ];
 
 function renderCards(containerId, data) {

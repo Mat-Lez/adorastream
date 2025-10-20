@@ -18,4 +18,10 @@ function requireSelfOrAdmin(param = 'id') {
     next();
   };
 }
-module.exports = { requireLogin, requireAdmin, requireSelfOrAdmin };
+
+function requireProfileSelection(req, res, next) {
+  if (req.session?.user?.profileId) return next();
+  return res.redirect('/profile-selection');
+}
+
+module.exports = { requireLogin, requireAdmin, requireSelfOrAdmin, requireProfileSelection };

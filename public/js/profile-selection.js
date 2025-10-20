@@ -44,8 +44,7 @@ async function loadProfiles(){
         <button data-action="delete" class="btn-delete">Delete</button>
       </div>`);
 
-    // Click handlers
-    el.querySelector('button[data-action="select"]').onclick = async () => {
+    el.querySelector('[data-action="select"]').addEventListener('click', async () => {
       try {
         // Call API to select profile (store the profileId in session)
         await api('/api/auth/select-profile', 'POST', { profileId: p.id });
@@ -53,9 +52,9 @@ async function loadProfiles(){
       } catch (e) {
         setMsg(e.message, 'error');
       }
-    };
+    });
 
-    el.querySelector('button[data-action="delete"]').onclick = async () => {
+    el.querySelector('[data-action="delete"]').addEventListener('click', async () => {
       const ok = confirm(`Delete profile "${p.name}"? This cannot be undone.`);
       if (!ok) return;
       try {
@@ -64,7 +63,7 @@ async function loadProfiles(){
       } catch (e) {
         setMsg(e.message, 'error');
       }
-    };
+    });
 
     container.appendChild(el);
   }
@@ -73,7 +72,7 @@ async function loadProfiles(){
   if ((user.profiles || []).length < 5) {
     const add = card(`<div class="add-profile-plus">+</div><div class="add-profile-label">Add profile</div>`);
     add.classList.add('add-profile-card');
-    add.onclick = () => { location.href = `/add-profile`; };
+    add.addEventListener('click', () => (location.href = '/add-profile'));
     container.appendChild(add);
   }
 }
@@ -84,5 +83,3 @@ function onDOMContentLoaded(){
 }
 
 document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
-
-

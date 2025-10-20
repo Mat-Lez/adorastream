@@ -1,0 +1,38 @@
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title || 'AdoraStream' %></title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" href="data:,">
+
+  <% if (typeof additional_css !== 'undefined' && additional_css.includes('profileSelection')) { %>
+    <link rel="stylesheet" href="/css/profile-selection.css">
+  <% } %>
+  <% if (typeof additional_css !== 'undefined' && additional_css.includes('addContent')) { %>
+    <link rel="stylesheet" href="/css/add-content.css">
+  <% } %>
+  <% if (typeof additional_css !== 'undefined' && additional_css.includes('contentMain')) { %>
+    <link rel="stylesheet" href="/css/content-main.css">
+  <% } %>
+  <% if (typeof additional_css !== 'undefined' && additional_css.includes('buttons')) { %>
+    <link rel="stylesheet" href="/css/buttons.css">
+  <% } %>
+
+
+
+  <% if (typeof scripts !== 'undefined' && scripts.includes('auth')) { %>
+    <script src="/js/auth.js" defer></script>
+  <% } %>
+  <% if (typeof scripts !== 'undefined' && scripts.includes('profileSelection')) { %>
+    <script type="module" src="/js/profile-selection.js"></script>
+  <% } %>
+  <% if (typeof scripts !== 'undefined' && scripts.includes('addProfile')) { %>
+    <script type="module" src="/js/add-profile.js"></script>
+  <% } %>
+  <% if (typeof scripts !== 'undefined' && scripts.includes('addContent')) { %>
+    <script type="module" src="/js/add-content.js"></script>
+  <% } %>
+  <% if (typeof scripts !== 'undefined' && scripts.includes('contentMain')) { %>
+    <script type="module" src="/js/content-main.js"></script>
+  <% } %>
+</head>
