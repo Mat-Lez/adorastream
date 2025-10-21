@@ -19,6 +19,7 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/stream
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '..', 'views'));
 
@@ -35,7 +36,7 @@ app.use(audit);
 
 // Static files (after guarded routes to avoid public access bypass)
 app.use(express.static('public'));
-app.use('/static', express.static(path.join(__dirname, 'adorastream-backend', 'assets')));
+app.use('/static', express.static(path.join(__dirname, 'assets')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);

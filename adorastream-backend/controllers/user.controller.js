@@ -56,7 +56,7 @@ exports.addProfile = async (req, res) => {
   user.profiles.push({ name: String(name).trim(), avatarPath: '' });
   const newProfile = user.profiles[user.profiles.length - 1];
 
-  // If an avatar file was uploaded, persist to public/<userId>/<profileId>/avatar.ext
+  // If an avatar file was uploaded, persist to assets/profile-photos/<userId>/<profileId>/avatar.ext
   if (!req.uploadError && file && file.path && file.originalname) {
     const path = require('path');
     const fs = require('fs');
@@ -67,8 +67,8 @@ exports.addProfile = async (req, res) => {
     const allowedExt = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp']);
     const useExt = allowedExt.has(ext) ? ext : '.png';
 
-    // Store under adorastream-backend/public/profile-photos/<userId>/<profileId>/
-    const backendPublic = path.join(__dirname, '..', 'public');
+    // Store under adorastream-backend/assets/profile-photos/<userId>/<profileId>/
+    const backendPublic = path.join(__dirname, '..', 'assets');
     const dir = path.join(backendPublic, 'profile-photos', safeUserId, safeProfileId);
     await fs.promises.mkdir(dir, { recursive: true });
     const filename = `avatar${useExt}`;
@@ -100,11 +100,11 @@ exports.removeProfile = async (req, res) => {
   user.profiles = user.profiles.filter(p => String(p._id) !== profileId);
   if (user.profiles.length === before) { const e = new Error('Profile not found'); e.status = 404; throw e; }
   await user.save();
-  // Best-effort delete avatar folder under backend public/profile-photos/<userId>/<profileId>
+  // Best-effort delete avatar folder under backend assets/profile-photos/<userId>/<profileId>
   try {
     const path = require('path');
     const fs = require('fs');
-    const backendPublic = path.join(__dirname, '..', 'public');
+    const backendPublic = path.join(__dirname, '..', 'assets');
     const dir = path.join(backendPublic, 'profile-photos', String(user._id), profileId);
     await fs.promises.rm(dir, { recursive: true, force: true });
   } catch (err) {
