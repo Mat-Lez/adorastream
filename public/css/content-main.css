@@ -261,6 +261,85 @@ span.action-btn {
   background: #484f58;
 }
 
+/* Profile dropdown container */
+.profile-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Dropdown menu */
+.profiles-menu {
+  position: absolute;
+  top: calc(100% + 0.1em);
+  right: 0;
+  background: var(--panel);
+  border: 1px solid var(--button-border);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  min-width: 180px;
+  flex-direction: column;
+  padding: 6px 0;
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* Each profile item */
+.profile-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-select-btn {
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  color: var(--text);
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.15s;
+}
+
+.profile-select-btn:hover {
+  background: var(--button-background-hover);
+}
+
+/* Avatar styling */
+.profile-avatar {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--button-border);
+  box-sizing: border-box;
+}
+
+.profile-avatar--emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+/* Hover open behavior — with delay */
+.profile-dropdown:hover .profiles-menu,
+.profile-dropdown.open .profiles-menu {
+  visibility: visible;
+  display: flex;
+  opacity: 1;
+  pointer-events: auto;
+}
+
 /* ====== Responsive Adjustments ====== */
 @media (max-width: 900px) {
   .header {

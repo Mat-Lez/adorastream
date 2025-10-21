@@ -1,4 +1,5 @@
 import { logoutEventListener } from '../utils/reuseableEventListeners.js';
+import { switchProfile } from '/utils/profilesManagement.js';
 
 // init functions
 (async () => {
@@ -16,8 +17,58 @@ import { logoutEventListener } from '../utils/reuseableEventListeners.js';
     }
 })();
 
+function profileDropDownTogglerListener(){
+  const pd = document.querySelector('.profile-dropdown');
+  if (!pd) return;
+  const btn = pd.querySelector('#profile-btn');
+  const menu = pd.querySelector('.profiles-menu');
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    
+    const isOpen = pd.classList.toggle('open');
+    btn.setAttribute('aria-expanded', String(isOpen));
+    menu.setAttribute('aria-hidden', String(!isOpen));
+  });
+
+  // close when clicking elsewhere
+  document.addEventListener('click', (e) => {
+    if (!pd.contains(e.target)) {
+      if (menu.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
+      pd.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+      menu.setAttribute('aria-hidden', 'true');
+    }
+  });
+}
+
+async function profileSwitchListener(){
+  const pd = document.querySelector('.profile-dropdown');
+  if (!pd) return;
+  const profileItems = pd.querySelectorAll('.profile-item');
+  profileItems.forEach(item => {
+    if (item.id === 'manage-profiles-item') {
+      // SHOULD ADD LOGIC HERE TO GO TO SETTINGS PAGE
+      console.log('Manage profiles clicked but there is no logic yet!');
+      return;
+    } else {
+      item.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const profileId = item.id;
+        const errMsg = await switchProfile(profileId);
+        if (errMsg) {
+          console.error('Profile switch failed:', errMsg);
+        }
+      }); 
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', 
     logoutEventListener('logout-btn'),
+    profileDropDownTogglerListener(),
+    profileSwitchListener(),
 );
 
 // TO BE REMOVED ...
