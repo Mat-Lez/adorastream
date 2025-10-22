@@ -28,8 +28,53 @@
                 <p>Logout</p>
             </span>
 
-            <!-- profile button -->
-            <button id="profile-btn" class="regular-btn" title="Profile">👤</button>
+            <!-- profile dropdown (hover to show list of profiles) -->
+            <div class="profile-dropdown">
+              <% if (profiles && profiles.length) { %>
+                <% 
+                  const activeProfile = profiles.find(p => String(p._id) === String(activeProfileId)); 
+                %>
+                <button aria-haspopup="menu" aria-expanded="false" id="profile-btn" class="regular-btn" title="Profile">
+                  <% if (activeProfile && activeProfile.avatarPath) { %>
+                    <img
+                      class="profile-avatar"
+                      src="/static/<%= activeProfile.avatarPath %>"
+                      alt="<%= activeProfile.name %>'s avatar"
+                      onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                    />
+                    <div class="profile-avatar profile-avatar--emoji" style="display: none;">👤</div>
+                  <% } else { %>
+                    <div class="profile-avatar profile-avatar--emoji">👤</div>
+                  <% } %>
+                </button>
+
+                <div class="profiles-menu" aria-hidden="true" role="menu">
+                  <% profiles.forEach(function(p) { %>
+                    <% if (String(p._id) === String(activeProfileId)) return; %>
+                      <div id=<%= p._id%> class="profile-item">
+                        <button class="profile-select-btn" role="menuitem" type="button" tabindex="-1">
+                          <% if (p.avatarPath) { %>
+                            <img
+                              class="profile-avatar"
+                              src="/static/<%= p.avatarPath %>"
+                              alt="<%= p.name %>'s avatar"
+                              onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                            />
+                            <div class="profile-avatar profile-avatar--emoji" style="display: none;">👤</div>
+                          <% } else { %>
+                            <div class="profile-avatar profile-avatar--emoji">👤</div>
+                          <% } %>
+                          <div class="profile-name"><%= p.name %></div>
+                        </button>
+                      </div>
+                  <% }) %>
+                  <div id="manage-profiles-item" class="profile-item">
+                    <!-- Give the manage profiles button the same CSS as the profile select buttons -->
+                    <button id="manage-profiles-btn" class="profile-select-btn" role="menuitem" type="button" tabindex="-1">⚙️ Manage Profiles</button>
+                  </div>
+                </div>
+              <% } %>
+            </div>
           </div>
         </header>
 

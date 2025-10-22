@@ -2,8 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 
-// Configure temp upload directory under backend public
-const uploadDir = path.join(__dirname, '..', 'public', 'tmp-uploads');
+// Configure temp upload directory under backend assets
+const uploadDir = path.join(__dirname, '..', 'assets', 'tmp-uploads');
 try {
   fs.mkdirSync(uploadDir, { recursive: true });
 } catch (err) {

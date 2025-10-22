@@ -1,5 +1,6 @@
 import { apiRequest as api } from '/utils/api-utils.js';
 import { logoutEventListener } from '/utils/reuseableEventListeners.js';
+import { switchProfile, deleteProfile } from '/utils/profilesManagement.js';
 
 function setMsg(text='', type=''){
   const el = document.getElementById('msg');
@@ -45,24 +46,20 @@ async function loadProfiles(){
       </div>`);
 
     el.querySelector('[data-action="select"]').addEventListener('click', async () => {
-      try {
-        // Call API to select profile (store the profileId in session)
-        await api('/api/auth/select-profile', 'POST', { profileId: p.id });
-        location.href = '/content-main';
-      } catch (e) {
-        setMsg(e.message, 'error');
+      const errMsg = await switchProfile(p.id);
+      if (errMsg) {
+        setMsg(errMsg, 'error');
       }
     });
 
     el.querySelector('[data-action="delete"]').addEventListener('click', async () => {
-      const ok = confirm(`Delete profile "${p.name}"? This cannot be undone.`);
-      if (!ok) return;
-      try {
-        await api(`/api/users/${user.id}/profiles/${p.id}`, 'DELETE');
-        await loadProfiles();
-      } catch (e) {
-        setMsg(e.message, 'error');
+      const errMsg = await deleteProfile(user.id, p);
+      if (errMsg) {
+        setMsg(errMsg, 'error');
+        return;
       }
+      // Reload profiles
+      await loadProfiles();
     });
 
     container.appendChild(el);
