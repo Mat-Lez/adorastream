@@ -36,7 +36,13 @@
                 %>
                 <button aria-haspopup="menu" aria-expanded="false" id="profile-btn" class="regular-btn" title="Profile">
                   <% if (activeProfile && activeProfile.avatarPath) { %>
-                    <div class="profile-avatar" style="background-image: url('/static/<%= activeProfile.avatarPath %>')"></div>
+                    <img
+                      class="profile-avatar"
+                      src="/static/<%= activeProfile.avatarPath %>"
+                      alt="<%= activeProfile.name %>'s avatar"
+                      onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                    />
+                    <div class="profile-avatar profile-avatar--emoji" style="display: none;">👤</div>
                   <% } else { %>
                     <div class="profile-avatar profile-avatar--emoji">👤</div>
                   <% } %>
@@ -48,7 +54,13 @@
                       <div id=<%= p._id%> class="profile-item">
                         <button class="profile-select-btn" role="menuitem" type="button" tabindex="-1">
                           <% if (p.avatarPath) { %>
-                            <div class="profile-avatar" style="background-image: url('/static/<%= p.avatarPath %>')"></div>
+                            <img
+                              class="profile-avatar"
+                              src="/static/<%= p.avatarPath %>"
+                              alt="<%= p.name %>'s avatar"
+                              onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                            />
+                            <div class="profile-avatar profile-avatar--emoji" style="display: none;">👤</div>
                           <% } else { %>
                             <div class="profile-avatar profile-avatar--emoji">👤</div>
                           <% } %>
