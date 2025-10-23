@@ -109,12 +109,12 @@ async function sideNavbarPageSwapListener() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', 
-    logoutEventListener('logout-btn'),
-    profileDropDownTogglerListener(),
-    profileSwitchListener(),
-    sideNavbarPageSwapListener(),
-);
+document.addEventListener('DOMContentLoaded', () => {
+    logoutEventListener('logout-btn');
+    profileDropDownTogglerListener();
+    profileSwitchListener();
+    sideNavbarPageSwapListener();
+});
 
 // TO BE REMOVED ...
 const mockData = [
