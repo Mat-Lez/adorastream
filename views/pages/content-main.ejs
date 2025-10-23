@@ -18,17 +18,11 @@
 
     <!-- Main content -->
     <main class="main">
-      <%- include('../partials/main-topbar') %>
-
-      <section class="category">
-        <h2>Continue Watching</h2>
-        <div class="grid" id="continue-watching"></div>
-      </section>
-
-      <section class="category">
-        <h2>Popular</h2>
-        <div class="grid" id="popular"></div>
-      </section>
+      <!-- By default display home page -->
+      <%- include('../partials/main-home', {
+        profiles: profiles,
+        activeProfileId: activeProfileId
+      }) %>
     </main>
   </div>
 </body>

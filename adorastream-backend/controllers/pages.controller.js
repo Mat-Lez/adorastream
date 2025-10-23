@@ -47,7 +47,19 @@ exports.showContentMainPage = async (req, res) => {
     scripts: ['contentMain'],
     additional_css: ['contentMain', 'buttons'],
     profiles: user.profiles,
-    activeProfileId: req.session.user.profileId,
-    topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
-    topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN"] });
+    activeProfileId: req.session.user.profileId });
+}
+
+exports.showMainSpecificPage = async (req, res) => {
+  const availablePages = ['home', 'movies', 'shows', 'settings'];
+  const { page } = req.params;
+  if (page === undefined || !availablePages.includes(page)) {
+    page = "home";
+  }
+  const user = await User.findOne({ _id: req.session.user.id }).lean();
+  res.render(`partials/main-${page}`, {
+    layout: false,
+    profiles: user.profiles,
+    activeProfileId: req.session.user.profileId
+  });
 }

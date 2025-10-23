@@ -65,10 +65,51 @@ async function profileSwitchListener(){
   });
 }
 
+async function sideNavbarPageSwapListener() {
+  const navButtons = document.querySelectorAll('.nav-item');
+  const main = document.querySelector('.main');
+
+  navButtons.forEach(btn => {
+    btn.addEventListener('click', async () => {
+      // Highlight active button
+      navButtons.forEach(b => {
+        b.classList.remove('active')
+        b.disabled = false;
+      });
+      btn.classList.add('active');
+      btn.disabled = true; // disable button so it will not be infinitly clickable and rerun the fade animation
+
+      const page = btn.dataset.page;
+      try {
+        const res = await fetch(`/content-main/${page}`);
+        if (!res.ok) throw new Error('Failed to load page');
+
+        // Fade out current content
+        main.classList.add('loading');
+        await new Promise(r => setTimeout(r, 250)); // Wait for fade-out
+        
+        const html = await res.text();
+
+        // Swap the main content
+        main.innerHTML = html;
+
+        // Fade back in
+        requestAnimationFrame(() => {
+          main.classList.remove('loading');
+        });
+      } catch (err) {
+        console.error(err);
+        main.innerHTML = `<p class="error">Failed to load page: ${page}</p>`;
+      }
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', 
     logoutEventListener('logout-btn'),
     profileDropDownTogglerListener(),
     profileSwitchListener(),
+    sideNavbarPageSwapListener(),
 );
 
 // TO BE REMOVED ...

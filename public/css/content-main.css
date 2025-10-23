@@ -96,6 +96,12 @@ body {
   flex-direction: column;
   align-items: center;
   background: var(--bg);
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.main.loading {
+  opacity: 0.2;
 }
 
 /* ====== Header ====== */
@@ -166,6 +172,7 @@ body {
 }
 
 .topbar-actions {
+  margin-left: auto; /* always push action items to the most right part of the topbar */
   display: flex;
   align-items: center;
   justify-content: flex-end;
