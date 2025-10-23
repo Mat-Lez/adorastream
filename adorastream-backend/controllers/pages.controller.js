@@ -47,5 +47,7 @@ exports.showContentMainPage = async (req, res) => {
     scripts: ['contentMain'],
     additional_css: ['contentMain', 'buttons'],
     profiles: user.profiles,
-    activeProfileId: req.session.user.profileId });
+    activeProfileId: req.session.user.profileId,
+    topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+    topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN"] });
 }

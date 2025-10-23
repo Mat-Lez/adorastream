@@ -1,0 +1,60 @@
+<header class="topbar">
+  <% 
+    // ----------------------------
+    // CONFIGURATION
+    // ----------------------------
+    const availableTopbarParts = {
+      search: "SEARCH",
+      topbarActions: "TOPBAR_ACTIONS"
+    };
+
+    const availableTopbarActions = {
+      logoutButton: "LOGOUT_BUTTON",
+      profileDropdown: "PROFILE_DROPDOWN"
+    };
+
+    const topbarPartsOrder = [
+      availableTopbarParts.search,
+      availableTopbarParts.topbarActions
+    ];
+
+    // Determine which topbar sections to render
+    let topbarPartsToDisplay = [];
+    if (topbarLayout && topbarLayout.length) {
+      topbarPartsToDisplay = topbarPartsOrder.filter(item => topbarLayout.includes(item));
+    } else {
+      topbarPartsToDisplay = topbarPartsOrder;
+    }
+
+    // Determine which actions appear inside topbar-actions
+    let topbarActionsToDisplay = [];
+    if (topbarActionsLayout && topbarActionsLayout.length) {
+      topbarActionsToDisplay = Object.values(availableTopbarActions).filter(a => topbarActionsLayout.includes(a));
+    } else {
+      topbarActionsToDisplay = Object.values(availableTopbarActions);
+    }
+
+    // ----------------------------
+    // RENDERING
+    // ----------------------------
+    topbarPartsToDisplay.forEach((part) => {
+      if (part === availableTopbarParts.search) {
+  %>
+        <%- include('main-topbar-search.ejs') %>
+  <% 
+      } else if (part === availableTopbarParts.topbarActions) {
+  %>
+        <div class="topbar-actions">
+          <% topbarActionsToDisplay.forEach((action) => { %>
+            <% if (action === availableTopbarActions.logoutButton) { %>
+              <%- include('main-topbar-logout.ejs') %>
+            <% } else if (action === availableTopbarActions.profileDropdown) { %>
+              <%- include('main-topbar-profiles-dropdown.ejs') %>
+            <% } %>
+          <% }) %>
+        </div>
+  <% 
+      }
+    });
+  %>
+</header>
