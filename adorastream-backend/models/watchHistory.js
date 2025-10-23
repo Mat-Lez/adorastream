@@ -14,7 +14,7 @@ const WatchHistorySchema = new Schema(
     completed: { type: Boolean, default: false },
     liked: { type: Boolean, default: false },
 
-    lastWatchedAt: { type: Date, default: Date.now }
+    lastWatchedAt: { type: Date, default: null }
   },
   { timestamps: true }
 );
