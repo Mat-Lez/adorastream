@@ -52,7 +52,7 @@ exports.showContentMainPage = async (req, res) => {
 
 exports.showMainSpecificPage = async (req, res) => {
   const availablePages = ['home', 'movies', 'shows', 'settings'];
-  const { page } = req.params;
+  let { page } = req.params;
   if (page === undefined || !availablePages.includes(page)) {
     page = "home";
   }
