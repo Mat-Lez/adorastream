@@ -99,7 +99,11 @@ async function sideNavbarPageSwapListener() {
         });
       } catch (err) {
         console.error(err);
-        main.innerHTML = `<p class="error">Failed to load page: ${page}</p>`;
+        main.innerHTML = '';
+        const p = document.createElement('p');
+        p.className = 'error';
+        p.textContent = `Failed to load page: ${page}`;
+        main.appendChild(p);
       }
     });
   });
