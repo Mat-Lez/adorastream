@@ -46,6 +46,7 @@ function profileDropDownTogglerListener(){
 async function profileSwitchListener(){
   const pd = document.querySelector('.profile-dropdown');
   if (!pd) return;
+  const main = document.querySelector('.main');
   const profileItems = pd.querySelectorAll('.profile-item');
   profileItems.forEach(item => {
     if (item.id === 'manage-profiles-item') {
@@ -56,9 +57,16 @@ async function profileSwitchListener(){
       item.addEventListener('click', async (e) => {
         e.preventDefault();
         const profileId = item.id;
+        await animateOut(main, 'loading');
+        main.classList.remove('loading');
         const errMsg = await switchProfile(profileId);
         if (errMsg) {
           console.error('Profile switch failed:', errMsg);
+          main.innerHTML = '';
+          const p = document.createElement('p');
+          p.className = 'error';
+          p.textContent = `Profile switch failed: ${errMsg}`;
+          main.appendChild(p);
         }
       }); 
     }
@@ -81,22 +89,25 @@ async function sideNavbarPageSwapListener() {
 
       const page = btn.dataset.page;
       try {
-        const res = await fetch(`/content-main/${page}`);
+        const res = await fetch(`/content-main/${page}`, {
+          headers: {
+            // added header to indicate ajax request coming from internal fetch
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
         if (!res.ok) throw new Error('Failed to load page');
 
-        // Fade out current content
-        main.classList.add('loading');
-        await new Promise(r => setTimeout(r, 250)); // Wait for fade-out
+        // Fade out
+        await animateOut(main, 'loading');
         
         const html = await res.text();
 
         // Swap the main content
         main.innerHTML = html;
 
+        initPageScripts(); // Reinitialize event listeners for new content
         // Fade back in
-        requestAnimationFrame(() => {
-          main.classList.remove('loading');
-        });
+        await animateIn(main, 'loading');
       } catch (err) {
         console.error(err);
         main.innerHTML = '';
@@ -109,11 +120,37 @@ async function sideNavbarPageSwapListener() {
   });
 }
 
+async function animateOut(element, animationClass, animationDuration = 250) {
+  element.classList.add(animationClass);
+  await new Promise(resolve => {
+    setTimeout(resolve, animationDuration);
+  });
+}
+
+async function animateIn(element, animationClass, animationDuration = 250) {
+  requestAnimationFrame(() => {
+    element.classList.remove(animationClass);
+  });
+  await new Promise(resolve => {
+    setTimeout(resolve, animationDuration);
+  });
+}
+
+
+// Global page scripts are those that do not need to be reinitialized on every page load
+function initGlobalPageScripts() {
+  sideNavbarPageSwapListener();
+}
+
+function initPageScripts() {
+  logoutEventListener('logout-btn');
+  profileDropDownTogglerListener();
+  profileSwitchListener();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    logoutEventListener('logout-btn');
-    profileDropDownTogglerListener();
-    profileSwitchListener();
-    sideNavbarPageSwapListener();
+  initGlobalPageScripts();
+  initPageScripts();
 });
 
 // TO BE REMOVED ...

@@ -7,6 +7,7 @@ const { showLoginPage, showRegisterPage, showProfilesPage,
     showMainSpecificPage } = 
     require('../../controllers/pages.controller');
 const noCache = require('../../middleware/noCache');
+const requireFetch = require('../../middleware/internalFetch');
 
 router.get('/', (req, res) => res.redirect('/login'));
 router.get('/login', noCache, showLoginPage);
@@ -14,7 +15,7 @@ router.get('/register', noCache, showRegisterPage);
 router.get('/profile-selection', requireLogin, showProfilesPage);
 router.get('/add-profile', requireLogin, showAddProfilePage);
 router.get('/add-content', requireLogin, requireAdmin, showAddContentPage);
-router.get('/content-main', requireLogin, requireProfileSelection, showContentMainPage);
-router.get('/content-main/:page', requireLogin, requireProfileSelection, showMainSpecificPage);
+router.get('/content-main', requireLogin, requireProfileSelection, noCache, showContentMainPage);
+router.get('/content-main/:page', requireLogin, requireProfileSelection, requireFetch, noCache, showMainSpecificPage);
 
 module.exports = router;
