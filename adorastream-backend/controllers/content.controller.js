@@ -109,7 +109,6 @@ exports.remove = async (req, res) => {
   res.json({ ok: true });
 };
 
-
 // ========== Series-specific handlers (consolidated) ==========
 
 // POST /api/series - create a new series
@@ -270,3 +269,46 @@ exports.addEpisodesBatch = async (req, res) => {
   enrichSeriesEpisodesRatings(series.id, specs).catch(err => console.error('Failed to enrich episode ratings in batch:', err));
   res.status(201).json(series);
 };
+
+exports.selectContent = async (req, res) => {
+    // require an authenticated session user
+    if (!req.session?.user?.id) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    if (!req.session?.user?.profileId) {
+      return res.status(401).json({ error: 'No profile selected' });
+    }
+    const { contentId } = req.body;
+    if (!contentId) {
+      return res.status(400).json({ error: 'ContentId is required' });
+    }
+    const { season, episode } = req.query; // for series
+
+    const content = await Content.findById(contentId);
+    if (!content) { const e = new Error('Content not found'); e.status = 404; throw e; }
+
+    let currentEpisode = null;
+    let nextEpisode = null;
+
+    if (content.type === 'series') {
+      const episodes = content.episodes.sort((a, b) => {
+        if (a.season === b.season) return a.episode - b.episode;
+        return a.season - b.season;
+      });
+
+      currentEpisode = episodes.find(
+        (e) => e.season == season && e.episode == episode
+      ) || episodes[0]; // default to first episode
+
+      // Find next episode if available
+      const currentIndex = episodes.indexOf(currentEpisode);
+      nextEpisode = episodes[currentIndex + 1] || null;
+    }
+    // Save it in the session and persist
+    req.session.user.contentId = content.id;
+    await new Promise((resolve, reject) => {
+      req.session.save(err => (err ? reject(err) : resolve()));
+    });
+    res.json({ content, currentEpisode, nextEpisode });
+  }
