@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const Content = require('../models/content');
 
 exports.showLoginPage = (req, res) => {
   if (req.session?.user?.id) {
@@ -47,8 +48,9 @@ exports.showContentMainPage = async (req, res) => {
     scripts: ['contentMain'],
     additional_css: ['contentMain', 'buttons'],
     profiles: user.profiles,
-    activeProfileId: req.session.user.profileId });
-}
+    activeProfileId: req.session.user.profileId
+   });
+} 
 
 exports.showMainSpecificPage = async (req, res) => {
   const availablePages = ['home', 'movies', 'shows', 'settings'];
@@ -60,6 +62,13 @@ exports.showMainSpecificPage = async (req, res) => {
   res.render(`partials/main-${page}`, {
     layout: false,
     profiles: user.profiles,
-    activeProfileId: req.session.user.profileId
+    activeProfileId: req.session.user.profileId });
+}
+exports.showMediaPlayerPage = (req, res) => {    
+  res.render('pages/player', {
+    title: 'Play - AdoraStream',
+    content: media,
+    scripts: ['player'],
+    additional_css: ['player'] 
   });
 }
