@@ -85,34 +85,6 @@ exports.list = async (req, res) => {
   res.json({ contents, total, page, pages: Math.ceil(total / limit) });
 };
 
-
-// GET content by ID
-exports.get = async (req, res) => {
-  const content = await Content.findById(req.params.id);
-
-  // should handle here episode for tv shows
-  if (!content) { const e = new Error('Content not found'); e.status = 404; throw e; }
-  res.json(content);
-
-  if (content.type === 'series') {
-    const episodes = content.episodes.sort((a, b) => {
-      if (a.season === b.season) return a.episode - b.episode;
-      return a.season - b.season;
-    });
-
-    currentEpisode = episodes.find(
-      (e) => e.season == season && e.episode == episode
-    ) || episodes[0]; // default to first episode
-
-    // Find next episode if available
-    const currentIndex = episodes.indexOf(currentEpisode);
-    nextEpisode = episodes[currentIndex + 1] || null;
-  }
-
-  res.render('player', { content, currentEpisode, nextEpisode });
-};
-
-
 // PATCH update content by ID
 exports.update = async (req, res) => {
   const content = await Content.findByIdAndUpdate(req.params.id, req.body, { new: true });

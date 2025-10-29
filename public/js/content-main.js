@@ -1,8 +1,10 @@
 import { apiRequest as api } from '/utils/api-utils.js';
+import { apiRequest as api } from '/utils/api-utils.js';
 import { logoutEventListener } from '../utils/reuseableEventListeners.js';
 import { switchProfile } from '/utils/profilesManagement.js';
 import { fetchPage } from '../utils/pageManagement.js';
 import { animateOut } from "../utils/reuseableAnimations.js";
+
 
 
 // init functions
@@ -165,6 +167,7 @@ function addCardClickListeners() {
         location.href = '/player';
       } catch (e) {
           console.error(`Failed to select content: ${e.message}`);
+
       }
     });
   });

@@ -60,7 +60,9 @@ const ContentSchema = new Schema(
     numberOfSeasons: { type: Number, min: 0, default: 0 },
     seasons: { type: [SeasonSchema], default: [] }
   },
-  { timestamps: true }
+  { timestamps: true,
+    _id: true }
+   
 );
 
 // search index
