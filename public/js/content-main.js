@@ -1,4 +1,5 @@
 import { apiRequest as api } from '/utils/api-utils.js';
+import { apiRequest as api } from '/utils/api-utils.js';
 import { logoutEventListener } from '../utils/reuseableEventListeners.js';
 import { switchProfile } from '/utils/profilesManagement.js';
 import { fetchPage } from '../utils/pageManagement.js';
@@ -6,6 +7,7 @@ import { animateOut } from "../utils/reuseableAnimations.js";
 import { openPreview } from "./media-preview.js"
 
 const SEARCH_RESULTS_LIMIT = 50;
+
 
 
 // init functions
@@ -279,6 +281,7 @@ function initSearchFeature() {
       if (contents.length === 0) {
         showMessage(`No results found for "${term}".`);
         return;
+
       }
     searchGrid.innerHTML = contents.map(buildCardMarkup).join('');
       searchEmpty.classList.add('is-hidden');
