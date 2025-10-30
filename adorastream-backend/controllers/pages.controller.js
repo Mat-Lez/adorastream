@@ -49,3 +49,17 @@ exports.showContentMainPage = async (req, res) => {
     profiles: user.profiles,
     activeProfileId: req.session.user.profileId });
 }
+
+exports.showMainSpecificPage = async (req, res) => {
+  const availablePages = ['home', 'movies', 'shows', 'settings'];
+  let { page } = req.params;
+  if (page === undefined || !availablePages.includes(page)) {
+    page = "home";
+  }
+  const user = await User.findOne({ _id: req.session.user.id }).lean();
+  res.render(`partials/main-${page}`, {
+    layout: false,
+    profiles: user.profiles,
+    activeProfileId: req.session.user.profileId
+  });
+}

@@ -9,84 +9,20 @@
         <img src="/adorastream.png" alt="AdoraStream logo">
       </div>
       <nav>
-        <button class="nav-item active">🏠</button>
-        <button class="nav-item">🎬</button>
-        <button class="nav-item">📅</button>
-        <button class="nav-item">⚙️</button>
+        <button class="nav-item active" data-page="home">🏠</button>
+        <button class="nav-item" data-page="movies">🎬</button>
+        <button class="nav-item" data-page="shows">📺</button>
+        <button class="nav-item" data-page="settings">⚙️</button>
       </nav>
     </aside>
 
     <!-- Main content -->
     <main class="main">
-      <header class="topbar">
-        <input type="text" id="search" placeholder="Search..." />
-
-          <div class="topbar-actions">
-            <!-- logout button -->
-            <span id="logout-btn" class="action-btn">
-                <button title="Logout">🚶</button>
-                <p>Logout</p>
-            </span>
-
-            <!-- profile dropdown (hover to show list of profiles) -->
-            <div class="profile-dropdown">
-              <% if (profiles && profiles.length) { %>
-                <% 
-                  const activeProfile = profiles.find(p => String(p._id) === String(activeProfileId)); 
-                %>
-                <button aria-haspopup="menu" aria-expanded="false" id="profile-btn" class="regular-btn" title="Profile">
-                  <% if (activeProfile && activeProfile.avatarPath) { %>
-                    <img
-                      class="profile-avatar"
-                      src="/static/<%= activeProfile.avatarPath %>"
-                      alt="<%= activeProfile.name %>'s avatar"
-                      onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                    />
-                    <div class="profile-avatar profile-avatar--emoji" style="display: none;">👤</div>
-                  <% } else { %>
-                    <div class="profile-avatar profile-avatar--emoji">👤</div>
-                  <% } %>
-                </button>
-
-                <div class="profiles-menu" aria-hidden="true" role="menu">
-                  <% profiles.forEach(function(p) { %>
-                    <% if (String(p._id) === String(activeProfileId)) return; %>
-                      <div id=<%= p._id%> class="profile-item">
-                        <button class="profile-select-btn" role="menuitem" type="button" tabindex="-1">
-                          <% if (p.avatarPath) { %>
-                            <img
-                              class="profile-avatar"
-                              src="/static/<%= p.avatarPath %>"
-                              alt="<%= p.name %>'s avatar"
-                              onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                            />
-                            <div class="profile-avatar profile-avatar--emoji" style="display: none;">👤</div>
-                          <% } else { %>
-                            <div class="profile-avatar profile-avatar--emoji">👤</div>
-                          <% } %>
-                          <div class="profile-name"><%= p.name %></div>
-                        </button>
-                      </div>
-                  <% }) %>
-                  <div id="manage-profiles-item" class="profile-item">
-                    <!-- Give the manage profiles button the same CSS as the profile select buttons -->
-                    <button id="manage-profiles-btn" class="profile-select-btn" role="menuitem" type="button" tabindex="-1">⚙️ Manage Profiles</button>
-                  </div>
-                </div>
-              <% } %>
-            </div>
-          </div>
-        </header>
-
-      <section class="category">
-        <h2>Continue Watching</h2>
-        <div class="grid" id="continue-watching"></div>
-      </section>
-
-      <section class="category">
-        <h2>Popular</h2>
-        <div class="grid" id="popular"></div>
-      </section>
+      <!-- By default display home page -->
+      <%- include('../partials/main-home', {
+        profiles: profiles,
+        activeProfileId: activeProfileId
+      }) %>
     </main>
   </div>
 </body>
