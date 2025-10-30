@@ -24,7 +24,13 @@
         profiles: profiles,
         activeProfileId: activeProfileId
       }) %>
+
+      <%- include('../partials/media-preview', {
+        scripts: ['media-preview.js']
+        additional_css: ['media-preview.css']
+      })%>
     </main>
+
   </div>
 </body>
 </html>
