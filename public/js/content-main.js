@@ -150,31 +150,6 @@ async function sideNavbarPageSwapListener() {
   });
 }
 
-
-// TO BE REMOVED ...
-const mockData = [
-  { _id: "68fbd22e42639281fc130633", title: "Shironet", posterUrl: "/assets/posters/1761302557127_pr6.jpeg" },
-  { _id: "690dfedd493dac251df79dd9", title: "Grey's Anatomy", posterUrl: "/assets/posters/1762526252136_greys1.jpg" },
-  { _id: "3", title: "The Terminator", posterUrl: "/assets/posters/terminator.jpg" },
-  { _id: "4", title: "Snowfall", posterUrl: "/assets/posters/snowfall.jpg" },
-];
-
-function renderCards(containerId, data) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = data.map(item => `
-    <div class="card" data-id="${item._id}">
-      <img src="${item.posterUrl}" alt="${item.title}">
-      <div class="play-overlay">▶</div>
-      <div class="card-title">${item.title}</div>
-    </div>
-  `).join('');
-}
-
-
-  const overlay = document.getElementById('preview-overlay');
-  const closeBtn = overlay.querySelector('.close-btn');
-  const main = document.querySelector('.main');
-
 function addCardClickListeners() {
   const cards = document.querySelectorAll('.card');
   
@@ -193,7 +168,6 @@ function addCardClickListeners() {
   });
 });
 } 
-
 
 function escapeHtml(value = '') {
   return String(value)
@@ -215,7 +189,6 @@ function buildCardMarkup(item = {}) {
         <div class="play-overlay">▶</div>
       </div>
       <div class="card-title">${title}</div>
-
     </div>
   `;
 }
