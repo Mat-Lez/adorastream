@@ -23,5 +23,6 @@ router.get('/content-main/:page', requireLogin, requireProfileSelection, require
 router.get('/settings/:page', requireLogin, requireProfileSelection, noCache, requireFetch, loadUserContext, showSettingsSpecificPage);
 router.get('/settings/profiles/:action', requireLogin, requireProfileSelection, noCache, requireFetch, loadUserContext, showSettingsProfileActionPage);
 router.get('/player', requireLogin, requireProfileSelection, showMediaPlayerPage);
+router.get('/content-main/:page', requireLogin, requireProfileSelection, showMainSpecificPage);
 
 module.exports = router;
