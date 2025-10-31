@@ -22,6 +22,9 @@
   <% if (typeof additional_css !== 'undefined' && additional_css.includes('player')) { %>
     <link rel="stylesheet" href="/css/player.css">
   <% } %>
+  <% if (typeof additional_css !== 'undefined' && additional_css.includes('mediaPreview')) { %>
+    <link rel="stylesheet" href="/css/media-preview.css">
+  <% } %>
 
 
 
@@ -46,5 +49,8 @@
   <% } %>
   <% if (typeof scripts !== 'undefined' && scripts.includes('player')) { %>
     <script type="module" src="/js/player.js"></script>
+  <% } %>
+  <% if (typeof scripts !== 'undefined' && scripts.includes('mediaPreview')) { %>
+    <script type="module" src="/js/media-preview.js"></script>
   <% } %>
 </head>

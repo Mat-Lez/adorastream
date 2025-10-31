@@ -219,6 +219,7 @@ function renderCards(containerId, data) {
   `).join('');
 }
 
+<<<<<<< HEAD
 function addCardClickListeners() {
   const cards = document.querySelectorAll('.card');
   cards.forEach(card => {
@@ -240,11 +241,96 @@ function addCardClickListeners() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  sideNavbarPageSwapListener();
-  topbarProfilesDropdownActionsListener();
-  logoutEventListener('logout-btn');
-  renderCards('continue-watching', mockData);
-  renderCards('popular', mockData);
-  addCardClickListeners();
+document.addEventListener('DOMContentLoaded', 
+// function addCardClickListeners() {
+//   const cards = document.querySelectorAll('.card');
+//   cards.forEach(card => {
+//     card.addEventListener('click', async (e) => {
+//       const cardEl = e.target.closest('.card'); // adjust selector to match your card class
+//       if (!cardEl) return; // click was outside a card
+//       const contentId = cardEl.dataset.id;
+//       if (!contentId) return;
+//       try {
+//         // Call API to select profile (store the profileId in session)
+//         await api('/api/content/select-content', 'POST', { contentId: contentId });
+//         location.href = '/player';
+//       } catch (e) {
+//           console.error(`Failed to select content: ${e.message}`);
+//       }
+//     });
+//   });
+// }
+
+function addCardClickListeners() {
+  const cards = document.querySelectorAll('.card');
+  const overlay = document.getElementById('preview-overlay');
+  const main = document.querySelector('.main');
+
+  function closePreview() {
+    overlay.classList.add('hidden');
+    main.classList.remove('blurred');
+  }
+
+  // Close when clicking outside card or on close button
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closePreview();
+  });
+  // overlay.querySelector('.close-btn').addEventListener('click', closePreview);
+
+
+  cards.forEach(card => {
+    card.addEventListener('click', async () => {
+      const contentId = card.dataset.id;
+      console.log(contendId);
+      console.log('blah');
+      if (!contentId) return;
+
+      try {
+        console.log('whoisthis');
+        const res = await fetch(`/api/content/${contentId}/preview`);
+        console.log(res);
+        if (!res.ok) throw new Error('Failed to fetch preview');
+        const data = await res.json();
+
+        // Fill the preview UI
+        document.getElementById('preview-poster').src = data.posterUrl;
+        document.getElementById('preview-title').textContent = data.title;
+        document.getElementById('preview-description').textContent = data.description;
+        document.getElementById('preview-genre').textContent = data.genre;
+        document.getElementById('preview-actors').textContent = data.actors.join(', ');
+
+        const episodesList = document.getElementById('episodes-list');
+          if (data.type === 'series') {
+            episodesList.classList.remove('hidden');
+            episodesList.innerHTML = data.episodes.map(ep =>
+              `<div class="episode">${ep.title}</div>`
+            ).join('');
+          } else {
+            episodesList.classList.add('hidden');
+          }
+
+          overlay.classList.remove('hidden');
+          main.classList.add('blurred');
+    } catch (err) {
+        console.error('Preview error:', err);
+      }
+  });
 });
+}
+
+// Close button
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('close-btn') || e.target.id === 'preview-overlay') {
+    document.getElementById('preview-overlay').classList.add('hidden');
+  }
+});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    logoutEventListener('logout-btn'),
+    profileDropDownTogglerListener(),
+    profileSwitchListener(),
+    renderCards('continue-watching', mockData),
+    renderCards('popular', mockData),
+    addCardClickListeners()
+);

@@ -85,6 +85,21 @@ exports.list = async (req, res) => {
   res.json({ contents, total, page, pages: Math.ceil(total / limit) });
 };
 
+// GET content by ID
+exports.get = async (req, res) => {
+  const content = await Content.findById(req.params.id).lean();
+  if (!content) { const e = new Error('Content not found'); e.status = 404; throw e; }
+  res.json({
+    title: content.title,
+    posterUrl: content.posterUrl,
+    description: content.description,
+    genre: content.genre,
+    actors: content.actors,
+    type: content.type,
+    episodes: content.episodes || []
+  });
+};
+
 // PATCH update content by ID
 exports.update = async (req, res) => {
   const content = await Content.findByIdAndUpdate(req.params.id, req.body, { new: true });
