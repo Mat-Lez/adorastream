@@ -24,6 +24,7 @@ router.get('/settings/:page', requireLogin, requireProfileSelection, noCache, re
 router.get('/settings/profiles/:action', requireLogin, requireProfileSelection, noCache, requireFetch, loadUserContext, showSettingsProfileActionPage);
 router.get('/player', requireLogin, requireProfileSelection, showMediaPlayerPage);
 <<<<<<< HEAD
+<<<<<<< HEAD
 router.get('/content-main', requireLogin, requireProfileSelection, noCache, showContentMainPage);
 router.get('/content-main/:page', requireLogin, requireProfileSelection, requireFetch, noCache, showMainSpecificPage);
 router.get('/content-main/preview/:contentId/episodes', requireLogin, requireProfileSelection, showEpisodesDetailedList);
@@ -32,5 +33,9 @@ router.get('/content-main/preview/:contentId/actors', requireLogin, requireProfi
 =======
 router.get('/content-main/:page', requireLogin, requireProfileSelection, showMainSpecificPage);
 >>>>>>> 13201a6 (resolve conflict)
+=======
+router.get('/content-main', requireLogin, requireProfileSelection, noCache, showContentMainPage);
+router.get('/content-main/:page', requireLogin, requireProfileSelection, requireFetch, noCache, showMainSpecificPage);
+>>>>>>> 2fe1144 (resolve-conflicts)
 
 module.exports = router;
