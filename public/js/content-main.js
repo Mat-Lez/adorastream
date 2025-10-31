@@ -173,6 +173,16 @@ async function sideNavbarPageSwapListener() {
   });
 }
 
+<<<<<<< HEAD
+=======
+document.addEventListener('DOMContentLoaded', () => {
+    logoutEventListener('logout-btn');
+    profileDropDownTogglerListener();
+    profileSwitchListener();
+    sideNavbarPageSwapListener();
+});
+
+>>>>>>> 97ef282 (fix: make event listeners run only when the DOMContentLoaded event if fired instead of when the script is parsed)
 // TO BE REMOVED ...
 const mockData = [
   { _id: "68fbd22e42639281fc130633", title: "Shironet", posterUrl: "/assets/posters/1761302557127_pr6.jpeg" },
