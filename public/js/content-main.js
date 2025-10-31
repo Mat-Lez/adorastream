@@ -107,29 +107,25 @@ function topbarProfilesDropdownActionsListener() {
   });
 }
 
-async function sideNavbarPageSwapListener() {
-  const navButtons = document.querySelectorAll('.nav-item');
-  const main = document.querySelector('.main');
-
-  navButtons.forEach(btn => {
-    btn.addEventListener('click', async () => {
-      // Highlight active button
-      navButtons.forEach(b => {
-        b.classList.remove('active')
-        b.disabled = false;
-      });
-      btn.classList.add('active');
-      btn.disabled = true; // disable button so it will not be infinitly clickable and rerun the fade animation
-
-      const page = btn.dataset.page;
-      let pageUrl = `/content-main/${page}`;
-      if (page === 'settings' && btn.dataset.settingsTarget) {
-        pageUrl += `?tab=${btn.dataset.settingsTarget}`;
-      }
-
-      await fetchPage(pageUrl, main, "loading");
-
-    });
+async function profileSwitchListener(){
+  const pd = document.querySelector('.profile-dropdown');
+  if (!pd) return;
+  const profileItems = pd.querySelectorAll('.profile-item');
+  profileItems.forEach(item => {
+    if (item.id === 'manage-profiles-item') {
+      // SHOULD ADD LOGIC HERE TO GO TO SETTINGS PAGE
+      console.log('Manage profiles clicked but there is no logic yet!');
+      return;
+    } else {
+      item.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const profileId = item.id;
+        const errMsg = await switchProfile(profileId);
+        if (errMsg) {
+          console.error('Profile switch failed:', errMsg);
+        }
+      }); 
+    }
   });
 }
 
@@ -149,22 +145,25 @@ async function sideNavbarPageSwapListener() {
 
       const page = btn.dataset.page;
       try {
-        const res = await fetch(`/content-main/${page}`);
+        const res = await fetch(`/content-main/${page}`, {
+          headers: {
+            // added header to indicate ajax request coming from internal fetch
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
         if (!res.ok) throw new Error('Failed to load page');
 
-        // Fade out current content
-        main.classList.add('loading');
-        await new Promise(r => setTimeout(r, 250)); // Wait for fade-out
+        // Fade out
+        await animateOut(main, 'loading');
         
         const html = await res.text();
 
         // Swap the main content
         main.innerHTML = html;
 
+        initPageScripts(); // Reinitialize event listeners for new content
         // Fade back in
-        requestAnimationFrame(() => {
-          main.classList.remove('loading');
-        });
+        await animateIn(main, 'loading');
       } catch (err) {
         console.error(err);
         main.innerHTML = `<p class="error">Failed to load page: ${page}</p>`;
@@ -173,16 +172,34 @@ async function sideNavbarPageSwapListener() {
   });
 }
 
-<<<<<<< HEAD
-=======
-document.addEventListener('DOMContentLoaded', () => {
-    logoutEventListener('logout-btn');
-    profileDropDownTogglerListener();
-    profileSwitchListener();
-    sideNavbarPageSwapListener();
-});
+async function animateOut(element, animationClass, animationDuration = 250) {
+  element.classList.add(animationClass);
+  await new Promise(resolve => {
+    setTimeout(resolve, animationDuration);
+  });
+}
 
->>>>>>> 97ef282 (fix: make event listeners run only when the DOMContentLoaded event if fired instead of when the script is parsed)
+async function animateIn(element, animationClass, animationDuration = 250) {
+  requestAnimationFrame(() => {
+    element.classList.remove(animationClass);
+  });
+  await new Promise(resolve => {
+    setTimeout(resolve, animationDuration);
+  });
+}
+
+
+// Global page scripts are those that do not need to be reinitialized on every page load
+function initGlobalPageScripts() {
+  sideNavbarPageSwapListener();
+}
+
+function initPageScripts() {
+  logoutEventListener('logout-btn');
+  profileDropDownTogglerListener();
+  profileSwitchListener();
+}
+
 // TO BE REMOVED ...
 const mockData = [
   { _id: "68fbd22e42639281fc130633", title: "Shironet", posterUrl: "/assets/posters/1761302557127_pr6.jpeg" },
