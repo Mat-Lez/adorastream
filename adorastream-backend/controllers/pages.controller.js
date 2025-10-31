@@ -238,6 +238,7 @@ exports.showMediaPlayerPage = async (req, res) => {
 }
 
 exports.showPreviewPage = async (req, res) => {
+<<<<<<< HEAD
   const { contentId, currentEpisodeId } = req.query;
 
   if (!contentId) {
@@ -320,3 +321,31 @@ exports.showActorsList = async (req, res) => {
     return res.status(500).send('Internal server error');
   }
 };
+=======
+  const { id } = req.params;
+  const content = await Content.findById(id).lean();
+
+  if (!content) {
+    return res.status(404).send('Content not found');
+  }
+
+  res.render('partials/preview', {
+    layout: false,
+    content
+  });
+}
+
+exports.showPreviewPage = async (req, res) => {
+  const { id } = req.params;
+  const content = await Content.findById(id).lean();
+
+  if (!content) {
+    return res.status(404).send('Content not found');
+  }
+
+  res.render('partials/preview', {
+    layout: false,
+    content
+  });
+};
+>>>>>>> 6c9f3cf (resolve-conflicts)

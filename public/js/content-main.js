@@ -110,7 +110,6 @@ function topbarProfilesDropdownActionsListener() {
   });
 }
 
-<<<<<<< HEAD
 async function sideNavbarPageSwapListener() {
   const navButtons = document.querySelectorAll('.nav-item');
   const main = document.querySelector('.main');
@@ -190,116 +189,6 @@ function buildCardMarkup(item = {}) {
         <div class="play-overlay">▶</div>
       </div>
       <div class="card-title">${title}</div>
-=======
-async function profileSwitchListener(){
-  const pd = document.querySelector('.profile-dropdown');
-  if (!pd) return;
-  const profileItems = pd.querySelectorAll('.profile-item');
-  profileItems.forEach(item => {
-    if (item.id === 'manage-profiles-item') {
-      // SHOULD ADD LOGIC HERE TO GO TO SETTINGS PAGE
-      console.log('Manage profiles clicked but there is no logic yet!');
-      return;
-    } else {
-      item.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const profileId = item.id;
-        const errMsg = await switchProfile(profileId);
-        if (errMsg) {
-          console.error('Profile switch failed:', errMsg);
-        }
-      }); 
-    }
-  });
-}
-
-async function sideNavbarPageSwapListener() {
-  const navButtons = document.querySelectorAll('.nav-item');
-  const main = document.querySelector('.main');
-
-  navButtons.forEach(btn => {
-    btn.addEventListener('click', async () => {
-      // Highlight active button
-      navButtons.forEach(b => {
-        b.classList.remove('active')
-        b.disabled = false;
-      });
-      btn.classList.add('active');
-      btn.disabled = true; // disable button so it will not be infinitly clickable and rerun the fade animation
-
-      const page = btn.dataset.page;
-      try {
-        const res = await fetch(`/content-main/${page}`, {
-          headers: {
-            // added header to indicate ajax request coming from internal fetch
-            'X-Requested-With': 'XMLHttpRequest'
-          }
-        });
-        if (!res.ok) throw new Error('Failed to load page');
-
-        // Fade out
-        await animateOut(main, 'loading');
-        
-        const html = await res.text();
-
-        // Swap the main content
-        main.innerHTML = html;
-
-        initPageScripts(); // Reinitialize event listeners for new content
-        // Fade back in
-        await animateIn(main, 'loading');
-      } catch (err) {
-        console.error(err);
-        main.innerHTML = `<p class="error">Failed to load page: ${page}</p>`;
-      }
-    });
-  });
-}
-
-async function animateOut(element, animationClass, animationDuration = 250) {
-  element.classList.add(animationClass);
-  await new Promise(resolve => {
-    setTimeout(resolve, animationDuration);
-  });
-}
-
-async function animateIn(element, animationClass, animationDuration = 250) {
-  requestAnimationFrame(() => {
-    element.classList.remove(animationClass);
-  });
-  await new Promise(resolve => {
-    setTimeout(resolve, animationDuration);
-  });
-}
-
-
-// Global page scripts are those that do not need to be reinitialized on every page load
-function initGlobalPageScripts() {
-  sideNavbarPageSwapListener();
-}
-
-function initPageScripts() {
-  logoutEventListener('logout-btn');
-  profileDropDownTogglerListener();
-  profileSwitchListener();
-}
-
-// TO BE REMOVED ...
-const mockData = [
-  { _id: "68fbd22e42639281fc130633", title: "Shironet", posterUrl: "/assets/posters/1761302557127_pr6.jpeg" },
-  { _id: "2", title: "American Psycho", posterUrl: "/assets/posters/psycho.jpg" },
-  { _id: "3", title: "The Terminator", posterUrl: "/assets/posters/terminator.jpg" },
-  { _id: "4", title: "Snowfall", posterUrl: "/assets/posters/snowfall.jpg" },
-];
-
-function renderCards(containerId, data) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = data.map(item => `
-    <div class="card" data-id="${item._id}">
-      <img src="${item.posterUrl}" alt="${item.title}">
-      <div class="play-overlay">▶</div>
-      <div class="card-title">${item.title}</div>
->>>>>>> 24d8e4b (resolve-conflicts)
     </div>
   `;
 }
@@ -408,5 +297,6 @@ document.addEventListener('DOMContentLoaded', () => {
   addCardClickListeners();
   if (document.getElementById('search')) {
     initSearchFeature();
+
   }
 });
