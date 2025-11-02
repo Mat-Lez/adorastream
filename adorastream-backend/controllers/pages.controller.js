@@ -63,3 +63,44 @@ exports.showMainSpecificPage = async (req, res) => {
     activeProfileId: req.session.user.profileId
   });
 }
+
+exports.showSettingsSpecificPage = async (req, res) => {
+  const availablePages = ['manage-profiles', 'statistics'];
+  let { page } = req.params;
+  if (page === undefined || !availablePages.includes(page)) {
+    page = "manage-profiles";
+  } 
+
+  const user = await User.findOne({ _id: req.session.user.id }).lean();
+
+  res.render(`partials/main-settings-${page}`, {
+    layout: false,
+    profiles: user.profiles,
+    activeProfileId: req.session.user.profileId,
+  });
+}
+
+// Reach here from /settings/profiles/:action
+exports.showSettingsProfileActionPage = async (req, res) => {
+  const availablePages = ['add', 'edit'];
+  let { page } = req.params;
+  const profileIdToEdit = req.query.id;
+  const user = await User.findOne({ _id: req.session.user.id }).lean();
+
+  if ((page === undefined || !availablePages.includes(page)) || (page === "edit" && !profileIdToEdit)) {
+    page = "manage-profiles";
+    res.render(`partials/main-settings-${page}`, {
+      layout: false,
+      profiles: user.profiles,
+      activeProfileId: req.session.user.profileId
+    });
+    return;
+  }  
+  
+  res.render(`partials/main-settings-${page}-profile`, {
+    layout: false,
+    profiles: user.profiles,
+    activeProfileId: req.session.user.profileId,
+    profile: user.profiles.find(p => String(p._id) === String(profileIdToEdit)) || undefined
+  });
+}

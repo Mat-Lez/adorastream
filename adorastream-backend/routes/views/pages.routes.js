@@ -4,7 +4,7 @@ const router = express.Router();
 const { requireAdmin, requireLogin, requireProfileSelection } = require('../../middleware/auth');
 const { showLoginPage, showRegisterPage, showProfilesPage, 
     showAddProfilePage, showAddContentPage, showContentMainPage,
-    showMainSpecificPage } = 
+    showMainSpecificPage, showSettingsSpecificPage, showSettingsProfileActionPage} = 
     require('../../controllers/pages.controller');
 const noCache = require('../../middleware/noCache');
 const requireFetch = require('../../middleware/internalFetch');
@@ -17,5 +17,7 @@ router.get('/add-profile', requireLogin, showAddProfilePage);
 router.get('/add-content', requireLogin, requireAdmin, showAddContentPage);
 router.get('/content-main', requireLogin, requireProfileSelection, noCache, showContentMainPage);
 router.get('/content-main/:page', requireLogin, requireProfileSelection, requireFetch, noCache, showMainSpecificPage);
+router.get('/settings/:page', requireLogin, requireProfileSelection, noCache, requireFetch, showSettingsSpecificPage);
+router.get('/settings/profiles/:action', requireLogin, requireProfileSelection, noCache, requireFetch, showSettingsProfileActionPage);
 
 module.exports = router;

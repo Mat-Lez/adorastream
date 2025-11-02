@@ -22,16 +22,12 @@
     let topbarPartsToDisplay = [];
     if (topbarLayout && topbarLayout.length) {
       topbarPartsToDisplay = topbarPartsOrder.filter(item => topbarLayout.includes(item));
-    } else {
-      topbarPartsToDisplay = topbarPartsOrder;
     }
 
     // Determine which actions appear inside topbar-actions
     let topbarActionsToDisplay = [];
     if (topbarActionsLayout && topbarActionsLayout.length) {
       topbarActionsToDisplay = Object.values(availableTopbarActions).filter(a => topbarActionsLayout.includes(a));
-    } else {
-      topbarActionsToDisplay = Object.values(availableTopbarActions);
     }
 
     // ----------------------------

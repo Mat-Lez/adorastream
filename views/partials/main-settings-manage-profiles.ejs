@@ -1,0 +1,48 @@
+<h1 class="page-title">Manage Profiles</h1>
+
+<div class="profiles-list">
+    <% if (typeof profiles !== 'undefined' && profiles.length) { %>
+    <% profiles.forEach(function(p) { %>
+        
+        <a href="/profiles/edit/<%= p._id %>" class="profile-box">
+        
+        <div class="profile-box-avatar">
+            <% if (p.avatarPath) { %>
+            <img
+                src="/static/<%= p.avatarPath %>"
+                alt="<%= p.name %>'s avatar"
+                onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
+            />
+            <div class="profile-avatar-emoji" style="display: none;">👤</div>
+            <% } else { %>
+            <div class="profile-avatar-emoji">👤</div>
+            <% } %>
+        </div>
+
+        <!-- Profile Name -->
+        <span class="profile-box-name"><%= p.name %></span>
+
+        <!-- "Your Profile" Tag -->
+        <% if (String(p._id) === String(activeProfileId)) { %>
+            <span class="profile-box-tag">Your Profile</span>
+        <% } %>
+
+        <!-- Chevron Icon -->
+        <i class="bi bi-chevron-right profile-box-chevron"></i>
+        </a>
+
+    <% }) %>
+    <% } else { %>
+    <p class="profiles-empty-state">No profiles found.</p>
+    <% } %>
+</div>
+
+<!-- "Add Profile" Button -->
+<a href="/profiles/add" class="add-profile-box">
+    <i class="bi bi-plus-lg"></i>
+    <span>Add Profile</span>
+</a>
+
+<p class="profiles-page-subtitle">
+    Add up to 5 profiles for anyone who lives with you.
+</p>

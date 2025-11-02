@@ -1,5 +1,6 @@
 import { logoutEventListener } from '../utils/reuseableEventListeners.js';
 import { switchProfile } from '/utils/profilesManagement.js';
+import { fetchPage } from '../utils/pageManagement.js';
 
 // init functions
 (async () => {
@@ -88,54 +89,11 @@ async function sideNavbarPageSwapListener() {
       btn.disabled = true; // disable button so it will not be infinitly clickable and rerun the fade animation
 
       const page = btn.dataset.page;
-      try {
-        const res = await fetch(`/content-main/${page}`, {
-          headers: {
-            // added header to indicate ajax request coming from internal fetch
-            'X-Requested-With': 'XMLHttpRequest'
-          }
-        });
-        if (!res.ok) throw new Error('Failed to load page');
-
-        // Fade out
-        await animateOut(main, 'loading');
-        
-        const html = await res.text();
-
-        // Swap the main content
-        main.innerHTML = html;
-
-        initPageScripts(); // Reinitialize event listeners for new content
-        // Fade back in
-        await animateIn(main, 'loading');
-      } catch (err) {
-        console.error(err);
-        main.innerHTML = '';
-        const p = document.createElement('p');
-        p.className = 'error';
-        p.textContent = `Failed to load page: ${page}`;
-        main.appendChild(p);
-      }
+      await fetchPage(`/content-main/${page}`, main, "loading");
+      initPageScripts();
     });
   });
 }
-
-async function animateOut(element, animationClass, animationDuration = 250) {
-  element.classList.add(animationClass);
-  await new Promise(resolve => {
-    setTimeout(resolve, animationDuration);
-  });
-}
-
-async function animateIn(element, animationClass, animationDuration = 250) {
-  requestAnimationFrame(() => {
-    element.classList.remove(animationClass);
-  });
-  await new Promise(resolve => {
-    setTimeout(resolve, animationDuration);
-  });
-}
-
 
 // Global page scripts are those that do not need to be reinitialized on every page load
 function initGlobalPageScripts() {

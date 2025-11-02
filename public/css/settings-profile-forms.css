@@ -1,0 +1,79 @@
+/* Hint text for file input */
+.form-hint {
+  color: var(--muted);
+  font-size: 12px;
+  display: block;
+  margin-top: 8px;
+}
+
+/* Container for the avatar editor */
+.avatar-edit-wrapper {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0 auto 24px; /* Center the avatar */
+  cursor: pointer;
+  border: 2px solid var(--button-border);
+}
+
+/* Large avatar image */
+.profile-avatar-large {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Large emoji fallback */
+.profile-avatar-emoji-large {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+/* The dark overlay with the pencil icon */
+.avatar-hover-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.avatar-edit-wrapper:hover .avatar-hover-icon {
+  opacity: 1;
+}
+
+/* Divider line */
+.form-divider {
+  border: none;
+  border-top: 1px solid var(--button-border);
+  margin: 24px 0;
+}
+
+/* Red "danger" button style */
+.btn-danger {
+  background: var(--danger);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-danger:hover {
+  background: #b92c2a; /* A slightly darker red */
+}
