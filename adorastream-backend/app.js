@@ -35,7 +35,7 @@ app.use(audit);
 
 // Static files (after guarded routes to avoid public access bypass)
 app.use(express.static('public'));
-app.use('/static', express.static(path.join(__dirname, 'assets')));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);

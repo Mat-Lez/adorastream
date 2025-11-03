@@ -1,6 +1,6 @@
 const Content = require('../models/content');
 const { enrichMovieRatings } = require('../services/rating.service');
-const upload = require('../services/videoUpload.services');
+const upload = require('../services/videoUpload.service');
 
 // POST create new content
 exports.create = async (req, res) => {
@@ -35,10 +35,10 @@ exports.create = async (req, res) => {
   let posterUrl = '';
   let videoUrl = '';
   if (req.files && req.files.poster && req.files.poster[0]) {
-    posterUrl = `/public/posters/${req.files.poster[0].filename}`;
+    posterUrl = `/assets/posters/${req.files.poster[0].filename}`;
   }
   if (req.files && req.files.video && req.files.video[0]) {
-    videoUrl = `/public/videos/${req.files.video[0].filename}`;
+    videoUrl = `/assets/videos/${req.files.video[0].filename}`;
   }
 
   // Create content
