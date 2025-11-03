@@ -1,6 +1,6 @@
 const Content = require('../models/content');
 const { enrichMovieRatings, enrichSeriesRatings, enrichSeriesEpisodesRatings } = require('../services/rating.service');
-const upload = require('../services/videoUpload.services');
+const upload = require('../services/videoUpload.service');
 
 // POST create new content
 exports.create = async (req, res) => {

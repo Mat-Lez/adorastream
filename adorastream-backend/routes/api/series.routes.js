@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const SeriesCtl = require('../../controllers/content.controller');
 const { requireLogin, requireAdmin } = require('../../middleware/auth');
-const upload = require('../../services/videoUpload.services');
+const upload = require('../../services/videoUpload.service');
 
 router.get('/', (req, res, next) => SeriesCtl.listSeries(req, res).catch(next));
 router.get('/:id', (req, res, next) => SeriesCtl.getSeries(req, res).catch(next));
