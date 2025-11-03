@@ -35,10 +35,10 @@ exports.create = async (req, res) => {
   let posterUrl = '';
   let videoUrl = '';
   if (req.files && req.files.poster && req.files.poster[0]) {
-    posterUrl = `/static/posters/${req.files.poster[0].filename}`;
+    posterUrl = `/assets/posters/${req.files.poster[0].filename}`;
   }
   if (req.files && req.files.video && req.files.video[0]) {
-    videoUrl = `/static/videos/${req.files.video[0].filename}`;
+    videoUrl = `/assets/videos/${req.files.video[0].filename}`;
   }
 
   // Create content
@@ -125,7 +125,7 @@ exports.createSeries = async (req, res) => {
 
   let posterUrl = '';
   if (req.files && req.files.poster && req.files.poster[0]) {
-    posterUrl = `/static/posters/${req.files.poster[0].filename}`;
+    posterUrl = `/assets/posters/${req.files.poster[0].filename}`;
   }
 
   const genresArr = typeof genres === 'string'
@@ -182,10 +182,10 @@ exports.addEpisode = async (req, res) => {
   let posterUrl = '';
   let videoUrl = '';
   if (req.files && req.files.poster && req.files.poster[0]) {
-    posterUrl = `/static/posters/${req.files.poster[0].filename}`;
+    posterUrl = `/assets/posters/${req.files.poster[0].filename}`;
   }
   if (req.files && req.files.video && req.files.video[0]) {
-    videoUrl = `/static/videos/${req.files.video[0].filename}`;
+    videoUrl = `/assets/videos/${req.files.video[0].filename}`;
   }
 
   const seasonNum = Number(seasonNumber);
@@ -247,8 +247,8 @@ exports.addEpisodesBatch = async (req, res) => {
     }
     const exists = (season.episodes || []).some(e => e.episodeNumber === epNum);
     if (exists) return;
-    const posterUrl = posters[idx] ? `/static/posters/${posters[idx].filename}` : '';
-    const videoUrl  = videos[idx]  ? `/static/videos/${videos[idx].filename}`   : '';
+    const posterUrl = posters[idx] ? `/assets/posters/${posters[idx].filename}` : '';
+    const videoUrl  = videos[idx]  ? `/assets/videos/${videos[idx].filename}`   : '';
     const actorsArr = Array.isArray(ep.actors) ? ep.actors : [];
     season.episodes.push({
       seasonNumber: seasonNum,
