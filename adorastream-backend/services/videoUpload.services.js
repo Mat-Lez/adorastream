@@ -1,14 +1,24 @@
 const path = require('path');
 const multer = require('multer');
 
+const fs = require('fs');
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    if (file.fieldname === 'poster') {
-      cb(null, path.join(__dirname, '..', 'public/posters'));
-    } else if (file.fieldname === 'video') {
-      cb(null, path.join(__dirname, '..', 'public/videos'));
-    } else {
-      cb(new Error('Unknown field'), null);
+    try {
+      const basePublic = path.join(__dirname, '..', '..', 'public');
+      let targetDir;
+      if (file.fieldname === 'poster' || file.fieldname === 'posters') {
+        targetDir = path.join(basePublic, 'posters');
+      } else if (file.fieldname === 'video' || file.fieldname === 'videos') {
+        targetDir = path.join(basePublic, 'videos');
+      } else {
+        return cb(new Error('Unknown field'), null);
+      }
+      fs.mkdirSync(targetDir, { recursive: true });
+      cb(null, targetDir);
+    } catch (e) {
+      cb(e, null);
     }
   },  filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname);

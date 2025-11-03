@@ -13,6 +13,7 @@ const authRoutes = require('./routes/api/auth.routes');
 const usersRoutes = require('./routes/api/user.routes');
 const contentRoutes = require('./routes/api/content.routes');
 const historyRoutes = require('./routes/api/watchHistory.routes');
+const seriesRoutes = require('./routes/api/series.routes');
 
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/streaming_app';
@@ -36,11 +37,13 @@ app.use(audit);
 // Static files (after guarded routes to avoid public access bypass)
 app.use(express.static('public'));
 app.use('/static', express.static(path.join(__dirname, 'assets')));
+app.use('/media', express.static(path.join(__dirname, 'public')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/history', historyRoutes);
+app.use('/api/series', seriesRoutes);
 app.use('/', pagesRoutes);
 
 app.use(notFound);
