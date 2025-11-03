@@ -6,12 +6,12 @@ const fs = require('fs');
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     try {
-      const basePublic = path.join(__dirname, '..', '..', 'public');
+      const baseAssets = path.join(__dirname, '..', 'assets');
       let targetDir;
       if (file.fieldname === 'poster' || file.fieldname === 'posters') {
-        targetDir = path.join(basePublic, 'posters');
+        targetDir = path.join(baseAssets, 'posters');
       } else if (file.fieldname === 'video' || file.fieldname === 'videos') {
-        targetDir = path.join(basePublic, 'videos');
+        targetDir = path.join(baseAssets, 'videos');
       } else {
         return cb(new Error('Unknown field'), null);
       }

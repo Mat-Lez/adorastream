@@ -35,10 +35,10 @@ exports.create = async (req, res) => {
   let posterUrl = '';
   let videoUrl = '';
   if (req.files && req.files.poster && req.files.poster[0]) {
-    posterUrl = `/posters/${req.files.poster[0].filename}`;
+    posterUrl = `/static/posters/${req.files.poster[0].filename}`;
   }
   if (req.files && req.files.video && req.files.video[0]) {
-    videoUrl = `/videos/${req.files.video[0].filename}`;
+    videoUrl = `/static/videos/${req.files.video[0].filename}`;
   }
 
   // Create content
