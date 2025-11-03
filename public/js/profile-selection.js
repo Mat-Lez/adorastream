@@ -33,7 +33,7 @@ async function loadProfiles(){
 
   // Render existing profiles
   for (const p of (user.profiles || [])) {
-    const avatarPath = p.avatarPath ? `/static/${p.avatarPath}` : '';
+    const avatarPath = p.avatarPath ? `/assets/${p.avatarPath}` : '';
     const avatarBlock = p.avatarPath
       ? `<div class="profile-avatar" style="background-image:url('${encodeURI(avatarPath)}')"></div>`
       : `<div class="profile-avatar">👤</div>`;
