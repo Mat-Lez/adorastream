@@ -4,9 +4,9 @@ const multer = require('multer');
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     if (file.fieldname === 'poster') {
-      cb(null, path.join(__dirname, '..', 'public/posters'));
+      cb(null, path.join(__dirname, '..', 'assets/posters'));
     } else if (file.fieldname === 'video') {
-      cb(null, path.join(__dirname, '..', 'public/videos'));
+      cb(null, path.join(__dirname, '..', 'assets/videos'));
     } else {
       cb(new Error('Unknown field'), null);
     }
