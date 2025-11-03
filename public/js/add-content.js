@@ -323,18 +323,7 @@ function init() {
     }
   }
 
-  function handleSeriesActionChange() {
-    if (!actionEl) return;
-    const action = actionEl.value;
-    if (createFields) createFields.style.display = action === 'create' ? '' : 'none';
-    if (episodeFields) episodeFields.style.display = action === 'add-episode' ? '' : 'none';
-    if (action === 'add-episode') loadSeriesOptions();
-    // Show actors/description/video only for episode; hide for create
-    const isEpisode = action === 'add-episode';
-    if (actorsSection) actorsSection.style.display = isEpisode ? '' : 'none';
-    if (descriptionField) descriptionField.style.display = isEpisode ? '' : 'none';
-    if (videoField) videoField.style.display = isEpisode ? '' : 'none';
-  }
+  // removed unused handleSeriesActionChange
 
   if (typeEl) {
     typeEl.addEventListener('change', handleTypeChange);

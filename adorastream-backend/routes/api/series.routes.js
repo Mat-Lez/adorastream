@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const SeriesCtl = require('../../controllers/series.controller');
+const SeriesCtl = require('../../controllers/content.controller');
 const { requireLogin, requireAdmin } = require('../../middleware/auth');
 const upload = require('../../services/videoUpload.services');
 
