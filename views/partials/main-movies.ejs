@@ -2,3 +2,158 @@
 topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
 topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
 }) %>
+	<section class="movies-page" data-per-row="<%= process.env.CONTENT_PER_ROW || 5 %>" style="--per-row: <%= process.env.CONTENT_PER_ROW || 5 %>">
+		<h2>Movies</h2>
+
+		<div class="movies-controls">
+			<!-- Filters moved to topbar search area -->
+		</div>
+
+		<div id="movies-grid" class="cards-grid">
+			<!-- movies will be rendered here -->
+		</div>
+		<div id="movies-sentinel" style="height:1px"></div>
+
+		<div class="movies-pagination">
+			<button id="movies-prev">Previous</button>
+			<span id="movies-page-indicator">Page 1</span>
+			<button id="movies-next">Next</button>
+		</div>
+
+		<script>
+			(function(){
+				const gridId = 'movies-grid';
+				let page = 1;
+				const limit = 8;
+				let totalPages = 1;
+
+				// use topbar search input (id="search") if available
+				const searchInput = document.getElementById('search') || { value: '' };
+				// genre and sort selects may exist in desktop (movies-genre) or mobile panel (movies-genre-mobile)
+				function getGenreElement(){ return document.getElementById('movies-genre') || document.getElementById('movies-genre-mobile'); }
+				function getSortElement(){ return document.getElementById('movies-sort') || document.getElementById('movies-sort-mobile'); }
+				const genreSelect = getGenreElement();
+				const sortSelect = getSortElement();
+				const prevBtn = document.getElementById('movies-prev');
+				const nextBtn = document.getElementById('movies-next');
+				const pageIndicator = document.getElementById('movies-page-indicator');
+
+				// number of items per row, from server-side env or fallback 5
+				const perRow = parseInt((document.querySelector('.movies-page') && document.querySelector('.movies-page').dataset.perRow) || '<%= process.env.CONTENT_PER_ROW || 5 %>', 10) || 5;
+
+				let loading = false;
+
+				async function fetchPage() {
+					if (loading) return;
+					loading = true;
+					const q = encodeURIComponent(searchInput.value.trim());
+					const genre = encodeURIComponent(genreSelect.value);
+					const [sortBy, order] = sortSelect.value.split(':');
+					const url = `/api/content?type=movie&page=${page}&limit=${limit}` +
+											(q ? `&q=${q}` : '') +
+											(genre ? `&genres=${genre}` : '') +
+											`&sortBy=${encodeURIComponent(sortBy)}&order=${encodeURIComponent(order)}`;
+
+					try {
+						const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+						if (!res.ok) throw new Error('Failed to fetch movies');
+						const body = await res.json();
+						const data = body.contents || [];
+						totalPages = body.pages || 1;
+						const append = page > 1;
+						render(data, append);
+						pageIndicator.textContent = `Page ${page} / ${totalPages}`;
+						prevBtn.disabled = page <= 1;
+						nextBtn.disabled = page >= totalPages;
+
+						// stop observing when we've loaded all pages
+						if (page >= totalPages && observer) observer.disconnect();
+					} catch (err) {
+						console.error(err);
+						const container = document.getElementById(gridId);
+						container.insertAdjacentHTML('beforeend', '<p class="error">Failed to load movies</p>');
+					} finally {
+						loading = false;
+					}
+				}
+
+			function render(items, append = false) {
+				const mapped = items.map(d => ({ title: d.title, posterUrl: d.posterUrl || '/adorastream.png' }));
+				const container = document.getElementById(gridId);
+				if (typeof renderCards === 'function') {
+					// if a helper exists, prefer it (it may already handle rows)
+					if (append) renderCards(gridId, mapped, { append: true });
+					else renderCards(gridId, mapped);
+					return;
+				}
+
+				const html = mapped.map(item => `
+					<div class="card">
+						<img src="${item.posterUrl}" alt="${item.title}">
+						<div class="card-title">${item.title}</div>
+					</div>
+				`).join('');
+
+				if (append) container.insertAdjacentHTML('beforeend', html);
+				else container.innerHTML = html;
+			}
+
+				// populate genre filter by pulling first page and extracting genres
+				async function populateGenres() {
+					try {
+						const res = await fetch('/api/content?type=movie&limit=50', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+						if (!res.ok) return;
+						const body = await res.json();
+						const genres = new Set();
+						(body.contents || []).forEach(c => (c.genres || []).forEach(g => genres.add(g)));
+						const arr = Array.from(genres).sort();
+						arr.forEach(g => {
+							const opt = document.createElement('option');
+							opt.value = g;
+							opt.textContent = g;
+							// populate both desktop and mobile selects if present
+							const d = document.getElementById('movies-genre');
+							const m = document.getElementById('movies-genre-mobile');
+							if (d) d.appendChild(opt.cloneNode(true));
+							if (m) m.appendChild(opt.cloneNode(true));
+						});
+					} catch (e) { /* ignore */ }
+				}
+
+				// event listeners
+				prevBtn.addEventListener('click', () => { if (page>1) { page--; fetchPage(); } });
+				nextBtn.addEventListener('click', () => { if (page<totalPages) { page++; fetchPage(); } });
+				if (searchInput && typeof searchInput.addEventListener === 'function') {
+					searchInput.addEventListener('input', debounce(() => { page = 1; fetchPage(); }, 350));
+				}
+				// attach listeners to both desktop and mobile selects if present
+				const genreDesktop = document.getElementById('movies-genre');
+				const genreMobile = document.getElementById('movies-genre-mobile');
+				const sortDesktop = document.getElementById('movies-sort');
+				const sortMobile = document.getElementById('movies-sort-mobile');
+				if (genreDesktop) genreDesktop.addEventListener('change', () => { page = 1; fetchPage(); });
+				if (genreMobile) genreMobile.addEventListener('change', () => { page = 1; fetchPage(); });
+				if (sortDesktop) sortDesktop.addEventListener('change', () => { page = 1; fetchPage(); });
+				if (sortMobile) sortMobile.addEventListener('change', () => { page = 1; fetchPage(); });
+
+				function debounce(fn, wait){ let t; return (...args) => { clearTimeout(t); t = setTimeout(()=>fn(...args), wait); }; }
+
+				// infinite scroll observer
+				const sentinel = document.getElementById('movies-sentinel');
+				const observer = new IntersectionObserver(entries => {
+					entries.forEach(entry => {
+						if (entry.isIntersecting && !loading && page < totalPages) {
+							page++;
+							fetchPage();
+						}
+					});
+				}, { root: null, rootMargin: '200px' });
+
+				// init
+				populateGenres().finally(() => {
+					fetchPage();
+					if (sentinel) observer.observe(sentinel);
+				});
+			})();
+		</script>
+	</section>

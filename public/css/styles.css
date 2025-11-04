@@ -13,4 +13,40 @@
 .alt a{color:#58a6ff;text-decoration:none}
 .error{margin-top:10px;color:var(--danger);font-size:14px}
 .success{margin-top:10px;color:#3fb950;font-size:14px}
+/* Movies/cards layout */
+.cards-grid{display:grid;grid-template-columns:repeat(var(--per-row),1fr);gap:12px;margin-bottom:8px}
+.card{background:var(--panel);border-radius:8px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.4);display:flex;flex-direction:column}
+.card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.card-title{padding:8px;color:var(--text);font-size:14px;text-align:center}
+.play-overlay{position:absolute;pointer-events:none}
+
+/* topbar search group */
+.topbar-search-group{display:flex;gap:8px;align-items:center;width:100%;max-width:920px;flex:1;position:relative}
+.topbar-search-group input#search{flex:1;min-width:220px;padding:10px 14px;border-radius:8px;border:1px solid #30363d;background:#0b0f14;color:var(--text);font-size:15px;max-width:none}
+.topbar-filter{padding:9px 12px;border-radius:8px;border:1px solid #30363d;background:#0b0f14;color:var(--text);min-width:140px}
+
+/* Ensure our custom topbar search can grow inside the existing .topbar layout
+	 and override the previously defined .topbar #search max-width constraint. */
+.topbar .topbar-search-group { margin: 0 12px; }
+.topbar .topbar-search-group input#search { max-width: none; }
+
+@media (max-width: 720px) {
+	/* On small screens hide the filter selects to keep the search usable */
+	.topbar-filter { display: none; }
+	.topbar-search-group input#search { min-width: 120px; }
+}
+
+/* filters toggle and mobile panel */
+.filters-toggle{display:none;background:transparent;border:none;color:var(--text);font-size:18px;padding:6px 8px;border-radius:6px}
+.filters-toggle:hover{background:rgba(255,255,255,0.03);transform:translateY(-1px)}
+.filters-panel{display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--panel);border:1px solid #30363d;padding:10px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.4);z-index:9999;min-width:180px}
+.filters-panel.open{display:flex;flex-direction:column;gap:8px}
+.filters-panel .topbar-filter{display:block;min-width:200px}
+
+@media (max-width: 720px) {
+	.filters-toggle{display:inline-block}
+	/* show mobile panel content separately */
+	.filters-panel{right:8px}
+	.mobile-only{display:block}
+}
 

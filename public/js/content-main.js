@@ -105,6 +105,32 @@ async function sideNavbarPageSwapListener() {
         // Swap the main content
         main.innerHTML = html;
 
+        // Execute any scripts included in the fetched HTML (inline or external)
+        // Browsers don't run scripts inserted via innerHTML, so we recreate them.
+        (function runInsertedScripts(root) {
+          const scripts = Array.from(root.querySelectorAll('script'));
+          scripts.forEach(s => {
+            try {
+              const newScript = document.createElement('script');
+              // copy attributes
+              for (let i = 0; i < s.attributes.length; i++) {
+                const a = s.attributes[i];
+                newScript.setAttribute(a.name, a.value);
+              }
+              if (s.src) {
+                // external script - set src and append to body to load
+                newScript.src = s.src;
+                newScript.async = false; // preserve execution order
+                document.body.appendChild(newScript);
+              } else {
+                // inline script: copy textContent
+                newScript.textContent = s.textContent;
+                document.body.appendChild(newScript);
+              }
+            } catch (e) { console.warn('Failed to run inserted script', e); }
+          });
+        })(main);
+
         initPageScripts(); // Reinitialize event listeners for new content
         // Fade back in
         await animateIn(main, 'loading');
@@ -140,7 +166,78 @@ async function animateIn(element, animationClass, animationDuration = 250) {
 // Global page scripts are those that do not need to be reinitialized on every page load
 function initGlobalPageScripts() {
   sideNavbarPageSwapListener();
+  // Delegate filter toggle clicks to ensure the mobile filters toggle works even
+  // when the topbar partial was injected dynamically or its inline script didn't run.
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('#filters-toggle');
+    if (!btn) return;
+    const panel = document.getElementById('filters-panel');
+    if (!panel) return;
+    const open = panel.classList.toggle('open');
+    btn.setAttribute('aria-expanded', String(open));
+    panel.setAttribute('aria-hidden', String(!open));
+    e.stopPropagation();
+  });
+
+  // Expose a global function so inline onclicks or other code can toggle filters reliably
+  window.toggleFilters = function toggleFilters() {
+    const btn = document.getElementById('filters-toggle');
+    const panel = document.getElementById('filters-panel');
+    if (!btn || !panel) return;
+    const open = panel.classList.toggle('open');
+    btn.setAttribute('aria-expanded', String(open));
+    panel.setAttribute('aria-hidden', String(!open));
+  };
+
+  // Close panel on Escape for accessibility
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const panel = document.getElementById('filters-panel');
+      const btn = document.getElementById('filters-toggle');
+      if (panel && panel.classList.contains('open')) {
+        panel.classList.remove('open');
+        panel.setAttribute('aria-hidden', 'true');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+      }
+    }
+  });
+
+  // Try to attach direct handler if the button exists now
+  attachFiltersToggleIfPresent();
 }
+
+function attachFiltersToggleIfPresent(){
+  try{
+    const btn = document.getElementById('filters-toggle');
+    if (!btn || btn.__filtersAttached) return;
+    const handler = (e)=>{
+      const panel = document.getElementById('filters-panel');
+      if (!panel) return;
+      const open = panel.classList.toggle('open');
+      btn.setAttribute('aria-expanded', String(open));
+      panel.setAttribute('aria-hidden', String(!open));
+      e.stopPropagation();
+    };
+    btn.addEventListener('click', handler);
+    btn.addEventListener('touchstart', handler);
+    btn.__filtersAttached = true;
+  }catch(e){console.warn('attachFiltersToggleIfPresent failed', e)}
+}
+
+// Observe DOM for when the topbar search partial is injected so we can attach the handler
+const topbarObserver = new MutationObserver((mutations)=>{
+  for(const m of mutations){
+    if(m.addedNodes){
+      for(const n of m.addedNodes){
+        if(n.nodeType===1 && n.querySelector && n.querySelector('#filters-toggle')){
+          attachFiltersToggleIfPresent();
+          return;
+        }
+      }
+    }
+  }
+});
+topbarObserver.observe(document.body, { childList: true, subtree: true });
 
 function initPageScripts() {
   logoutEventListener('logout-btn');

@@ -1,1 +1,58 @@
-<input type="text" id="search" placeholder="Search..." />
+<div class="topbar-search-group">
+	<input type="text" id="search" placeholder="Search..." />
+	<select id="movies-genre" class="topbar-filter">
+		<option value="">All genres</option>
+	</select>
+	<select id="movies-sort" class="topbar-filter">
+		<option value="createdAt:desc">Newest</option>
+		<option value="createdAt:asc">Oldest</option>
+		<option value="title:asc">Title A→Z</option>
+		<option value="title:desc">Title Z→A</option>
+		<option value="year:desc">Year ↓</option>
+		<option value="year:asc">Year ↑</option>
+	</select>
+
+	<!-- small-screen filter toggle -->
+		<button id="filters-toggle" class="filters-toggle" aria-expanded="false" aria-controls="filters-panel" title="Filters" onclick="window.toggleFilters && window.toggleFilters()">
+			☰
+		</button>
+
+	<!-- mobile filter panel (hidden by default) -->
+	<div id="filters-panel" class="filters-panel" role="dialog" aria-hidden="true">
+		<label for="movies-genre-mobile" class="visually-hidden">Genre</label>
+		<select id="movies-genre-mobile" class="topbar-filter mobile-only">
+			<option value="">All genres</option>
+		</select>
+		<label for="movies-sort-mobile" class="visually-hidden">Sort</label>
+		<select id="movies-sort-mobile" class="topbar-filter mobile-only">
+			<option value="createdAt:desc">Newest</option>
+			<option value="createdAt:asc">Oldest</option>
+			<option value="title:asc">Title A→Z</option>
+			<option value="title:desc">Title Z→A</option>
+			<option value="year:desc">Year ↓</option>
+			<option value="year:asc">Year ↑</option>
+		</select>
+	</div>
+</div>
+
+<script>
+	// Toggle filter panel on small screens
+	(function(){
+		const btn = document.getElementById('filters-toggle');
+		const panel = document.getElementById('filters-panel');
+		if (!btn || !panel) return;
+		btn.addEventListener('click', () => {
+			const open = panel.classList.toggle('open');
+			btn.setAttribute('aria-expanded', String(open));
+			panel.setAttribute('aria-hidden', String(!open));
+		});
+		// close when clicking outside
+		document.addEventListener('click', (e) => {
+			if (!panel.classList.contains('open')) return;
+			if (panel.contains(e.target) || btn.contains(e.target)) return;
+			panel.classList.remove('open');
+			btn.setAttribute('aria-expanded','false');
+			panel.setAttribute('aria-hidden','true');
+		});
+	})();
+</script>
