@@ -15,9 +15,11 @@ async function onLoginSubmit(e){
   const password = document.getElementById('password').value;
   try {
     const data = await api('/api/auth/login', 'POST', { username, password });
-    setMsg('Logged in successfully', 'success');
-
-    setTimeout(() => location.href = `/profile-selection`, 300);
+    if (data.isAdmin) {
+      setTimeout(() => location.href = `/add-content`, 300);
+    } else {
+      setTimeout(() => location.href = `/profile-selection`, 300);
+    }
 
     // navigate to content listing placeholder
 

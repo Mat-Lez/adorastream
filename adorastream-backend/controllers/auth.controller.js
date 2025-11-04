@@ -59,7 +59,8 @@ exports.login = async (req, res) => {
     });
   });
 
-  res.json({ user: req.session.user });
+  const isAdmin = username === process.env.ADMIN_USERNAME;
+  res.json({ user: req.session.user, isAdmin });
 };
 
 exports.logout = (req, res) => {
