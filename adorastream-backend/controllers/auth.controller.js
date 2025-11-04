@@ -59,7 +59,7 @@ exports.login = async (req, res) => {
     });
   });
 
-  const isAdmin = username === process.env.ADMIN_USERNAME;
+  const isAdmin = user.roles.includes('admin');
   res.json({ user: req.session.user, isAdmin });
 };
 
