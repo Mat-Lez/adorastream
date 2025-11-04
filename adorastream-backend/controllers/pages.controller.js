@@ -83,13 +83,13 @@ exports.showSettingsSpecificPage = async (req, res) => {
 // Reach here from /settings/profiles/:action
 exports.showSettingsProfileActionPage = async (req, res) => {
   const availablePages = ['add', 'edit'];
-  let { page } = req.params;
+  let { action } = req.params;
   const profileIdToEdit = req.query.id;
   const user = await User.findOne({ _id: req.session.user.id }).lean();
 
-  if ((page === undefined || !availablePages.includes(page)) || (page === "edit" && !profileIdToEdit)) {
-    page = "manage-profiles";
-    res.render(`partials/main-settings-${page}`, {
+  if ((action === undefined || !availablePages.includes(action)) || (action === "edit" && !profileIdToEdit)) {
+    action = "manage-profiles";
+    res.render(`partials/main-settings-${action}`, {
       layout: false,
       profiles: user.profiles,
       activeProfileId: req.session.user.profileId
@@ -97,7 +97,7 @@ exports.showSettingsProfileActionPage = async (req, res) => {
     return;
   }  
   
-  res.render(`partials/main-settings-${page}-profile`, {
+  res.render(`partials/main-settings-${action}-profile`, {
     layout: false,
     profiles: user.profiles,
     activeProfileId: req.session.user.profileId,

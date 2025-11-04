@@ -4,7 +4,7 @@
     <% if (typeof profiles !== 'undefined' && profiles.length) { %>
     <% profiles.forEach(function(p) { %>
         
-        <a href="/profiles/edit/<%= p._id %>" class="profile-box">
+        <a id="<%= p._id %>" class="profile-box">
         
         <div class="profile-box-avatar">
             <% if (p.avatarPath) { %>
@@ -37,12 +37,14 @@
     <% } %>
 </div>
 
-<!-- "Add Profile" Button -->
-<a href="/profiles/add" class="add-profile-box">
-    <i class="bi bi-plus-lg"></i>
-    <span>Add Profile</span>
-</a>
+<% if (typeof profiles !== 'undefined' && profiles.length < 5) { %>
+    <!-- "Add Profile" Button -->
+    <a class="add-profile-box">
+        <i class="bi bi-plus-lg"></i>
+        <span>Add Profile</span>
+    </a>
 
-<p class="profiles-page-subtitle">
-    Add up to 5 profiles for anyone who lives with you.
-</p>
+    <p class="profiles-page-subtitle">
+        Add up to 5 profiles for anyone who lives with you.
+    </p>
+<% } %>
