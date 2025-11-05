@@ -6,45 +6,77 @@
     <h1 class="title">Add Content (Admin)</h1>
     <p class="subtitle">Create a movie or series entry</p>
     <form id="add-content-form" enctype="multipart/form-data">
-      <div class="field">
+      <div class="field" id="title-field">
         <label class="label">Title</label>
         <input id="title" name="title" class="input" placeholder="Title" required>
       </div>
       <div class="field">
         <label class="label">Type</label>
-        <select name="type" class="input"><option>movie</option><option>series</option></select>
+        <select id="type" name="type" class="input">
+          <option value="movie">movie</option>
+          <option value="series-new">series-new</option>
+          <option value="episode">episode</option>
+        </select>
       </div>
-      <div class="field">
+      <div class="field" id="year-field">
         <label class="label">Year</label>
         <input name="year" class="input" type="number" placeholder="Year">
       </div>
-      <div class="field">
+      <div class="field" id="genres-field">
         <label class="label">Genres</label>
         <input name="genres" class="input" placeholder="e.g. Action, Sci-Fi">
       </div>
-      <div class="field">
+      <div class="field" id="director-field">
         <label class="label">Director</label>
         <input name="director" class="input" placeholder="e.g., Christopher Nolan">
       </div>
-      <div class="field">
+      <div class="field" id="actors-section">
         <label class="label">Actors</label>
         <div id="actors-container">
           <!-- Actor fields will be added here dynamically -->
         </div>
         <button type="button" id="add-actor-btn" class="btn btn-secondary" style="margin-top: 10px;">Add Actor</button>
       </div>
-      <div class="field">
+      <div class="field" id="description-field">
         <label class="label">Description</label>
         <textarea name="description" class="input" placeholder="Description"></textarea>
       </div>
-      <div class="field">
+      <div class="field" id="poster-field">
         <label class="label">Poster image</label>
         <input class="input" type="file" name="poster" accept="image/*">
       </div>
-      <div class="field">
+      <div class="field" id="video-field">
         <label class="label">Video (MP4)</label>
         <input class="input" type="file" name="video" accept="video/mp4">
       </div>
+
+      <section id="series-section" style="display:none; border-top:1px solid #ddd; padding-top:12px; margin-top:12px;">
+        <div id="create-series-fields">
+          <div class="field" id="series-description-field">
+            <label class="label">Series Description</label>
+            <textarea id="series-description" class="input" placeholder="Describe the series"></textarea>
+          </div>
+          <div class="field">
+            <label class="label">Creators</label>
+            <input id="series-creators" class="input" placeholder="e.g., Shonda Rhimes, Vince Gilligan">
+          </div>
+          <div class="field">
+            <label class="label">Number of seasons</label>
+            <input id="series-num-seasons" class="input" type="number" min="0" value="0">
+          </div>
+        </div>
+      </section>
+
+      <section id="episodes-section" style="display:none; border-top:1px solid #ddd; padding-top:12px; margin-top:12px;">
+        <div id="add-episode-fields">
+          <div class="field">
+            <label class="label">Select Series</label>
+            <select id="series-select" class="input"></select>
+          </div>
+          <div id="episodes-container"></div>
+          <button type="button" id="add-episode-btn" class="btn btn-secondary" style="margin-top: 10px;">Add Episode</button>
+        </div>
+      </section>
       <button class="btn" id="submitBtn">Add</button>
       <div id="msg"></div>
       <button class="btn" id="addAnotherBtn" style="display:none;margin-top:10px">Add another</button>

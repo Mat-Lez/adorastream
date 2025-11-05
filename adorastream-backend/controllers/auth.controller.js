@@ -59,7 +59,8 @@ exports.login = async (req, res) => {
     });
   });
 
-  res.json({ user: req.session.user });
+  const isAdmin = user.roles.includes('admin');
+  res.json({ user: req.session.user, isAdmin });
 };
 
 exports.logout = (req, res) => {

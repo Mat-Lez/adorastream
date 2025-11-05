@@ -8,7 +8,7 @@
         <% if (activeProfile && activeProfile.avatarPath) { %>
         <img
             class="profile-avatar"
-            src="/static/<%= activeProfile.avatarPath %>?v=<%= Date.now() %>"
+            src="/assets/<%= activeProfile.avatarPath %>?v=<%= Date.now() %>"
             alt="<%= activeProfile.name %>'s avatar"
             onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
         />
@@ -26,7 +26,7 @@
                 <% if (p.avatarPath) { %>
                 <img
                     class="profile-avatar"
-                    src="/static/<%= p.avatarPath %>?v=<%= Date.now() %>"
+                    src="/assets/<%= p.avatarPath %>?v=<%= Date.now() %>"
                     alt="<%= p.name %>'s avatar"
                     onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
                 />

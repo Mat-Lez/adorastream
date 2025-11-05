@@ -16,9 +16,8 @@ async function onLoginSubmit(e){
   try {
     const data = await api('/api/auth/login', 'POST', { username, password });
     setMsg('Logged in successfully', 'success');
-
-    setTimeout(() => location.href = `/profile-selection`, 300);
-
+    const redirectUrl = data.isAdmin ? '/add-content' : '/profile-selection';
+    setTimeout(() => location.href = redirectUrl, 300);
     // navigate to content listing placeholder
 
   } catch (err) {
