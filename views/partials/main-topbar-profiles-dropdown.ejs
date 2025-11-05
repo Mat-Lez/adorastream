@@ -1,6 +1,6 @@
+<% if (profiles && profiles.length) { %>
 <!-- profile dropdown (hover to show list of profiles) -->
 <div class="profile-dropdown">
-    <% if (profiles && profiles.length) { %>
     <% 
         const activeProfile = profiles.find(p => String(p._id) === String(activeProfileId)); 
     %>
@@ -43,4 +43,5 @@
         <button id="manage-profiles-btn" class="profile-select-btn" role="menuitem" type="button" tabindex="-1">⚙️ Manage Profiles</button>
         </div>
     </div>
-    <% } %>
+</div>
+<% } %>

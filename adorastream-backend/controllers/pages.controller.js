@@ -46,6 +46,7 @@ exports.showContentMainPage = async (req, res) => {
     title: 'Main - AdoraStream',
     scripts: ['contentMain'],
     additional_css: ['contentMain', 'buttons'],
+    user: user,
     profiles: user.profiles,
     activeProfileId: req.session.user.profileId });
 }
@@ -59,6 +60,7 @@ exports.showMainSpecificPage = async (req, res) => {
   const user = await User.findOne({ _id: req.session.user.id }).lean();
   res.render(`partials/main-${page}`, {
     layout: false,
+    user: user,
     profiles: user.profiles,
     activeProfileId: req.session.user.profileId
   });
