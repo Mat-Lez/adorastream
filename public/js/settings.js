@@ -210,7 +210,7 @@ async function updateProfileFormSubmitListener() {
                 formData.set('avatar', file);
             }
             
-            await apiRequest(`/api/users/${encodeURIComponent(userId)}/profiles/${encodeURIComponent(profileId)}`, 'PATCH', formData);
+            await apiForm(`/api/users/${encodeURIComponent(userId)}/profiles/${encodeURIComponent(profileId)}`, formData, 'PATCH');
             const contentArea = document.querySelector('.settings-content-area');
             await fetchPage('/settings/manage-profiles', contentArea, "loading");
         } catch (err) {
