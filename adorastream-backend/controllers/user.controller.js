@@ -119,7 +119,8 @@ exports.removeProfile = async (req, res) => {
 };
 
 exports.updateProfile = async (req, res) => {
-  console.log("here1");
+  const path = require('path');
+  const fs = require('fs');
   const { name } = req.body;
   const file = req.file;
   const { id: userId, profileId } = req.params;
@@ -186,8 +187,6 @@ exports.updateProfile = async (req, res) => {
       const filename = `avatar${useExt}`;
       const absPath = path.join(dir, filename);
 
-      console.log(`Saving new avatar to: ${absPath}`);
-      console.log(`Temp upload path: ${file.path}`);
       // Move from multer temp path to final path
       await fs.promises.rename(file.path, absPath);
 

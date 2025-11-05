@@ -1,4 +1,25 @@
+const { render } = require('ejs');
 const User = require('../models/user');
+
+const availablePages = ['home', 'movies', 'shows', 'settings'];
+const pageToLayoutMap = {
+    home: {
+      topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+      topbarActionsLayout: ["NOTIFICATIONS", "LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
+    },
+    shows: {
+      topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+      topbarActionsLayout: ["NOTIFICATIONS", "LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
+    },
+    movies: {
+      topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+      topbarActionsLayout: ["NOTIFICATIONS", "LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
+    },
+    settings: {
+      topbarLayout: ["TOPBAR_ACTIONS"],
+      topbarActionsLayout: ["NOTIFICATIONS", "LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
+    },
+};
 
 exports.showLoginPage = (req, res) => {
   if (req.session?.user?.id) {
@@ -47,21 +68,37 @@ exports.showContentMainPage = async (req, res) => {
     scripts: ['contentMain'],
     additional_css: ['contentMain', 'buttons'],
     profiles: user.profiles,
-    activeProfileId: req.session.user.profileId });
+    activeProfileId: req.session.user.profileId,
+    topbarLayout: pageToLayoutMap['home'].topbarLayout,
+    topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout
+   });
 }
 
 exports.showMainSpecificPage = async (req, res) => {
-  const availablePages = ['home', 'movies', 'shows', 'settings'];
   let { page } = req.params;
   if (page === undefined || !availablePages.includes(page)) {
     page = "home";
   }
+  await showPage(req, res, page, `partials/main-${page}`);
+}
+
+exports.showTopbar = async (req, res) => {
+  let { page } = req.params;
+  if (page === undefined || !availablePages.includes(page)) {
+    page = "home";
+  }
+  await showPage(req, res, page, 'partials/main-topbar');
+}
+
+async function showPage(req, res, page, renderPath) {
   const user = await User.findOne({ _id: req.session.user.id }).lean();
-  res.render(`partials/main-${page}`, {
+  res.render(renderPath, {
     layout: false,
     profiles: user.profiles,
-    activeProfileId: req.session.user.profileId
-  });
+    activeProfileId: req.session.user.profileId,
+    topbarLayout: pageToLayoutMap[page].topbarLayout,
+    topbarActionsLayout: pageToLayoutMap[page].topbarActionsLayout
+  });  
 }
 
 exports.showSettingsSpecificPage = async (req, res) => {

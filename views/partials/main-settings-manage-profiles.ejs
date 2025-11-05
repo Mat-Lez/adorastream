@@ -9,7 +9,7 @@
         <div class="profile-box-avatar">
             <% if (p.avatarPath) { %>
             <img
-                src="/static/<%= p.avatarPath %>"
+                src="/static/<%= p.avatarPath %>?v=<%= Date.now() %>"
                 alt="<%= p.name %>'s avatar"
                 onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
             />

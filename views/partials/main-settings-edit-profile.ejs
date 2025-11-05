@@ -17,7 +17,7 @@
       <% if (profile && profile.avatarPath) { %>
         <img
           class="profile-avatar-large"
-          src="/static/<%= profile.avatarPath %>"
+          src="/static/<%= profile.avatarPath %>?v=<%= Date.now() %>"
           alt="<%= profile.name %>'s avatar"
           onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
         />

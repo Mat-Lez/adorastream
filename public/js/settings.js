@@ -213,6 +213,8 @@ async function updateProfileFormSubmitListener() {
             await apiForm(`/api/users/${encodeURIComponent(userId)}/profiles/${encodeURIComponent(profileId)}`, formData, 'PATCH');
             const contentArea = document.querySelector('.settings-content-area');
             await fetchPage('/settings/manage-profiles', contentArea, "loading");
+            const topbar = document.querySelector('.topbar');
+            await fetchPage('/topbar/settings', topbar, "loading");
         } catch (err) {
             showError(err.message);
         }
