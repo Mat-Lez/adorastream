@@ -8,7 +8,7 @@
         <% if (activeProfile && activeProfile.avatarPath) { %>
         <img
             class="profile-avatar"
-            src="/static/<%= activeProfile.avatarPath %>"
+            src="/assets/<%= activeProfile.avatarPath %>"
             alt="<%= activeProfile.name %>'s avatar"
             onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
         />
@@ -26,11 +26,7 @@
                 <% if (p.avatarPath) { %>
                 <img
                     class="profile-avatar"
-<<<<<<< HEAD
                     src="/assets/<%= p.avatarPath %>"
-=======
-                    src="/static/<%= p.avatarPath %>"
->>>>>>> cc4d8d8 (feat: configureable main menu topbar allowing: search bar, logout button and profiles dropdown)
                     alt="<%= p.name %>'s avatar"
                     onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
                 />
