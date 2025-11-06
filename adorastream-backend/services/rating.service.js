@@ -29,6 +29,40 @@ async function fetchOmdbData(title, year) {
       if (!isNaN(pct) && pct >= 0 && pct <= 100) rotten = pct;
     }
   }
+<<<<<<< HEAD
+  return { imdb, rottenTomatoes: rotten };
+}
+
+async function fetchOmdbEpisodeData(seriesTitle, seasonNumber, episodeNumber) {
+  const apiKey = process.env.OMDB_API_KEY;
+  if (!apiKey) return null;
+  const params = new URLSearchParams({
+    t: seriesTitle,
+    Season: String(seasonNumber),
+    Episode: String(episodeNumber),
+    apikey: apiKey
+  });
+  const url = `https://www.omdbapi.com/?${params.toString()}`;
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  const data = await res.json();
+  if (!data || data.Response === 'False') return null;
+
+  let imdb = null;
+  if (data.imdbRating && !isNaN(Number(data.imdbRating))) {
+    const n = Number(data.imdbRating);
+    imdb = n >= 0 && n <= 10 ? n : null;
+  }
+  let rotten = null;
+  if (Array.isArray(data.Ratings)) {
+    const rt = data.Ratings.find(r => r.Source === 'Rotten Tomatoes');
+    if (rt && typeof rt.Value === 'string' && rt.Value.endsWith('%')) {
+      const pct = Number(rt.Value.replace('%', ''));
+      if (!isNaN(pct) && pct >= 0 && pct <= 100) rotten = pct;
+    }
+  }
+=======
+>>>>>>> 77a4c55 (fix gemini code review issues)
   return { imdb, rottenTomatoes: rotten };
 }
 
@@ -82,6 +116,27 @@ async function enrichMovieRatings(contentDoc) {
   }
 }
 
+<<<<<<< HEAD
+// Enrich a series (top-level Content with type 'series') using OMDb by title/year
+async function enrichSeriesRatings(seriesDoc) {
+  if (!seriesDoc || seriesDoc.type !== 'series') return seriesDoc;
+  try {
+    const ratings = await fetchOmdbData(seriesDoc.title, seriesDoc.year);
+    if (!ratings) return seriesDoc;
+    const update = {};
+    if (ratings.imdb != null) update['ratings.imdb'] = ratings.imdb;
+    if (ratings.rottenTomatoes != null) update['ratings.rottenTomatoes'] = ratings.rottenTomatoes;
+    if (Object.keys(update).length === 0) return seriesDoc;
+    const updated = await Content.findByIdAndUpdate(seriesDoc.id, { $set: update }, { new: true });
+    return updated || seriesDoc;
+  } catch (err) {
+    // swallow enrichment errors
+    return seriesDoc;
+  }
+}
+
+=======
+>>>>>>> 77a4c55 (fix gemini code review issues)
 // Enrich a series (top-level Content with type 'series') using OMDb by title/year
 async function enrichSeriesRatings(seriesDoc) {
   if (!seriesDoc || seriesDoc.type !== 'series') return seriesDoc;
@@ -122,6 +177,10 @@ async function enrichSeriesEpisodesRatings(seriesId, episodesToUpdate) {
     return series;
   } catch (err) {
     // swallow enrichment errors
+<<<<<<< HEAD
+
+=======
+>>>>>>> 77a4c55 (fix gemini code review issues)
     return null;
   }
 }
@@ -131,3 +190,7 @@ module.exports = {
   enrichSeriesRatings,
   enrichSeriesEpisodesRatings
 };
+<<<<<<< HEAD
+
+=======
+>>>>>>> 77a4c55 (fix gemini code review issues)

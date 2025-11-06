@@ -102,7 +102,11 @@ body {
 
 .main.loading {
   opacity: 0;
+<<<<<<< HEAD
+
+=======
 }
+>>>>>>> 48136dc (fx: reinitialize event listeners on page swap, add no cache to ensure a client will no go back to content main after logout, added middleware to check that requests to /content-main/page are allowed internally only)
 
 
 /* ====== Header ====== */
