@@ -40,7 +40,14 @@ exports.showAddContentPage = (req, res) => {
 }
 
 exports.showContentMainPage = async (req, res) => {   
-  const user = await User.findOne({ _id: req.session.user.id }).lean();
+  const user = await User.findOne({ _id: req.session.user.id }).lean({ virtuals: true });
+
+  if (!user) {
+    return res.redirect('/login');
+  }
+
+  // Manually compute isAdmin virtual for lean queries
+  user.isAdmin = (user.roles || []).includes('admin');
 
   res.render('pages/content-main', {
     title: 'Main - AdoraStream',
@@ -57,7 +64,15 @@ exports.showMainSpecificPage = async (req, res) => {
   if (page === undefined || !availablePages.includes(page)) {
     page = "home";
   }
-  const user = await User.findOne({ _id: req.session.user.id }).lean();
+  const user = await User.findOne({ _id: req.session.user.id }).lean({ virtuals: true });
+
+  if (!user) {
+    return res.redirect('/login');
+  }
+
+  // Manually compute isAdmin virtual for lean queries
+  user.isAdmin = (user.roles || []).includes('admin');
+
   res.render(`partials/main-${page}`, {
     layout: false,
     user: user,

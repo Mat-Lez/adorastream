@@ -51,7 +51,7 @@
               <%- include('main-topbar-logout.ejs') %>
             <% } else if (action === availableTopbarActions.profileDropdown) { %>
               <%- include('main-topbar-profiles-dropdown.ejs') %>
-            <% } else if (action === availableTopbarActions.addContentButton && user && user.roles.includes('admin')) { %>
+            <% } else if (action === availableTopbarActions.addContentButton && user && user.isAdmin) { %>
               <%- include('main-topbar-add-content.ejs') %>
             <% } %>
           <% }) %>
