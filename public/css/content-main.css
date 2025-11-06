@@ -363,3 +363,25 @@ span.action-btn {
   color: var(--text);
   cursor: pointer;
 }
+
+/* ====== Responsive Design ====== */
+@media (max-width: 900px) {
+  .header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .topbar-actions {
+    justify-content: center;
+  }
+}

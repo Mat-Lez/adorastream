@@ -43,6 +43,8 @@ exports.showContentMainPage = async (req, res) => {
   const user = await User.findOne({ _id: req.session.user.id }).lean({ virtuals: true });
 
   if (!user) {
+    // The user might have been deleted while the session still exists
+    // Redirect to the login page or handle gracefully
     return res.redirect('/login');
   }
 
@@ -67,6 +69,8 @@ exports.showMainSpecificPage = async (req, res) => {
   const user = await User.findOne({ _id: req.session.user.id }).lean({ virtuals: true });
 
   if (!user) {
+    // The user might have been deleted while the session still exists
+    // Redirect to the login page or handle gracefully
     return res.redirect('/login');
   }
 
