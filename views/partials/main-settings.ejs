@@ -23,6 +23,7 @@
     </nav>
 
     <div class="settings-content-area">
+        <!-- activeSettingsPage is server-validated ('statistics' | 'manage-profiles'), safe for dynamic include -->
         <%- include('main-settings-' + activeSettingsPage) %>
     </div>
 
