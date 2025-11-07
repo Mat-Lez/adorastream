@@ -6,8 +6,7 @@
 
 <div class="settings-layout-container">
   
-<% const activeSettingsPage = (typeof initialSettingsPage === 'string' ? initialSettingsPage : 'manage-profiles'); %>
-
+<% const activeSettingsPage = initialSettingsPage || 'manage-profiles'; %>
 <nav class="settings-nav">
 
         <!-- By default, manage-profiles will be active when reaching the settings page -->
