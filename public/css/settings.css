@@ -1,31 +1,21 @@
-/* UPDATED:
-  - Renamed .settings-container to .settings-layout-container
-  - Added flex styles to create a 2-column layout.
-  - Added .settings-content-area for the right column.
-  - Merged all styles from 'profiles.css' into this file.
-*/
-
 .settings-layout-container {
   display: flex;
   flex-direction: row; /* Side-by-side columns */
   gap: 40px; /* Space between nav and content */
   width: 100%;
-  max-width: 1200px; /* Wider container for 2 columns */
+  max-width: 1200px;
   padding-top: 20px;
 }
 
-/* ====== COLUMN 1: SETTINGS NAV ====== */
-/* Container for the new navigation-style buttons */
 .settings-nav {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* Space between items */
+  gap: 8px;
   width: 100%;
-  max-width: 300px; /* Give the nav menu a fixed width */
-  flex-shrink: 0; /* Don't let it shrink */
+  max-width: 300px;
+  flex-shrink: 0;
 }
 
-/* Styling for the clickable nav items */
 .settings-nav-item {
   display: flex;
   align-items: center;
@@ -209,7 +199,6 @@
   border: 1px dashed var(--button-border);
 }
 
-/* ====== RESPONSIVE STYLES FOR SMALL SCREENS ====== */
 @media (max-width: 900px) {
 
   .settings-layout-container {
@@ -222,19 +211,18 @@
     flex-direction: row; /* Arrange nav items horizontally */
     overflow-x: auto; /* Allow nav to scroll horizontally if needed */
     
-    /* Add padding for scrollbar visibility */
     padding-bottom: 10px; 
 
     /* Hide scrollbar for a cleaner look */
     -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    scrollbar-width: none;
   }
   .settings-nav::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
+    display: none;
   }
 
   .settings-nav-item {
-    flex-shrink: 0; /* Prevent nav items from shrinking */
+    flex-shrink: 0;
     padding: 10px 14px;
     font-size: 14px;
   }

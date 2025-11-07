@@ -17,7 +17,7 @@
       <% if (profile && profile.avatarPath) { %>
         <img
           class="profile-avatar-large"
-          src="/static/<%= profile.avatarPath %>?v=<%= Date.now() %>"
+          src="/assets/<%= profile.avatarPath %>?v=<%= Date.now() %>"
           alt="<%= profile.name %>'s avatar"
           onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
         />
@@ -29,7 +29,7 @@
   </label>
 
   <input id="avatar" name="avatar" class="input" type="file" accept="image/*" style="display:none;" />
-  <small class="form-hint" style="display: block; text-align: center; margin-bottom: 1.5rem; margin-top: -1rem;">
+  <small class="form-hint">
     Max 5MB. PNG, JPG, JPEG, GIF, WEBP.
   </small>
 

@@ -76,12 +76,8 @@ async function addProfileFormSubmitListener() {
         }
         event.preventDefault();
 
-        let userId = null;
-        try {
-            const me = await apiRequest('/api/auth/me', 'GET');
-            userId = me?.user?.id || null;
-        } catch (e) {
-            location.href = '/login';
+        const userId = await getUserIdOrRedirect();
+        if (!userId) {
             return;
         }
 
@@ -114,6 +110,8 @@ async function addProfileFormSubmitListener() {
             await apiForm(`/api/users/${encodeURIComponent(userId)}/profiles`, formData);
             const contentArea = document.querySelector('.settings-content-area');
             await fetchPage('/settings/manage-profiles', contentArea, "loading");
+            const topbar = document.querySelector('.topbar');
+            await fetchPage('/topbar/settings', topbar, "loading");
         } catch (err) {
             showError(err.message);
         }
@@ -131,12 +129,8 @@ async function deleteProfileListener() {
         }
         event.preventDefault();
 
-        let userId = null;
-        try {
-            const me = await apiRequest('/api/auth/me', 'GET');
-            userId = me?.user?.id || null;
-        } catch (e) {
-            location.href = '/login';
+        const userId = await getUserIdOrRedirect();
+        if (!userId) {
             return;
         }
 
@@ -157,6 +151,8 @@ async function deleteProfileListener() {
             }
             const contentArea = document.querySelector('.settings-content-area');
             await fetchPage('/settings/manage-profiles', contentArea, "loading");
+            const topbar = document.querySelector('.topbar');
+            await fetchPage('/topbar/settings', topbar, "loading");
         } catch (err) {
             showError(err.message);
         }
@@ -174,12 +170,8 @@ async function updateProfileFormSubmitListener() {
         }
         event.preventDefault();
 
-        let userId = null;
-        try {
-            const me = await apiRequest('/api/auth/me', 'GET');
-            userId = me?.user?.id || null;
-        } catch (e) {
-            location.href = '/login';
+        const userId = await getUserIdOrRedirect();
+        if (!userId) {
             return;
         }
 
@@ -219,6 +211,19 @@ async function updateProfileFormSubmitListener() {
             showError(err.message);
         }
     });
+}
+
+async function getUserIdOrRedirect() {
+  try {
+    const me = await apiRequest('/api/auth/me', 'GET');
+    if (me?.user?.id) {
+      return me.user.id;
+    }
+  } catch (e) {
+    // Fall through to redirect
+  }
+  location.href = '/login';
+  return null;
 }
 
 // Global page scripts are those that do not need to be reinitialized on every page load

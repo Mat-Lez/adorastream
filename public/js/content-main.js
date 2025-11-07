@@ -1,6 +1,7 @@
 import { logoutEventListener } from '../utils/reuseableEventListeners.js';
 import { switchProfile } from '/utils/profilesManagement.js';
 import { fetchPage } from '../utils/pageManagement.js';
+import { animateOut } from "../utils/reuseableAnimations.js";
 
 // init functions
 (async () => {

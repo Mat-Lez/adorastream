@@ -1,23 +1,23 @@
-const { render } = require('ejs');
+const { get } = require('mongoose');
 const User = require('../models/user');
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
 const pageToLayoutMap = {
     home: {
       topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
-      topbarActionsLayout: ["NOTIFICATIONS", "LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
+      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
     },
     shows: {
       topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
-      topbarActionsLayout: ["NOTIFICATIONS", "LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
+      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
     },
     movies: {
       topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
-      topbarActionsLayout: ["NOTIFICATIONS", "LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
+      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
     },
     settings: {
       topbarLayout: ["TOPBAR_ACTIONS"],
-      topbarActionsLayout: ["NOTIFICATIONS", "LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
+      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
     },
 };
 
@@ -75,18 +75,12 @@ exports.showContentMainPage = async (req, res) => {
 }
 
 exports.showMainSpecificPage = async (req, res) => {
-  let { page } = req.params;
-  if (page === undefined || !availablePages.includes(page)) {
-    page = "home";
-  }
+  const page = getRequestedPage(req, availablePages, 'home');
   await showPage(req, res, page, `partials/main-${page}`);
 }
 
 exports.showTopbar = async (req, res) => {
-  let { page } = req.params;
-  if (page === undefined || !availablePages.includes(page)) {
-    page = "home";
-  }
+  const page = getRequestedPage(req, availablePages, 'home');
   await showPage(req, res, page, 'partials/main-topbar');
 }
 
@@ -101,12 +95,17 @@ async function showPage(req, res, page, renderPath) {
   });  
 }
 
-exports.showSettingsSpecificPage = async (req, res) => {
-  const availablePages = ['manage-profiles', 'statistics'];
+function getRequestedPage(req, availablePages, defaultPage) {
   let { page } = req.params;
   if (page === undefined || !availablePages.includes(page)) {
-    page = "manage-profiles";
-  } 
+    page = defaultPage;
+  }
+  return page;
+}
+
+exports.showSettingsSpecificPage = async (req, res) => {
+  const availablePages = ['manage-profiles', 'statistics'];
+  const page = getRequestedPage(req, availablePages, 'manage-profiles');
 
   const user = await User.findOne({ _id: req.session.user.id }).lean();
 

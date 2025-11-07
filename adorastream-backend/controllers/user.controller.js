@@ -1,4 +1,6 @@
 const User = require('../models/user');
+const path = require('path');
+const fs = require('fs');
 
 
 // GET list of users with pagination
@@ -58,8 +60,6 @@ exports.addProfile = async (req, res) => {
 
   // If an avatar file was uploaded, persist to assets/profile-photos/<userId>/<profileId>/avatar.ext
   if (!req.uploadError && file && file.path && file.originalname) {
-    const path = require('path');
-    const fs = require('fs');
     const safeUserId = String(user._id);
     const safeProfileId = String(newProfile._id);
 
@@ -119,8 +119,6 @@ exports.removeProfile = async (req, res) => {
 };
 
 exports.updateProfile = async (req, res) => {
-  const path = require('path');
-  const fs = require('fs');
   const { name } = req.body;
   const file = req.file;
   const { id: userId, profileId } = req.params;
