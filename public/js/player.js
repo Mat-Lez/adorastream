@@ -1,3 +1,5 @@
+import { apiRequest as api } from '../utils/api-utils.js';
+
 document.addEventListener('DOMContentLoaded', () => {
   const video = document.getElementById('video-player');
   const controls = document.getElementById('custom-controls');
@@ -13,9 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const timeline = document.getElementById('timeline');
 
   if (!video) return console.error('video element not found'); 
+  const lastPosition = parseFloat(video.dataset.lastPosition || 0);
+  video.currentTime = lastPosition;
 
   // --- global variables ---
   let hideControlsTimeout;
+  let lastSavedTime = 0;
+  const SAVE_INTERVAL = 10; // seconds
+  let saveTimer;
 
   // --- Utility functions ---
   function showSkipOverlay(text) {
@@ -43,9 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showControls() {
-    controls.classList.remove('hide');
+    controls.classList.remove('hide-controls');
     clearTimeout(hideControlsTimeout);
-    hideControlsTimeout = setTimeout(() => controls.classList.add('hide'), 2500);
+    hideControlsTimeout = setTimeout(() => controls.classList.add('hide-controls'), 2500);
   }
 
   // --- Event listeners ---
@@ -78,6 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (timeline && video.duration) {
       timeline.value = (video.currentTime / video.duration) * 100 || 0;
       timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+    }
+    if (video.currentTime - lastSavedTime >= SAVE_INTERVAL) {
+      saveProgress();
     }
   });
 
@@ -129,4 +139,32 @@ document.addEventListener('DOMContentLoaded', () => {
   if (backBtn) {
     backBtn.addEventListener('click', () => window.location.href = '/content-main');
   }
+
+  async function saveProgress() {
+  console.log('saving progress');
+  try {
+    await api('/api/history/progress', 'POST', {
+      positionSec: Math.floor(video.currentTime),
+      completed: video.currentTime >= video.duration - 5
+    });
+    lastSavedTime = video.currentTime;
+  } catch (err) {
+    console.error('Failed to save progress:', err);
+  }
+}
+
+  // also save on pause or before leaving the page
+  video.addEventListener('pause', saveProgress);
+  window.addEventListener('beforeunload', saveProgress);
+
+
+  // When metadata is loaded - duration and etc are known
+  video.addEventListener('loadedmetadata', () => {
+    if (lastPosition > 0 && lastPosition < video.duration) {
+      video.currentTime = lastPosition; // resume from saved time
+    }
+    video.play().catch(err => {
+      console.warn('Autoplay failed (maybe browser restriction):', err);
+    });
+  });
 });

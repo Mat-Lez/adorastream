@@ -1,6 +1,8 @@
 const Content = require('../models/content');
 const { enrichMovieRatings, enrichSeriesRatings, enrichSeriesEpisodesRatings } = require('../services/rating.service');
 const upload = require('../services/videoUpload.service');
+const WatchHistory = require('../models/watchHistory');
+
 
 // POST create new content
 exports.create = async (req, res) => {
@@ -92,12 +94,15 @@ exports.get = async (req, res) => {
   res.json({
     title: content.title,
     posterUrl: content.posterUrl,
-    description: content.description,
-    genre: content.genre,
+    description: content.synopsis,
+    year: content.year,
+    genres: content.genres,
     actors: content.actors,
     type: content.type,
+    durationSec: content.durationSec,
     episodes: content.episodes || []
   });
+   
 };
 
 // PATCH update content by ID
@@ -311,10 +316,25 @@ exports.selectContent = async (req, res) => {
     const currentIndex = episodes.indexOf(currentEpisode);
     nextEpisode = episodes[currentIndex + 1] || null;
   }
+
+    // --- Fetch last watched time from WatchHistory ---
+  let lastPositionSec = 0;
+  try {
+    const history = await WatchHistory.findOne({
+      userId: req.session.user.id,
+      profileId: req.session.user.profileId,
+      contentId: contentId,
+      season: currentEpisode?.season || null,
+      episode: currentEpisode?.episode || null
+    });
+    if (history) lastPositionSec = history.lastPositionSec || 0;
+  } catch (err) {
+    console.error('Failed to get watch history:', err);
+  }
   // Save it in the session and persist
   req.session.user.contentId = content.id;
   await new Promise((resolve, reject) => {
     req.session.save(err => (err ? reject(err) : resolve()));
   });
-  res.json({ content, currentEpisode, nextEpisode });
+  res.json({ content, currentEpisode, nextEpisode, lastPositionSec });
 };

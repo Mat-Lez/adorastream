@@ -17,6 +17,7 @@
                   ? currentEpisode.videoUrl
                   : '/videos/not-found.mp4' %>"
         type="video/mp4"
+        data-last-position="<%= lastPositionSec || 0 %>"
       ></video>
 
       <!-- Overlay for skip seconds feedback -->

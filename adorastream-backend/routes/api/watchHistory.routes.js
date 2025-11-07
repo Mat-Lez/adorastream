@@ -5,5 +5,7 @@ const { requireLogin } = require('../../middleware/auth');
 router.get('/',          requireLogin, (req, res, next) => History.listMine(req, res).catch(next));
 router.post('/progress', requireLogin, (req, res, next) => History.upsertProgress(req, res).catch(next));
 router.post('/like',     requireLogin, (req, res, next) => History.toggleLike(req, res).catch(next));
+router.get('/progress', requireLogin, (req, res, next) => History.getProgress(req, res).catch(next));
+router.post('/:contentId/like', requireLogin, (req, res, next) => History.toggleLike(req, res).catch(next));
 
 module.exports = router;
