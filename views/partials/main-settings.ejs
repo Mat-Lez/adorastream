@@ -1,6 +1,8 @@
-<header class="topbar">
-<%- include('main-topbar') %>
-</header>
+<%- include('main-topbar', {
+user: user,
+topbarLayout: ["TOPBAR_ACTIONS"],
+topbarActionsLayout: ["ADD_CONTENT_BUTTON", "LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
+}) %>
 
 <link rel="stylesheet" href="/css/settings.css">
 

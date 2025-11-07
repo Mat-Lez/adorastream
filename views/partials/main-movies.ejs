@@ -1,3 +1,5 @@
-<header class="topbar">
-<%- include('main-topbar') %>
-</header>
+<%- include('main-topbar', {
+user: user,
+topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+topbarActionsLayout: ["ADD_CONTENT_BUTTON", "LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
+}) %>

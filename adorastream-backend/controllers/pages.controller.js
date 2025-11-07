@@ -62,12 +62,22 @@ exports.showAddContentPage = (req, res) => {
 }
 
 exports.showContentMainPage = async (req, res) => {   
-  const user = await User.findOne({ _id: req.session.user.id }).lean();
+  const user = await User.findOne({ _id: req.session.user.id }).lean({ virtuals: true });
+
+  if (!user) {
+    // The user might have been deleted while the session still exists
+    // Redirect to the login page or handle gracefully
+    return res.redirect('/login');
+  }
+
+  // Manually compute isAdmin virtual for lean queries
+  user.isAdmin = (user.roles || []).includes('admin');
 
   res.render('pages/content-main', {
     title: 'Main - AdoraStream',
     scripts: ['contentMain'],
     additional_css: ['contentMain', 'buttons'],
+    user: user,
     profiles: user.profiles,
     activeProfileId: req.session.user.profileId,
     topbarLayout: pageToLayoutMap['home'].topbarLayout,
@@ -102,6 +112,18 @@ function getRequestedPage(req, availablePages, defaultPage) {
   if (page === undefined || !availablePages.includes(page)) {
     page = defaultPage;
   }
+  const user = await User.findOne({ _id: req.session.user.id }).lean({ virtuals: true });
+
+  if (!user) {
+    // The user might have been deleted while the session still exists
+    // Redirect to the login page or handle gracefully
+    return res.redirect('/login');
+  }
+
+  // Manually compute isAdmin virtual for lean queries
+  user.isAdmin = (user.roles || []).includes('admin');
+
+  res.render(`partials/main-${page}`, {
   return page;
 }
 
@@ -113,6 +135,7 @@ exports.showSettingsSpecificPage = async (req, res) => {
 
   res.render(`partials/main-settings-${page}`, {
     layout: false,
+    user: user,
     profiles: user.profiles,
     activeProfileId: req.session.user.profileId,
   });
