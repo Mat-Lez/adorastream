@@ -91,8 +91,14 @@ async function sideNavbarPageSwapListener() {
       btn.disabled = true; // disable button so it will not be infinitly clickable and rerun the fade animation
 
       const page = btn.dataset.page;
-      await fetchPage(`/content-main/${page}`, main, "loading");
+      let pageUrl = `/content-main/${page}`;
+      if (page === 'settings' && btn.dataset.settingsTarget) {
+        pageUrl += `?tab=${btn.dataset.settingsTarget}`;
+      }
+
+      await fetchPage(pageUrl, main, "loading");
       initPageScripts();
+
     });
   });
 }

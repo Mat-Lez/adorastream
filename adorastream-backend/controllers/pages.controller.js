@@ -92,7 +92,8 @@ async function showPage(req, res, page, renderPath) {
     profiles: user.profiles,
     activeProfileId: req.session.user.profileId,
     topbarLayout: pageToLayoutMap[page].topbarLayout,
-    topbarActionsLayout: pageToLayoutMap[page].topbarActionsLayout
+    topbarActionsLayout: pageToLayoutMap[page].topbarActionsLayout,
+    initialSettingsPage: page === 'settings' ? (req.query.tab === 'statistics' ? 'statistics' : 'manage-profiles') : undefined
   });  
 }
 
