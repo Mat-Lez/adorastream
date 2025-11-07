@@ -1,4 +1,28 @@
-<%- include('main-topbar', {
-topbarLayout: ["TOPBAR_ACTIONS"],
-topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
-}) %>
+<header class="topbar">
+<%- include('main-topbar') %>
+</header>
+
+<link rel="stylesheet" href="/css/settings.css">
+
+<div class="settings-layout-container">
+  
+    <nav class="settings-nav">
+
+        <!-- By default, manage-profiles will be active when reaching the settings page -->
+        <a class="settings-nav-item active" data-page="manage-profiles">
+            <i class="bi bi-people-fill"></i>
+            <span>Manage profiles</span>
+        </a>
+
+        <a class="settings-nav-item" data-page="statistics">
+            <i class="bi bi-bar-chart-line-fill"></i>
+            <span>Statistics</span>
+        </a>
+
+    </nav>
+
+    <div class="settings-content-area">
+        <%- include('main-settings-manage-profiles') %>
+    </div>
+
+</div>

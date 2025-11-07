@@ -1,0 +1,59 @@
+<link rel="stylesheet" href="/css/settings-profile-forms.css">
+<a class="form-back-link" title="Back to manage profiles">
+  <i class="bi bi-arrow-left"></i>
+  <span>Back</span>
+</a>
+<h1 class="title">Edit Profile</h1>
+<form id="editProfileForm" enctype="multipart/form-data">
+  
+  <label for="avatar" title="Change profile picture" style="cursor: pointer;">
+    <!-- Avatar Editor -->
+    <div class="avatar-edit-wrapper" title="Change profile picture">
+      <!-- The hover overlay with the pencil icon -->
+      <div class="avatar-hover-icon">
+        <i class="bi bi-pencil-fill"></i>
+      </div>
+      
+      <% if (profile && profile.avatarPath) { %>
+        <img
+          class="profile-avatar-large"
+          src="/assets/<%= profile.avatarPath %>?v=<%= Date.now() %>"
+          alt="<%= profile.name %>'s avatar"
+          onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
+        />
+        <div class="profile-avatar-emoji-large" style="display: none;">👤</div>
+      <% } else { %>
+        <div class="profile-avatar-emoji-large">👤</div>
+      <% } %>
+    </div>
+  </label>
+
+  <input id="avatar" name="avatar" class="input" type="file" accept="image/*" style="display:none;" />
+  <small class="form-hint">
+    Max 5MB. PNG, JPG, JPEG, GIF, WEBP.
+  </small>
+
+  <!-- Name Input Field -->
+  <div class="field">
+    <label class="label" for="name">Profile name</label>
+    <input 
+      id="name" 
+      class="input" 
+      type="text" 
+      value="<%= profile ? profile.name : '' %>" 
+      required
+    />
+  </div>
+
+  <!-- Save Button -->
+  <button id="save-profile-changes-button" class="btn" type="submit" data-profileid="<%= profile._id %>">Save Changes</button>
+  
+  <!-- Divider -->
+  <hr class="form-divider" />
+
+  <button id="delete-profile-button" class="btn btn-danger" type="button" title="Delete this profile" data-profileid="<%= profile._id %>" data-activeProfileId="<%= activeProfileId %>">
+    <i class="bi bi-x-lg"></i>
+    <span>Delete Profile</span>
+  </button>
+  <div id="msg"></div>
+</form>

@@ -13,5 +13,6 @@ router.delete('/:id',  requireLogin, requireSelfOrAdmin('id'), (req, res, next) 
 // profiles under the same user
 router.post('/:id/profiles',                   requireLogin, requireSelfOrAdmin('id'), uploadAvatar, (req, res, next) => Users.addProfile(req, res).catch(next));
 router.delete('/:id/profiles/:profileId',      requireLogin, requireSelfOrAdmin('id'), (req, res, next) => Users.removeProfile(req, res).catch(next));
+router.patch('/:id/profiles/:profileId',       requireLogin, requireSelfOrAdmin('id'), uploadAvatar, (req, res, next) => Users.updateProfile(req, res).catch(next));
 
 module.exports = router;
