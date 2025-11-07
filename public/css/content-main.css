@@ -177,7 +177,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 20px;
 }
 
 .regular-btn,
@@ -272,7 +272,14 @@ span.action-btn {
 /* Profile dropdown container */
 .profile-dropdown {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+}
+
+.profile-dropdown .regular-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Dropdown menu */
@@ -287,10 +294,18 @@ span.action-btn {
   min-width: 180px;
   flex-direction: column;
   padding: 6px 0;
-  z-index: 999;
+  z-index: 1000;
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.profile-dropdown.open .profiles-menu {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  display: flex;
 }
 
 /* Each profile item */
