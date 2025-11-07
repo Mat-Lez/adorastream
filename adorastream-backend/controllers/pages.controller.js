@@ -1,4 +1,27 @@
+const { get } = require('mongoose');
 const User = require('../models/user');
+const Content = require('../models/content');
+
+const availablePages = ['home', 'movies', 'shows', 'settings'];
+const pageToLayoutMap = {
+    home: {
+      topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+      
+     : ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "PROFILE_DROPDOWN"]
+    },
+    shows: {
+      topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "PROFILE_DROPDOWN"]
+    },
+    movies: {
+      topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "PROFILE_DROPDOWN"]
+    },
+    settings: {
+      topbarLayout: ["TOPBAR_ACTIONS"],
+      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "PROFILE_DROPDOWN"]
+    },
+};
 
 exports.showLoginPage = (req, res) => {
   if (req.session?.user?.id) {
@@ -57,30 +80,91 @@ exports.showContentMainPage = async (req, res) => {
     additional_css: ['contentMain', 'buttons'],
     user: user,
     profiles: user.profiles,
-    activeProfileId: req.session.user.profileId });
+    activeProfileId: req.session.user.profileId,
+    topbarLayout: pageToLayoutMap['home'].topbarLayout,
+    topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout
+   });
 }
 
 exports.showMainSpecificPage = async (req, res) => {
-  const availablePages = ['home', 'movies', 'shows', 'settings'];
+  const page = getRequestedPage(req, availablePages, 'home');
+  await showPage(req, res, page, `partials/main-${page}`);
+}
+
+exports.showTopbar = async (req, res) => {
+  const page = getRequestedPage(req, availablePages, 'home');
+  await showPage(req, res, page, 'partials/main-topbar');
+}
+
+async function showPage(req, res, page, renderPath) {
+  const user = await User.findOne({ _id: req.session.user.id }).lean();
+  res.render(renderPath, {
+    layout: false,
+    profiles: user.profiles,
+    activeProfileId: req.session.user.profileId,
+    topbarLayout: pageToLayoutMap[page].topbarLayout,
+    topbarActionsLayout: pageToLayoutMap[page].topbarActionsLayout,
+    initialSettingsPage: page === 'settings' ? (req.query.tab === 'statistics' ? 'statistics' : 'manage-profiles') : undefined
+  });  
+}
+
+function getRequestedPage(req, availablePages, defaultPage) {
   let { page } = req.params;
   if (page === undefined || !availablePages.includes(page)) {
-    page = "home";
+    page = defaultPage;
   }
-  const user = await User.findOne({ _id: req.session.user.id }).lean({ virtuals: true });
+  return page;
+}
 
-  if (!user) {
-    // The user might have been deleted while the session still exists
-    // Redirect to the login page or handle gracefully
-    return res.redirect('/login');
-  }
+exports.showSettingsSpecificPage = async (req, res) => {
+  const availablePages = ['manage-profiles', 'statistics'];
+  const page = getRequestedPage(req, availablePages, 'manage-profiles');
 
-  // Manually compute isAdmin virtual for lean queries
-  user.isAdmin = (user.roles || []).includes('admin');
+  const user = await User.findOne({ _id: req.session.user.id }).lean();
 
-  res.render(`partials/main-${page}`, {
+  res.render(`partials/main-settings-${page}`, {
     layout: false,
     user: user,
     profiles: user.profiles,
-    activeProfileId: req.session.user.profileId
+    activeProfileId: req.session.user.profileId,
+  });
+}
+
+// Reach here from /settings/profiles/:action
+exports.showSettingsProfileActionPage = async (req, res) => {
+  const availablePages = ['add', 'edit'];
+  let { action } = req.params;
+  const profileIdToEdit = req.query.id;
+  const user = await User.findOne({ _id: req.session.user.id }).lean();
+
+  if ((action === undefined || !availablePages.includes(action)) || (action === "edit" && !profileIdToEdit)) {
+    action = "manage-profiles";
+    res.render(`partials/main-settings-${action}`, {
+      layout: false,
+      profiles: user.profiles,
+      activeProfileId: req.session.user.profileId
+    });
+    return;
+  }  
+  
+  res.render(`partials/main-settings-${action}-profile`, {
+    layout: false,
+    profiles: user.profiles,
+    activeProfileId: req.session.user.profileId,
+    profile: user.profiles.find(p => String(p._id) === String(profileIdToEdit)) || undefined
+  });
+}
+
+exports.showMediaPlayerPage = async (req, res) => {    
+  const contentId = req.session.user.contentId;
+  if (!contentId) {
+    return res.redirect('/content-main');
+  }
+  const media = await Content.findOne({ _id: contentId }).lean();
+  res.render('pages/player', {
+    title: 'Play - AdoraStream',
+    content: media,
+    scripts: ['player'],
+    additional_css: ['player'] 
   });
 }

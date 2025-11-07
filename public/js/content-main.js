@@ -1,5 +1,9 @@
+import { apiRequest as api } from '/utils/api-utils.js';
 import { logoutEventListener } from '../utils/reuseableEventListeners.js';
 import { switchProfile } from '/utils/profilesManagement.js';
+import { fetchPage } from '../utils/pageManagement.js';
+import { animateOut } from "../utils/reuseableAnimations.js";
+
 
 // init functions
 (async () => {
@@ -72,7 +76,6 @@ async function profileSwitchListener(){
     }
   });
 }
-
 async function sideNavbarPageSwapListener() {
   const navButtons = document.querySelectorAll('.nav-item');
   const main = document.querySelector('.main');
@@ -88,54 +91,17 @@ async function sideNavbarPageSwapListener() {
       btn.disabled = true; // disable button so it will not be infinitly clickable and rerun the fade animation
 
       const page = btn.dataset.page;
-      try {
-        const res = await fetch(`/content-main/${page}`, {
-          headers: {
-            // added header to indicate ajax request coming from internal fetch
-            'X-Requested-With': 'XMLHttpRequest'
-          }
-        });
-        if (!res.ok) throw new Error('Failed to load page');
-
-        // Fade out
-        await animateOut(main, 'loading');
-        
-        const html = await res.text();
-
-        // Swap the main content
-        main.innerHTML = html;
-
-        initPageScripts(); // Reinitialize event listeners for new content
-        // Fade back in
-        await animateIn(main, 'loading');
-      } catch (err) {
-        console.error(err);
-        main.innerHTML = '';
-        const p = document.createElement('p');
-        p.className = 'error';
-        p.textContent = `Failed to load page: ${page}`;
-        main.appendChild(p);
+      let pageUrl = `/content-main/${page}`;
+      if (page === 'settings' && btn.dataset.settingsTarget) {
+        pageUrl += `?tab=${btn.dataset.settingsTarget}`;
       }
+
+      await fetchPage(pageUrl, main, "loading");
+      initPageScripts();
+
     });
   });
 }
-
-async function animateOut(element, animationClass, animationDuration = 250) {
-  element.classList.add(animationClass);
-  await new Promise(resolve => {
-    setTimeout(resolve, animationDuration);
-  });
-}
-
-async function animateIn(element, animationClass, animationDuration = 250) {
-  requestAnimationFrame(() => {
-    element.classList.remove(animationClass);
-  });
-  await new Promise(resolve => {
-    setTimeout(resolve, animationDuration);
-  });
-}
-
 
 // Global page scripts are those that do not need to be reinitialized on every page load
 function initGlobalPageScripts() {
@@ -148,23 +114,18 @@ function initPageScripts() {
   profileSwitchListener();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  initGlobalPageScripts();
-  initPageScripts();
-});
-
 // TO BE REMOVED ...
 const mockData = [
-  { title: "Parasite", posterUrl: "/assets/posters/parasite.jpg" },
-  { title: "American Psycho", posterUrl: "/assets/posters/psycho.jpg" },
-  { title: "The Terminator", posterUrl: "/assets/posters/terminator.jpg" },
-  { title: "Snowfall", posterUrl: "/assets/posters/snowfall.jpg" },
+  { _id: "68fbd22e42639281fc130633", title: "Shironet", posterUrl: "/assets/posters/1761302557127_pr6.jpeg" },
+  { _id: "2", title: "American Psycho", posterUrl: "/assets/posters/psycho.jpg" },
+  { _id: "3", title: "The Terminator", posterUrl: "/assets/posters/terminator.jpg" },
+  { _id: "4", title: "Snowfall", posterUrl: "/assets/posters/snowfall.jpg" },
 ];
 
 function renderCards(containerId, data) {
   const container = document.getElementById(containerId);
   container.innerHTML = data.map(item => `
-    <div class="card">
+    <div class="card" data-id="${item._id}">
       <img src="${item.posterUrl}" alt="${item.title}">
       <div class="play-overlay">▶</div>
       <div class="card-title">${item.title}</div>
@@ -172,5 +133,30 @@ function renderCards(containerId, data) {
   `).join('');
 }
 
-renderCards('continue-watching', mockData);
-renderCards('popular', mockData);
+function addCardClickListeners() {
+  const cards = document.querySelectorAll('.card');
+  cards.forEach(card => {
+    card.addEventListener('click', async (e) => {
+      e.target.closest('.card'); // adjust selector to match your card class
+      const cardEl = e.target.closest('.card');
+      if (!cardEl) return; // click was outside a card
+      const contentId = cardEl.dataset.id;
+      if (!contentId) return;
+      try {
+        // Call API to select content to be played
+        await api('/api/content/select-content', 'POST', { contentId: contentId });
+        location.href = '/player';
+      } catch (e) {
+          console.error(`Failed to select content: ${e.message}`);
+      }
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initGlobalPageScripts();
+  initPageScripts();
+  renderCards('continue-watching', mockData);
+  renderCards('popular', mockData);
+  addCardClickListeners();
+});
