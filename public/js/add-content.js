@@ -30,7 +30,7 @@ function addActor() {
       </div>
       <div class="field">
         <label class="label">Wikipedia URL</label>
-        <input name="actorWikipedia_${actorCount}" class="input" type="text" placeholder="e.g., https://en.wikipedia.org/wiki/Tom_Hardy" />
+        <input name="actorWikipedia_${actorCount}" class="input" type="url" placeholder="e.g., https://en.wikipedia.org/wiki/Tom_Hardy" />
       </div>
       <button type="button" class="btn btn-danger" data-action="remove-actor">Remove</button>
     </div>
