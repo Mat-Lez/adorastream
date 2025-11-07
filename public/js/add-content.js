@@ -94,7 +94,7 @@ function handleEpisodesContainerClick(e) {
       <div class="field-row">
         <div class="field"><input class="input" type="text" placeholder="Actor Name"></div>
         <div class="field"><input class="input" type="text" placeholder="Role"></div>
-        <div class="field"><input class="input" type="text" placeholder="Wikipedia URL (optional)"></div>
+        <div class="field"><input class="input" type="url" placeholder="Wikipedia URL (optional)"></div>
         <button type="button" class="btn btn-danger" data-action="remove-ep-actor">Remove</button>
       </div>
     `;
