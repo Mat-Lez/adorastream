@@ -35,7 +35,7 @@
 }
 
 /* Action button with a text to the right */
-.action-btn {
+span.action-btn {
   display: flex;
   align-items: center;
   height: var(--btn-height);
@@ -45,24 +45,23 @@
   border-radius: 10px;
   padding: 8px 14px;
   color: var(--text);
-  text-decoration: none;
   cursor: pointer;
   transition: background 0.2s, transform 0.2s;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
 /* Hover/active states for visibility */
-.action-btn:hover {
+span.action-btn:hover {
   background: var(--button-background-hover);
   transform: scale(1.03);
 }
 
-.action-btn:active {
+span.action-btn:active {
   transform: scale(0.98);
 }
 
 /* The inner button (icon) */
-.action-btn button {
+span.action-btn button {
   all: unset;
   display: flex;
   align-items: center;
@@ -75,7 +74,7 @@
 }
 
 /* Logout text next to icon */
-.action-btn p {
+span.action-btn p {
   margin: 0;
   font-size: var(--button-font-size);
   color: var(--text);
@@ -83,17 +82,17 @@
 }
 
 /* Optional: subtle glow on hover */
-.action-btn:hover p,
-.action-btn:hover button {
+span.action-btn:hover p,
+span.action-btn:hover button {
   color: var(--primary);
 }
 
 /* Mobile adjustment */
 @media (max-width: 900px) {
-  .action-btn p {
+  span.action-btn p {
     font-size: var(--button-font-size-media);
   }
-  .action-btn button {
+  span.action-btn button {
     font-size: var(--button-font-size);
   }
 }

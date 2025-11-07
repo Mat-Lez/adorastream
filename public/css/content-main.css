@@ -348,7 +348,7 @@ span.action-btn {
   pointer-events: auto;
 }
 
-/* ====== Responsive Design ====== */
+/* ====== Responsive Adjustments ====== */
 @media (max-width: 900px) {
   .header {
     flex-direction: column;
