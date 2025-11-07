@@ -283,6 +283,8 @@ exports.selectContent = async (req, res) => {
     if (!contentId) {
       return res.status(400).json({ error: 'ContentId is required' });
     }
+
+   // Maybe if one of them is not defined, set 1 as default value?
     const { season, episode } = req.query; // for series
 
     const content = await Content.findById(contentId);
@@ -291,6 +293,7 @@ exports.selectContent = async (req, res) => {
     let currentEpisode = null;
     let nextEpisode = null;
 
+    // Needs to be changedd according to scheme
     if (content.type === 'series') {
       const episodes = content.episodes.sort((a, b) => {
         if (a.season === b.season) return a.episode - b.episode;
@@ -310,5 +313,5 @@ exports.selectContent = async (req, res) => {
     await new Promise((resolve, reject) => {
       req.session.save(err => (err ? reject(err) : resolve()));
     });
-    res.json({ content, currentEpisode, nextEpisode });
+    rres.json({ "content": content, "currentEpisode": currentEpisode, "nextEpisode": nextEpisode });
   }
