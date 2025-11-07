@@ -4,6 +4,8 @@
   <title><%= title || 'AdoraStream' %></title>
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
 
   <% if (typeof additional_css !== 'undefined' && additional_css.includes('profileSelection')) { %>
     <link rel="stylesheet" href="/css/profile-selection.css">
@@ -16,6 +18,9 @@
   <% } %>
   <% if (typeof additional_css !== 'undefined' && additional_css.includes('buttons')) { %>
     <link rel="stylesheet" href="/css/buttons.css">
+  <% } %>
+  <% if (typeof additional_css !== 'undefined' && additional_css.includes('player')) { %>
+    <link rel="stylesheet" href="/css/player.css">
   <% } %>
 
 
@@ -34,5 +39,8 @@
   <% } %>
   <% if (typeof scripts !== 'undefined' && scripts.includes('contentMain')) { %>
     <script type="module" src="/js/content-main.js"></script>
+  <% } %>
+  <% if (typeof scripts !== 'undefined' && scripts.includes('player')) { %>
+    <script type="module" src="/js/player.js"></script>
   <% } %>
 </head>
