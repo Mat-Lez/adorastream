@@ -28,6 +28,10 @@ function addActor() {
         <label class="label">Role</label>
         <input name="actorRole_${actorCount}" class="input" type="text" placeholder="e.g., Bane" />
       </div>
+      <div class="field">
+        <label class="label">Wikipedia URL</label>
+        <input name="actorWikipedia_${actorCount}" class="input" type="url" placeholder="e.g., https://en.wikipedia.org/wiki/Tom_Hardy" />
+      </div>
       <button type="button" class="btn btn-danger" data-action="remove-actor">Remove</button>
     </div>
   `;
@@ -90,6 +94,7 @@ function handleEpisodesContainerClick(e) {
       <div class="field-row">
         <div class="field"><input class="input" type="text" placeholder="Actor Name"></div>
         <div class="field"><input class="input" type="text" placeholder="Role"></div>
+        <div class="field"><input class="input" type="url" placeholder="Wikipedia URL (optional)"></div>
         <button type="button" class="btn btn-danger" data-action="remove-ep-actor">Remove</button>
       </div>
     `;
@@ -121,11 +126,13 @@ async function handleFormSubmit(e) {
   actorFields.forEach(field => {
     const nameInput = field.querySelector('input[name^="actorName_"]');
     const roleInput = field.querySelector('input[name^="actorRole_"]');
+    const wikiInput = field.querySelector('input[name^="actorWikipedia_"]');
     
     if (nameInput && roleInput && nameInput.value.trim() && roleInput.value.trim()) {
       actors.push({
         name: nameInput.value.trim(),
-        role: roleInput.value.trim()
+        role: roleInput.value.trim(),
+        wikipedia: (wikiInput?.value || '').trim()
       });
     }
   });
@@ -134,7 +141,7 @@ async function handleFormSubmit(e) {
   formData.set('actors', JSON.stringify(actors));
   
   // Remove individual actor fields from form data
-  const actorInputs = form.querySelectorAll('input[name^="actorName_"], input[name^="actorRole_"]');
+  const actorInputs = form.querySelectorAll('input[name^="actorName_"], input[name^="actorRole_"], input[name^="actorWikipedia_"]');
   actorInputs.forEach(input => formData.delete(input.name));
   
   try {
@@ -168,7 +175,9 @@ async function handleFormSubmit(e) {
         epActorRows.forEach(row => {
           const name = (row.querySelector('input[placeholder="Actor Name"]')?.value || '').trim();
           const role = (row.querySelector('input[placeholder="Role"]')?.value || '').trim();
-          if (name) actorsArr.push({ name, role });
+          const wikipedia = (row.querySelector('input[placeholder="Wikipedia URL (optional)"]')?.value || '').trim();
+
+          if (name) actorsArr.push({ name, role, wikipedia });
         });
         episodes.push({
           title,
