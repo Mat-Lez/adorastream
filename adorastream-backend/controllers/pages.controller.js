@@ -48,8 +48,7 @@ exports.showContentMainPage = async (req, res) => {
     scripts: ['contentMain'],
     additional_css: ['contentMain', 'buttons'],
     profiles: user.profiles,
-    activeProfileId: req.session.user.profileId
-   });
+    activeProfileId: req.session.user.profileId });
 } 
 
 exports.showMainSpecificPage = async (req, res) => {
@@ -62,7 +61,8 @@ exports.showMainSpecificPage = async (req, res) => {
   res.render(`partials/main-${page}`, {
     layout: false,
     profiles: user.profiles,
-    activeProfileId: req.session.user.profileId });
+    activeProfileId: req.session.user.profileId 
+  });
 }
 
 exports.showMediaPlayerPage = async (req, res) => {    
@@ -71,7 +71,6 @@ exports.showMediaPlayerPage = async (req, res) => {
     return res.redirect('/content-main');
   }
   const media = await Content.findOne({ _id: contentId }).lean();
-  console.log(media);
   res.render('pages/player', {
     title: 'Play - AdoraStream',
     content: media,
