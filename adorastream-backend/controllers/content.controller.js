@@ -126,7 +126,6 @@ exports.get = async (req, res) => {
   res.json(content);
 }
 
-
 // PATCH update content by ID
 exports.update = async (req, res) => {
   const content = await Content.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -395,7 +394,22 @@ exports.getNextEpisodeId = async (req, res) => {
     const currentIndex = allEpisodes.indexOf(currentEpisode);
     nextEpisode = allEpisodes[currentIndex + 1] || null;
   }
-   // Save it in the session and persist
+
+    // --- Fetch last watched time from WatchHistory ---
+  let lastPositionSec = 0;
+  try {
+    const history = await WatchHistory.findOne({
+      userId: req.session.user.id,
+      profileId: req.session.user.profileId,
+      contentId: contentId,
+      season: currentEpisode?.season || null,
+      episode: currentEpisode?.episode || null
+    });
+    if (history) lastPositionSec = history.lastPositionSec || 0;
+  } catch (err) {
+    console.error('Failed to get watch history:', err);
+  }
+  // Save it in the session and persist
   req.session.user.contentId = content.id;
   let nextEpisodeId = nextEpisode ? nextEpisode._id : null;
   req.session.user.currentEpisodeId = nextEpisodeId;

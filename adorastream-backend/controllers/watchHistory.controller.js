@@ -106,7 +106,6 @@ exports.listMine = async (req, res) => {
   res.json({ histories: rows, total: rows.length });
 };
 
-
 // controllers/watchHistory.js
 exports.getProgress = async (req, res) => {
   try {
@@ -229,6 +228,7 @@ exports.getProgress = async (req, res) => {
         lastWatchedAt: record?.lastWatchedAt,
       });
     }
+
   } catch (err) {
     console.error('Error fetching progress:', err);
     res.status(500).json({ error: 'Failed to fetch progress' });

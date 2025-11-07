@@ -76,6 +76,7 @@
 }
 
 .preview-meta span:not(.hidden) + span:not(.hidden)::before{
+
   content: "•";
   color: #aaa;
   margin: 0 12px;
@@ -143,6 +144,7 @@
   border-radius: 4px;
   z-index: 20;
 }
+
 
 .preview-buttons {
   display: flex;

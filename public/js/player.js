@@ -22,9 +22,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   let hideControlsTimeout;
   let carouselTimeout; 
 
-  let lastSavedTime = 0;
-  const SAVE_INTERVAL = 10; // seconds
-
   // --- get currently played ---
   let contentId, currentEpisodeId, type;
   try {
@@ -40,6 +37,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (type === 'series') {
     initSeries();
   }
+  let lastSavedTime = 0;
+  const SAVE_INTERVAL = 10; // seconds
+  let saveTimer;
 
   // --- Utility functions ---
   function showSkipOverlay(text) {
@@ -118,6 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // when the video finishes, time updates no longet fire
   video.addEventListener('ended', () => {
     lastSavedTime = 0; // reset for rewatch
+
   });
 
   if (timeline) {
@@ -259,6 +260,7 @@ window.addEventListener('beforeunload', saveProgress);
 
 
 // When metadata is loaded - duration and etc are known
+
   video.addEventListener('loadedmetadata', () => {
     if (lastPosition > 0 && lastPosition < video.duration) {
       video.currentTime = lastPosition; // resume from saved time
@@ -271,4 +273,5 @@ window.addEventListener('beforeunload', saveProgress);
   if (video.readyState >= 1) {
     video.dispatchEvent(new Event('loadedmetadata'));
   }
+
 });

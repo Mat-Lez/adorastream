@@ -8,8 +8,6 @@ import { openPreview } from "./media-preview.js"
 
 const SEARCH_RESULTS_LIMIT = 50;
 
-
-
 // init functions
 (async () => {
     // Check if the user is authenticated
@@ -254,7 +252,6 @@ function initSearchFeature() {
       if (contents.length === 0) {
         showMessage(`No results found for "${term}".`);
         return;
-
       }
     searchGrid.innerHTML = contents.map(buildCardMarkup).join('');
       searchEmpty.classList.add('is-hidden');
@@ -297,6 +294,5 @@ document.addEventListener('DOMContentLoaded', () => {
   addCardClickListeners();
   if (document.getElementById('search')) {
     initSearchFeature();
-
   }
 });
