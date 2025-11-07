@@ -136,7 +136,6 @@ async function deleteProfileListener() {
 
         const profileId = clickedButton.dataset.profileid;
         const activeProfileId = clickedButton.dataset.activeprofileid;
-        console.log(`Deleting profile with ID: ${profileId}`);
         if (!profileId) {
             showError(`Profile ID not found. ID: ${profileId}`);
             return;
