@@ -12,9 +12,9 @@
       <video
         id="video-player" class="playing"
         src="<%= content.type === 'movie'
-                ? '/static/' + content.videoUrl
+                ? content.videoUrl
                 : currentEpisode && currentEpisode.videoUrl
-                  ? '/static/' + currentEpisode.videoUrl
+                  ? currentEpisode.videoUrl
                   : '/videos/not-found.mp4' %>"
         type="video/mp4"
       ></video>

@@ -64,7 +64,14 @@ exports.showMainSpecificPage = async (req, res) => {
     profiles: user.profiles,
     activeProfileId: req.session.user.profileId });
 }
-exports.showMediaPlayerPage = (req, res) => {    
+
+exports.showMediaPlayerPage = async (req, res) => {    
+  const contentId = req.session.user.contentId;
+  if (!contentId) {
+    return res.redirect('/content-main');
+  }
+  const media = await Content.findOne({ _id: contentId }).lean();
+  console.log(media);
   res.render('pages/player', {
     title: 'Play - AdoraStream',
     content: media,

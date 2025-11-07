@@ -298,7 +298,7 @@ exports.selectContent = async (req, res) => {
       });
 
       currentEpisode = episodes.find(
-        (e) => e.season == season && e.episode == episode
+        (e) => e.season === season && e.episode === episode
       ) || episodes[0]; // default to first episode
 
       // Find next episode if available
