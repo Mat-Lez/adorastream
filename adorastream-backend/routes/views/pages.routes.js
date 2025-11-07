@@ -5,7 +5,7 @@ const { requireAdmin, requireLogin, requireProfileSelection } = require('../../m
 const { showLoginPage, showRegisterPage, showProfilesPage, 
     showAddProfilePage, showAddContentPage, showContentMainPage,
     showMainSpecificPage, showSettingsSpecificPage, showSettingsProfileActionPage,
-    showTopbar} = 
+    showTopbar, showMediaPlayerPage} = 
     require('../../controllers/pages.controller');
 const noCache = require('../../middleware/noCache');
 const requireFetch = require('../../middleware/internalFetch');
@@ -21,5 +21,6 @@ router.get('/content-main', requireLogin, requireProfileSelection, noCache, show
 router.get('/content-main/:page', requireLogin, requireProfileSelection, requireFetch, noCache, showMainSpecificPage);
 router.get('/settings/:page', requireLogin, requireProfileSelection, noCache, requireFetch, showSettingsSpecificPage);
 router.get('/settings/profiles/:action', requireLogin, requireProfileSelection, noCache, requireFetch, showSettingsProfileActionPage);
+router.get('/player', requireLogin, requireProfileSelection, showMediaPlayerPage);
 
 module.exports = router;

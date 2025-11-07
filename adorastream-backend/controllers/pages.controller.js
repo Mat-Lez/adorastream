@@ -1,5 +1,6 @@
 const { get } = require('mongoose');
 const User = require('../models/user');
+const Content = require('../models/content');
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
 const pageToLayoutMap = {
@@ -138,5 +139,19 @@ exports.showSettingsProfileActionPage = async (req, res) => {
     profiles: user.profiles,
     activeProfileId: req.session.user.profileId,
     profile: user.profiles.find(p => String(p._id) === String(profileIdToEdit)) || undefined
+  });
+}
+
+exports.showMediaPlayerPage = async (req, res) => {    
+  const contentId = req.session.user.contentId;
+  if (!contentId) {
+    return res.redirect('/content-main');
+  }
+  const media = await Content.findOne({ _id: contentId }).lean();
+  res.render('pages/player', {
+    title: 'Play - AdoraStream',
+    content: media,
+    scripts: ['player'],
+    additional_css: ['player'] 
   });
 }
