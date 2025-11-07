@@ -151,7 +151,7 @@ function initPageScripts() {
 
 // TO BE REMOVED ...
 const mockData = [
-  { _id: "68fbd22e42639281fc130633", title: "Shironet", posterUrl: "static/posters/1761302557127_pr6.jpeg" },
+  { _id: "68fbd22e42639281fc130633", title: "Shironet", posterUrl: "/assets/posters/1761302557127_pr6.jpeg" },
   { _id: "2", title: "American Psycho", posterUrl: "/assets/posters/psycho.jpg" },
   { _id: "3", title: "The Terminator", posterUrl: "/assets/posters/terminator.jpg" },
   { _id: "4", title: "Snowfall", posterUrl: "/assets/posters/snowfall.jpg" },
@@ -178,7 +178,7 @@ function addCardClickListeners() {
       const contentId = cardEl.dataset.id;
       if (!contentId) return;
       try {
-        // Call API to select profile (store the profileId in session)
+        // Call API to select content to be played
         await api('/api/content/select-content', 'POST', { contentId: contentId });
         location.href = '/player';
       } catch (e) {
