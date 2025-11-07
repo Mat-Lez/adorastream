@@ -3,3 +3,30 @@ user: user,
 topbarLayout: ["TOPBAR_ACTIONS"],
 topbarActionsLayout: ["ADD_CONTENT_BUTTON", "LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
 }) %>
+
+<link rel="stylesheet" href="/css/settings.css">
+
+<div class="settings-layout-container">
+  
+<% const activeSettingsPage = initialSettingsPage || 'manage-profiles'; %>
+<nav class="settings-nav">
+
+        <!-- By default, manage-profiles will be active when reaching the settings page -->
+        <a class="settings-nav-item <%= activeSettingsPage === 'manage-profiles' ? 'active' : '' %>" data-page="manage-profiles">
+            <i class="bi bi-people-fill"></i>
+            <span>Manage profiles</span>
+        </a>
+
+        <a class="settings-nav-item <%= activeSettingsPage === 'statistics' ? 'active' : '' %>" data-page="statistics">
+            <i class="bi bi-bar-chart-line-fill"></i>
+            <span>Statistics</span>
+        </a>
+
+    </nav>
+
+    <div class="settings-content-area">
+        <!-- activeSettingsPage is server-validated ('statistics' | 'manage-profiles'), safe for dynamic include -->
+        <%- include('main-settings-' + activeSettingsPage) %>
+    </div>
+
+</div>

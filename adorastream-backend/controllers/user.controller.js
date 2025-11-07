@@ -1,4 +1,6 @@
 const User = require('../models/user');
+const path = require('path');
+const fs = require('fs');
 
 
 // GET list of users with pagination
@@ -58,8 +60,6 @@ exports.addProfile = async (req, res) => {
 
   // If an avatar file was uploaded, persist to assets/profile-photos/<userId>/<profileId>/avatar.ext
   if (!req.uploadError && file && file.path && file.originalname) {
-    const path = require('path');
-    const fs = require('fs');
     const safeUserId = String(user._id);
     const safeProfileId = String(newProfile._id);
 
@@ -116,4 +116,107 @@ exports.removeProfile = async (req, res) => {
     });
   }
   res.json(user);
+};
+
+exports.updateProfile = async (req, res) => {
+  const { name } = req.body;
+  const file = req.file;
+  const { id: userId, profileId } = req.params;
+
+  // Add a try...catch block for error handling and temp file cleanup
+  try {
+    // 1. Find User and Profile
+    const user = await User.findById(userId);
+    if (!user) {
+      const e = new Error('User not found');
+      e.status = 404;
+      throw e;
+    }
+
+    const profile = user.profiles.id(profileId);
+    if (!profile) {
+      const e = new Error('Profile not found');
+      e.status = 404;
+      throw e;
+    }
+
+    let needsSave = false;
+
+    // 2. Handle Name Update (if 'name' was provided in the request)
+    if (name !== undefined) {
+      const trimmedName = String(name).trim();
+      if (!trimmedName) {
+        const e = new Error('Name cannot be empty');
+        e.status = 400;
+        throw e;
+      }
+      if (profile.name !== trimmedName) {
+        profile.name = trimmedName;
+        needsSave = true;
+      }
+    }
+
+    // 3. Handle File Upload (if a new file was provided)
+    if (!req.uploadError && file && file.path && file.originalname) {
+      // Delete Old Avatar (if it exists)
+      if (profile.avatarPath) {
+        try {
+          const oldAbsPath = path.join(__dirname, '..', 'assets', profile.avatarPath);
+          await fs.promises.unlink(oldAbsPath);
+        } catch (unlinkError) {
+          // Log a warning, but don't fail the request if old file is missing
+          console.warn(`Could not delete old avatar: ${unlinkError.message}`);
+        }
+      }
+
+      // Save New Avatar
+      const safeUserId = String(user._id);
+      const safeProfileId = String(profile._id);
+
+      const ext = path.extname(file.originalname || '').toLowerCase();
+      const allowedExt = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp']);
+      const useExt = allowedExt.has(ext) ? ext : '.png';
+
+      // Store under adorastream-backend/assets/profile-photos/<userId>/<profileId>/
+      const backendPublic = path.join(__dirname, '..', 'assets');
+      const dir = path.join(backendPublic, 'profile-photos', safeUserId, safeProfileId);
+      await fs.promises.mkdir(dir, { recursive: true });
+
+      const filename = `avatar${useExt}`;
+      const absPath = path.join(dir, filename);
+
+      // Move from multer temp path to final path
+      await fs.promises.rename(file.path, absPath);
+
+      // Save relative path from backend public/
+      const relPath = path.join('profile-photos', safeUserId, safeProfileId, filename).replace(/\\/g, '/');
+      
+      profile.avatarPath = relPath;
+      needsSave = true;
+    }
+
+    // 4. Save changes to the parent document (if any changes were made)
+    if (needsSave) {
+      await user.save();
+    }
+
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      profile: profile 
+    });
+
+  } catch (err) {
+    // Cleanup uploaded temp file in case of error
+    if (file && file.path) {
+      try {
+        await fs.promises.unlink(file.path);
+      } catch (cleanupError) {
+        console.warn(`Could not clean up temp file: ${cleanupError.message}`);
+      }
+    }
+    
+    res.status(err.status || 500).json({ 
+      message: err.message || 'An error occurred while updating the profile.' 
+    });
+  }
 };

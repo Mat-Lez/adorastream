@@ -3,15 +3,16 @@
  */
 
 /**
- * Generic API form submission function
+ * Generic API request function for FormData (file uploads)
  * @param {string} path - API endpoint
- * @param {FormData} formData - Form data to submit
+ * @param {FormData} formData - Request body
+ * @param {string} method - HTTP method (e.g., 'POST', 'PATCH')
  * @returns {Promise<Object>} - API response
  */
-async function apiForm(path, formData) {
+async function apiForm(path, formData, method = 'POST') {
   try {
     const response = await fetch(path, {
-      method: 'POST',
+      method: method,
       body: formData,
       credentials: 'include'
     });

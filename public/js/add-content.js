@@ -324,7 +324,6 @@ function init() {
   }
 
   // removed unused handleSeriesActionChange
-
   if (typeEl) {
     typeEl.addEventListener('change', handleTypeChange);
     handleTypeChange();
