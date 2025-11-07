@@ -132,7 +132,7 @@ async function handleFormSubmit(e) {
       actors.push({
         name: nameInput.value.trim(),
         role: roleInput.value.trim(),
-        wikipedia: wikiInput?.value.trim() || ''
+        wikipedia: (wikiInput?.value || '').trim()
       });
     }
   });
