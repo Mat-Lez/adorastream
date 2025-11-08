@@ -1,1 +1,13 @@
+<% 
+  // Find the active profile to display the name
+  const activeProfile = profiles.find((p) => String(p._id) === String(activeProfileId));
+  const profileName = activeProfile ? activeProfile.name : 'User';
+%>
+
 <h1 class="page-title">Statistics</h1>
+<p class="subtitle">Hi <%= profileName %>, here is your current watch activity.</p>
+<div class="statistics-container">
+  <div class="chart-wrapper">
+    <canvas id="genrePieChart"></canvas>
+  </div>
+</div>
