@@ -21,61 +21,90 @@ import { animateOut } from "../utils/reuseableAnimations.js";
     }
 })();
 
-function profileDropDownTogglerListener(){
-  const pd = document.querySelector('.profile-dropdown');
-  if (!pd) return;
-  const btn = pd.querySelector('#profile-btn');
-  const menu = pd.querySelector('.profiles-menu');
-  btn.addEventListener('click', (e) => {
-    e.preventDefault();
-    
-    const isOpen = pd.classList.toggle('open');
-    btn.setAttribute('aria-expanded', String(isOpen));
-    menu.setAttribute('aria-hidden', String(!isOpen));
-  });
-
-  // close when clicking elsewhere
-  document.addEventListener('click', (e) => {
-    if (!pd.contains(e.target)) {
-      if (menu.contains(document.activeElement)) {
-        document.activeElement.blur();
-      }
-      pd.classList.remove('open');
-      btn.setAttribute('aria-expanded', 'false');
-      menu.setAttribute('aria-hidden', 'true');
-    }
-  });
+function handleProfileMenuToggle(profileDropdown, profileBtn, profileMenu) {
+    const isOpen = profileDropdown.classList.toggle('open');
+    profileBtn.setAttribute('aria-expanded', String(isOpen));
+    profileMenu.setAttribute('aria-hidden', String(!isOpen));
 }
 
-async function profileSwitchListener(){
-  const pd = document.querySelector('.profile-dropdown');
-  if (!pd) return;
-  const main = document.querySelector('.main');
-  const profileItems = pd.querySelectorAll('.profile-item');
-  profileItems.forEach(item => {
-    if (item.id === 'manage-profiles-item') {
-      // SHOULD ADD LOGIC HERE TO GO TO SETTINGS PAGE
-      console.log('Manage profiles clicked but there is no logic yet!');
-      return;
+async function handleProfileSwitch(clickedProfileItem, main) {
+    const profileId = clickedProfileItem.id;
+    await animateOut(main, 'loading');
+    main.classList.remove('loading');
+    const errMsg = await switchProfile(profileId);
+    if (errMsg) {
+        console.error('Profile switch failed:', errMsg);
+        main.innerHTML = '';
+        const p = document.createElement('p');
+        p.className = 'error';
+        p.textContent = `Profile switch failed: ${errMsg}`;
+        main.appendChild(p);
+    }
+}
+
+async function handleManageProfilesClick(main) {
+    // This logic simulates a click on the "Settings" nav button
+    const settingsBtn = document.querySelector('.nav-item[data-page="settings"]');
+    if (settingsBtn) {
+        settingsBtn.click();
     } else {
-      item.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const profileId = item.id;
-        await animateOut(main, 'loading');
-        main.classList.remove('loading');
-        const errMsg = await switchProfile(profileId);
-        if (errMsg) {
-          console.error('Profile switch failed:', errMsg);
-          main.innerHTML = '';
-          const p = document.createElement('p');
-          p.className = 'error';
-          p.textContent = `Profile switch failed: ${errMsg}`;
-          main.appendChild(p);
-        }
-      }); 
+        // Fallback if settings button isn't found
+        await fetchPage(`/content-main/settings`, main, "loading");
+    }
+}
+
+function handleCloseProfileMenu(profileDropdown, profileBtn, profileMenu) {
+    if (profileMenu?.contains(document.activeElement)) {
+        document.activeElement.blur();
+    }
+    profileDropdown.classList.remove('open');
+    profileBtn?.setAttribute('aria-expanded', 'false');
+    profileMenu?.setAttribute('aria-hidden', 'true');
+}
+
+/**
+  * Listens for clicks related to the profile dropdown in the topbar
+  * This uses event listener on the body object in order to always capture clicks
+  * even if the dropdown is re-rendered.
+ */
+function topbarProfilesDropdownActionsListener() {
+  document.body.addEventListener('click', async (e) => {
+    const profileDropdown = document.querySelector('.profile-dropdown');
+    if (!profileDropdown) return;
+
+    const profileBtn = profileDropdown.querySelector('#profile-btn');
+    const profileMenu = profileDropdown.querySelector('.profiles-menu');
+    const main = document.querySelector('.main');
+
+    // User clicked the main profile button to toggle the menu
+    if (profileBtn?.contains(e.target)) {
+      e.preventDefault();
+      handleProfileMenuToggle(profileDropdown, profileBtn, profileMenu);
+      return;
+    }
+
+    const clickedProfileItem = e.target.closest('.profile-item');
+
+    // User clicked on a profile item
+    if (clickedProfileItem) {
+      e.preventDefault();
+      if (clickedProfileItem.id === 'manage-profiles-item') {
+        // User clicked "Manage Profiles"
+        await handleManageProfilesClick(main);
+      } else {
+        // User clicked on a profile item to switch
+        await handleProfileSwitch(clickedProfileItem, main);
+      }
+      return;
+    }
+
+    // User clicked *outside* the dropdown
+    if (!profileDropdown.contains(e.target) && profileDropdown.classList.contains('open')) {
+      handleCloseProfileMenu(profileDropdown, profileBtn, profileMenu);
     }
   });
 }
+
 async function sideNavbarPageSwapListener() {
   const navButtons = document.querySelectorAll('.nav-item');
   const main = document.querySelector('.main');
@@ -97,21 +126,9 @@ async function sideNavbarPageSwapListener() {
       }
 
       await fetchPage(pageUrl, main, "loading");
-      initPageScripts();
 
     });
   });
-}
-
-// Global page scripts are those that do not need to be reinitialized on every page load
-function initGlobalPageScripts() {
-  sideNavbarPageSwapListener();
-}
-
-function initPageScripts() {
-  logoutEventListener('logout-btn');
-  profileDropDownTogglerListener();
-  profileSwitchListener();
 }
 
 // TO BE REMOVED ...
@@ -154,8 +171,9 @@ function addCardClickListeners() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  initGlobalPageScripts();
-  initPageScripts();
+  sideNavbarPageSwapListener();
+  topbarProfilesDropdownActionsListener();
+  logoutEventListener('logout-btn');
   renderCards('continue-watching', mockData);
   renderCards('popular', mockData);
   addCardClickListeners();
