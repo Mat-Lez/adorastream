@@ -381,7 +381,7 @@ exports.selectContent = async (req, res) => {
       req.session.save(err => (err ? reject(err) : resolve()));
     });
 
-    res.json({ "contentId": contentId, "nextEpisodeId": nextEpisode._id });
+    res.json({ "contentId": contentId, "nextEpisodeId": nextEpisode ? nextEpisode._id : null });
   }
 
 
