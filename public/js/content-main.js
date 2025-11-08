@@ -183,11 +183,11 @@ function addCardClickListeners() {
         const { content, currentEpisodeId } = await api('/api/content/select-content', 'POST', { contentId: contentId, season: 1, episode: 1 });
         if (!content) return;
         // Redirect to player page  
-        if (content.type !== 'series') {
-          location.href = `/player?contentId=${contentId}`;
-          return;
+        let redirectUrl = `/player?contentId=${contentId}`;
+        if (content.type === 'series' && currentEpisodeId) {
+          redirectUrl += `&currentEpisodeId=${currentEpisodeId}`;
         }
-        location.href = `/player?contentId=${contentId}&currentEpisodeId=${currentEpisodeId}`;
+        location.href = redirectUrl;
       } catch (e) {
           console.error(`Failed to select content: ${e.message}`);
       }
