@@ -7,10 +7,11 @@
     topbarActions: "TOPBAR_ACTIONS"
   };
 
-  const availableTopbarActions = {
-    logoutButton: "LOGOUT_BUTTON",
-    profileDropdown: "PROFILE_DROPDOWN"
-  };
+    const availableTopbarActions = {
+      logoutButton: "LOGOUT_BUTTON",
+      profileDropdown: "PROFILE_DROPDOWN",
+      addContentButton: "ADD_CONTENT_BUTTON"
+    };
 
   const topbarPartsOrder = [
     availableTopbarParts.search,
@@ -29,26 +30,29 @@
     topbarActionsToDisplay = Object.values(availableTopbarActions).filter(a => topbarActionsLayout.includes(a));
   }
 
-  // ----------------------------
-  // RENDERING
-  // ----------------------------
-  topbarPartsToDisplay.forEach((part) => {
-    if (part === availableTopbarParts.search) {
-%>
-      <%- include('main-topbar-search.ejs') %>
-<% 
-    } else if (part === availableTopbarParts.topbarActions) {
-%>
-      <div class="topbar-actions">
-        <% topbarActionsToDisplay.forEach((action) => { %>
-          <% if (action === availableTopbarActions.logoutButton) { %>
-            <%- include('main-topbar-logout.ejs') %>
-          <% } else if (action === availableTopbarActions.profileDropdown) { %>
-            <%- include('main-topbar-profiles-dropdown.ejs') %>
-          <% } %>
-        <% }) %>
-      </div>
-<% 
-    }
-  });
-%>
+    // ----------------------------
+    // RENDERING
+    // ----------------------------
+    topbarPartsToDisplay.forEach((part) => {
+      if (part === availableTopbarParts.search) {
+  %>
+        <%- include('main-topbar-search.ejs') %>
+  <% 
+      } else if (part === availableTopbarParts.topbarActions) {
+  %>
+        <div class="topbar-actions">
+          <% topbarActionsToDisplay.forEach((action) => { %>
+            <% if (action === availableTopbarActions.logoutButton) { %>
+              <%- include('main-topbar-logout.ejs') %>
+            <% } else if (action === availableTopbarActions.profileDropdown) { %>
+              <%- include('main-topbar-profiles-dropdown.ejs') %>
+            <% } else if (action === availableTopbarActions.addContentButton && user && user.isAdmin) { %>
+              <%- include('main-topbar-add-content.ejs') %>
+            <% } %>
+          <% }) %>
+        </div>
+  <% 
+      }
+    });
+  %>
+</header>

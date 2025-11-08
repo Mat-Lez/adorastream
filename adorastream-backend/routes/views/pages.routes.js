@@ -9,6 +9,7 @@ const { showLoginPage, showRegisterPage, showProfilesPage,
     require('../../controllers/pages.controller');
 const noCache = require('../../middleware/noCache');
 const requireFetch = require('../../middleware/internalFetch');
+const loadUserContext = require('../../middleware/loadUserContext');
 
 router.get('/', (req, res) => res.redirect('/login'));
 router.get('/login', noCache, showLoginPage);
@@ -16,11 +17,11 @@ router.get('/register', noCache, showRegisterPage);
 router.get('/profile-selection', requireLogin, showProfilesPage);
 router.get('/add-profile', requireLogin, showAddProfilePage);
 router.get('/add-content', requireLogin, requireAdmin, showAddContentPage);
-router.get('/topbar/:page', requireLogin, requireProfileSelection, noCache, requireFetch, showTopbar);
-router.get('/content-main', requireLogin, requireProfileSelection, noCache, showContentMainPage);
-router.get('/content-main/:page', requireLogin, requireProfileSelection, requireFetch, noCache, showMainSpecificPage);
-router.get('/settings/:page', requireLogin, requireProfileSelection, noCache, requireFetch, showSettingsSpecificPage);
-router.get('/settings/profiles/:action', requireLogin, requireProfileSelection, noCache, requireFetch, showSettingsProfileActionPage);
+router.get('/topbar/:page', requireLogin, requireProfileSelection, noCache, requireFetch, loadUserContext, showTopbar);
+router.get('/content-main', requireLogin, requireProfileSelection, noCache, loadUserContext, showContentMainPage);
+router.get('/content-main/:page', requireLogin, requireProfileSelection, requireFetch, noCache, loadUserContext, showMainSpecificPage);
+router.get('/settings/:page', requireLogin, requireProfileSelection, noCache, requireFetch, loadUserContext, showSettingsSpecificPage);
+router.get('/settings/profiles/:action', requireLogin, requireProfileSelection, noCache, requireFetch, loadUserContext, showSettingsProfileActionPage);
 router.get('/player', requireLogin, requireProfileSelection, showMediaPlayerPage);
 
 module.exports = router;

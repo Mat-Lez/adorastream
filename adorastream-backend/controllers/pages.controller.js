@@ -1,24 +1,22 @@
-const { get } = require('mongoose');
-const User = require('../models/user');
 const Content = require('../models/content');
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
 const pageToLayoutMap = {
     home: {
       topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
-      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
+      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
     shows: {
       topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
-      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
+      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
     movies: {
       topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
-      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
+      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
     settings: {
       topbarLayout: ["TOPBAR_ACTIONS"],
-      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN"]
+      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
 };
 
@@ -62,14 +60,19 @@ exports.showAddContentPage = (req, res) => {
 }
 
 exports.showContentMainPage = async (req, res) => {   
-  const user = await User.findOne({ _id: req.session.user.id }).lean();
+  const { user, profiles, activeProfileId } = res.locals;
+
+  if (!user) {
+    return res.redirect('/login');
+  }
 
   res.render('pages/content-main', {
     title: 'Main - AdoraStream',
     scripts: ['contentMain'],
     additional_css: ['contentMain', 'buttons'],
-    profiles: user.profiles,
-    activeProfileId: req.session.user.profileId,
+    user,
+    profiles,
+    activeProfileId,
     topbarLayout: pageToLayoutMap['home'].topbarLayout,
     topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout
    });
@@ -86,11 +89,17 @@ exports.showTopbar = async (req, res) => {
 }
 
 async function showPage(req, res, page, renderPath) {
-  const user = await User.findOne({ _id: req.session.user.id }).lean();
+  const { user, profiles, activeProfileId } = res.locals;
+
+  if (!user) {
+    return res.status(403).send('User not found');
+  }
+
   res.render(renderPath, {
     layout: false,
-    profiles: user.profiles,
-    activeProfileId: req.session.user.profileId,
+    user,
+    profiles,
+    activeProfileId,
     topbarLayout: pageToLayoutMap[page].topbarLayout,
     topbarActionsLayout: pageToLayoutMap[page].topbarActionsLayout,
     initialSettingsPage: page === 'settings' ? (req.query.tab === 'statistics' ? 'statistics' : 'manage-profiles') : undefined
@@ -109,12 +118,17 @@ exports.showSettingsSpecificPage = async (req, res) => {
   const availablePages = ['manage-profiles', 'statistics'];
   const page = getRequestedPage(req, availablePages, 'manage-profiles');
 
-  const user = await User.findOne({ _id: req.session.user.id }).lean();
+  const { user, profiles, activeProfileId } = res.locals;
+
+  if (!user) {
+    return res.status(403).send('User not found');
+  }
 
   res.render(`partials/main-settings-${page}`, {
     layout: false,
-    profiles: user.profiles,
-    activeProfileId: req.session.user.profileId,
+    user,
+    profiles,
+    activeProfileId,
   });
 }
 
@@ -123,23 +137,27 @@ exports.showSettingsProfileActionPage = async (req, res) => {
   const availablePages = ['add', 'edit'];
   let { action } = req.params;
   const profileIdToEdit = req.query.id;
-  const user = await User.findOne({ _id: req.session.user.id }).lean();
+  const { user, profiles, activeProfileId } = res.locals;
+
+  if (!user) {
+    return res.status(403).send('User not found');
+  }
 
   if ((action === undefined || !availablePages.includes(action)) || (action === "edit" && !profileIdToEdit)) {
     action = "manage-profiles";
     res.render(`partials/main-settings-${action}`, {
       layout: false,
-      profiles: user.profiles,
-      activeProfileId: req.session.user.profileId
+      profiles,
+      activeProfileId
     });
     return;
   }  
   
   res.render(`partials/main-settings-${action}-profile`, {
     layout: false,
-    profiles: user.profiles,
-    activeProfileId: req.session.user.profileId,
-    profile: user.profiles.find(p => String(p._id) === String(profileIdToEdit)) || undefined
+    profiles,
+    activeProfileId,
+    profile: profiles.find(p => String(p._id) === String(profileIdToEdit)) || undefined
   });
 }
 
