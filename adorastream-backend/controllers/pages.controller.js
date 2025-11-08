@@ -1,4 +1,3 @@
-const { get } = require('mongoose');
 const Content = require('../models/content');
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
@@ -62,6 +61,10 @@ exports.showAddContentPage = (req, res) => {
 
 exports.showContentMainPage = async (req, res) => {   
   const { user, profiles, activeProfileId } = res.locals;
+
+  if (!user) {
+    return res.redirect('/login');
+  }
 
   res.render('pages/content-main', {
     title: 'Main - AdoraStream',
