@@ -286,9 +286,6 @@ exports.selectContent = async (req, res) => {
       return res.status(400).json({ error: 'ContentId is required' });
     }
 
-   // Maybe if one of them is not defined, set 1 as default value?
-    // const { season, episode } = req.query; 
-
     const content = await Content.findById(contentId);
     if (!content) { const e = new Error('Content not found'); e.status = 404; throw e; }
 
@@ -296,21 +293,7 @@ exports.selectContent = async (req, res) => {
 
     if (content.type === 'series' && Array.isArray(content.seasons) && content.seasons.length > 0) {
 
-      const allEpisodes = content.seasons.flatMap((s) =>
-          s.episodes.map((ep) => ({
-            ...ep.toObject?.() ?? ep,
-            seasonNumber: s.seasonNumber,
-          }))
-        );
-
-        // Sort them by season + episode number
-        allEpisodes.sort((a, b) => {
-          if (a.seasonNumber === b.seasonNumber) {
-            return a.episodeNumber - b.episodeNumber;
-          }
-          return a.seasonNumber - b.seasonNumber;
-        }); 
-
+      const allEpisodes = _getSortedEpisodes(content);
         if (episodeId) {
           currentEpisode =
             allEpisodes.find((ep) => ep._id.toString() === episodeId) ||
@@ -324,8 +307,8 @@ exports.selectContent = async (req, res) => {
           currentEpisode =
           allEpisodes.find(
             (ep) =>
-              ep.seasonNumber === Number(seasonNumber) &&
-              ep.episodeNumber === Number(episodeNumber)
+              ep.seasonNumber === seasonNumber &&
+              ep.episodeNumber === episodeNumber
           ) || allEpisodes[0];
        }
      }
@@ -365,9 +348,7 @@ exports.selectContent = async (req, res) => {
     let nextEpisode = null;
 
     if (content.type === 'series') {
-      const allEpisodes = content.seasons.flatMap(s =>
-        s.episodes.map(ep => ({ ...ep.toObject?.() ?? ep, seasonNumber: s.seasonNumber }))
-      ).sort((a,b) => a.seasonNumber === b.seasonNumber ? a.episodeNumber - b.episodeNumber : a.seasonNumber - b.seasonNumber);
+      const allEpisodes = _getSortedEpisodes(content);
 
       currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
       const currentIndex = allEpisodes.indexOf(currentEpisode);
@@ -405,7 +386,8 @@ exports.currentlyPlayed = async (req, res) => {
 // Get all episodes of a certain sereis
 exports.getEpisodesForContent = async (req, res) => {
 
-  const { contentId } = req.query;
+  const content = await Content.findById(req.params.id);
+  if (!content) return res.status(404).json({ error: 'Content not found' });
 
   if (!req.session?.user?.id) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -413,28 +395,10 @@ exports.getEpisodesForContent = async (req, res) => {
   if (!req.session?.user?.profileId) {
     return res.status(401).json({ error: 'No profile selected' });
   }
-  
-  if (!contentId) return res.status(400).json({ error: 'contentId is required' });
-
-  const content = await Content.findById(contentId);
-  if (!content) return res.status(404).json({ error: 'Content not found' });
 
   if (content.type !== 'series') return res.json({ episodes: [] });
 
-  // Flatten episodes and attach season number
-  const episodes = content.seasons.flatMap(s =>
-    s.episodes.map(ep => ({
-      ...ep.toObject?.() ?? ep,
-      seasonNumber: s.seasonNumber
-    }))
-  );
-
-  // Sort by season and episode
-  episodes.sort((a, b) =>
-    a.seasonNumber === b.seasonNumber
-      ? a.episodeNumber - b.episodeNumber
-      : a.seasonNumber - b.seasonNumber
-  );
+  const episodes = _getSortedEpisodes(content);
   
   // Determine current episode from session
   const currentEpisodeId = req.session.user.currentEpisodeId;
@@ -446,3 +410,27 @@ exports.getEpisodesForContent = async (req, res) => {
     totalSeasons: content.seasons.length
   });
 };
+
+// helper function
+function _getSortedEpisodes(content) {
+  if (!content?.seasons || !Array.isArray(content.seasons)) return [];
+
+  const episodes = [];
+  for (const season of content.seasons) {
+    if (!season?.episodes) continue;
+    for (const ep of season.episodes) {
+      episodes.push({
+        ...ep.toObject?.() ?? ep,
+        seasonNumber: season.seasonNumber ?? 1,
+      });
+    }
+  }
+
+  return episodes.sort((a, b) =>
+    a.seasonNumber === b.seasonNumber
+      ? a.episodeNumber - b.episodeNumber
+      : a.seasonNumber - b.seasonNumber
+  );
+}
+
+exports._getSortedEpisodes = _getSortedEpisodes;

@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const Content = require('../models/content');
+const ContentController = require('../controllers/content.controller');
 
 exports.showLoginPage = (req, res) => {
   if (req.session?.user?.id) {
@@ -79,12 +80,9 @@ exports.showMediaPlayerPage = async (req, res) => {
   }
 
   let currentEpisode = null;
-  let nextEpisode = null;
 
   if (media.type === 'series') {
-    const allEpisodes = media.seasons.flatMap(s =>
-      s.episodes.map(ep => ({ ...ep, seasonNumber: s.seasonNumber }))
-    ).sort((a,b) => a.seasonNumber === b.seasonNumber ? a.episodeNumber - b.episodeNumber : a.seasonNumber - b.seasonNumber);
+    const allEpisodes = ContentController._getSortedEpisodes(media);
 
     currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
   }

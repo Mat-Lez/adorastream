@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const carousel = carouselContainer.querySelector('.carousel');
       if (!carousel) return;
 
-      const res = await fetch(`/api/content/all-episodes-of-content?contentId=${contentId}`);
+      const res = await api(`/api/content/${contentId}/episodes`);
       const data = await res.json();
 
       carousel.innerHTML = '';
@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div class="poster-wrapper">
             <img src="${ep.posterUrl}" alt="${ep.title}">
           </div>
-          <div class="episode-title" data-episode-id=${ep._id}>
+          <div class="episode-title" data-episode-id="${ep._id}">
             S${ep.seasonNumber}E${ep.episodeNumber}
           </div>
         `;
@@ -202,11 +202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     async function selectEpisode(episodeId) {
-      try{ 
         location.href = `/player?contentId=${contentId}&currentEpisodeId=${episodeId}`;
-      } catch (e) {
-        console.error(`Failed to select episode: ${e.message}`);
-      }
     }
   }
 
