@@ -54,35 +54,9 @@ async function profileSwitchListener(){
   const profileItems = pd.querySelectorAll('.profile-item');
   profileItems.forEach(item => {
     if (item.id === 'manage-profiles-item') {
-      // const manageBtn = item.querySelector('#manage-profiles-btn');
-      // if (!manageBtn) return;
-      // manageBtn.addEventListener('click', async (e) => {
-      //   e.preventDefault();
-
-      //   // Close dropdown
-      //   pd.classList.remove('open');
-      //   const toggleBtn = pd.querySelector('#profile-btn');
-      //   const menu = pd.querySelector('.profiles-menu');
-      //   if (toggleBtn && menu) {
-      //     toggleBtn.setAttribute('aria-expanded', 'false');
-      //     menu.setAttribute('aria-hidden', 'true');
-      //   }
-
-      //   const navButtons = document.querySelectorAll('.nav-item');
-      //   const settingsBtn = Array.from(navButtons).find(btn => btn.dataset.page === 'settings' && !btn.dataset.settingsTarget);
-
-      //   if (settingsBtn) {
-      //     navButtons.forEach(b => {
-      //       b.classList.remove('active');
-      //       b.disabled = false;
-      //     });
-      //     settingsBtn.classList.add('active');
-      //     settingsBtn.disabled = true;
-      //   }
-
-      //   await fetchPage('/content-main/settings?tab=manage-profiles', main, "loading");
-      //   initPageScripts();
-      // });
+      // SHOULD ADD LOGIC HERE TO GO TO SETTINGS PAGE
+      console.log('Manage profiles clicked but there is no logic yet!');
+      return;
     } else {
       item.addEventListener('click', async (e) => {
         e.preventDefault();
