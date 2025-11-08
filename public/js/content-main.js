@@ -152,7 +152,7 @@ function initPageScripts() {
 // TO BE REMOVED ...
 const mockData = [
   { _id: "68fbd22e42639281fc130633", title: "Shironet", posterUrl: "/assets/posters/1761302557127_pr6.jpeg" },
-  { _id: "2", title: "American Psycho", posterUrl: "/assets/posters/psycho.jpg" },
+  { _id: "690dfedd493dac251df79dd9", title: "Grey's Anatomy", posterUrl: "/assets/posters/1762524893077_greys_poster.jpg" },
   { _id: "3", title: "The Terminator", posterUrl: "/assets/posters/terminator.jpg" },
   { _id: "4", title: "Snowfall", posterUrl: "/assets/posters/snowfall.jpg" },
 ];
@@ -179,8 +179,15 @@ function addCardClickListeners() {
       if (!contentId) return;
       try {
         // Call API to select content to be played
-        await api('/api/content/select-content', 'POST', { contentId: contentId });
-        location.href = '/player';
+        // Will be handled from media preview - currently place holders
+        const { content, currentEpisodeId } = await api('/api/content/select-content', 'POST', { contentId: contentId, season: 1, episode: 1 });
+        if (!content) return;
+        // Redirect to player page  
+        if (content.type !== 'series') {
+          location.href = `/player?contentId=${contentId}`;
+          return;
+        }
+        location.href = `/player?contentId=${contentId}&currentEpisodeId=${currentEpisodeId}`;
       } catch (e) {
           console.error(`Failed to select content: ${e.message}`);
       }

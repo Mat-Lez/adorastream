@@ -66,14 +66,33 @@ exports.showMainSpecificPage = async (req, res) => {
 }
 
 exports.showMediaPlayerPage = async (req, res) => {    
-  const contentId = req.session.user.contentId;
+  const { contentId, currentEpisodeId } = req.query;
+
   if (!contentId) {
     return res.redirect('/content-main');
   }
-  const media = await Content.findOne({ _id: contentId }).lean();
+
+  // Fetch the content
+  const media = await Content.findById(contentId).lean();
+  if (!media) {
+    return res.status(404).send('Content not found');
+  }
+
+  let currentEpisode = null;
+  let nextEpisode = null;
+
+  if (media.type === 'series') {
+    const allEpisodes = media.seasons.flatMap(s =>
+      s.episodes.map(ep => ({ ...ep, seasonNumber: s.seasonNumber }))
+    ).sort((a,b) => a.seasonNumber === b.seasonNumber ? a.episodeNumber - b.episodeNumber : a.seasonNumber - b.seasonNumber);
+
+    currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
+  }
+
   res.render('pages/player', {
     title: 'Play - AdoraStream',
     content: media,
+    currentEpisode,
     scripts: ['player'],
     additional_css: ['player'] 
   });
