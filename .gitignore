@@ -9,3 +9,4 @@ adorastream-backend/assets/tmp-uploads/*
 !adorastream-backend/assets/videos/.gitkeep
 !adorastream-backend/assets/posters/.gitkeep
 !adorastream-backend/assets/profile-photos/.gitkeep
+.vscode

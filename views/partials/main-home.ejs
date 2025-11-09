@@ -4,11 +4,30 @@
 </header>
 
 <section class="category">
-<h2>Continue Watching</h2>
-<div class="grid" id="continue-watching"></div>
+	<h2>Continue Watching</h2>
+	<div class="grid" id="continue-watching"></div>
 </section>
 
 <section class="category">
-<h2>Popular</h2>
-<div class="grid" id="popular"></div>
+	<h2>Popular</h2>
+	<div class="grid" id="popular"></div>
 </section>
+
+<div id="genre-sections-root">
+	<% (genreSections || []).forEach(section => { %>
+		<section class="category">
+			<h2><%= section.genre %></h2>
+			<div class="cards-row">
+				<% section.items.forEach(item => { %>
+					<div class="card" data-id="<%= item.id %>">
+						<div class="card-media">
+							<img src="<%= item.posterUrl %>" alt="<%= item.title %>">
+							<div class="play-overlay">▶</div>
+						</div>
+						<div class="card-title"><%= item.title %></div>
+					</div>
+				<% }); %>
+			</div>
+		</section>
+	<% }); %>
+</div>

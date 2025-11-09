@@ -1,4 +1,5 @@
 const Content = require('../models/content');
+const { getGenreSections } = require('./content.controller');
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
 const pageToLayoutMap = {
@@ -66,6 +67,8 @@ exports.showContentMainPage = async (req, res) => {
     return res.redirect('/login');
   }
 
+  const genreSections = await getGenreSections();
+
   res.render('pages/content-main', {
     title: 'Main - AdoraStream',
     scripts: ['contentMain'],
@@ -74,8 +77,9 @@ exports.showContentMainPage = async (req, res) => {
     profiles,
     activeProfileId,
     topbarLayout: pageToLayoutMap['home'].topbarLayout,
-    topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout
-   });
+    topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout,
+    genreSections
+    });
 }
 
 exports.showMainSpecificPage = async (req, res) => {
