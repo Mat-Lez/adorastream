@@ -134,7 +134,7 @@ async function sideNavbarPageSwapListener() {
               initStatisticsCharts();
           } catch (err) {
               console.error("Failed to load statistics scripts:", err);
-              contentArea.innerHTML = `<p class="error">Failed to load statistics module.</p>`;
+              main.innerHTML = `<p class="error">Failed to load statistics module.</p>`;
           }
       }
 

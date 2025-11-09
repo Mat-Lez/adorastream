@@ -76,9 +76,6 @@ async function createChart(canvasId, apiEndpoint, createChartConfig, noDataMessa
 
         if (!Array.isArray(data) || data.length === 0) {
             console.warn(`No data for ${canvasId}.`);
-            if (!document.getElementById(canvasId)) {
-                chartWrapper.innerHTML = `<canvas id="${canvasId}"></canvas>`;
-            }
             chartWrapper.innerHTML = `<p class="subtitle" style="text-align: center;">${noDataMessage}</p>`;
             return;
         }
@@ -118,7 +115,7 @@ async function createChart(canvasId, apiEndpoint, createChartConfig, noDataMessa
  * @param {object} theme - The computed theme colors
  * @returns {object} A Chart.js config object
  */
-function createGenrePieConfig(data, theme) {
+function createGenrePieConfig(data, theme, days) {
     const labels = data.map(item => item.genre);
     const values = data.map(item => item.watchedCount);
 
@@ -146,7 +143,7 @@ function createGenrePieConfig(data, theme) {
             plugins: {
                 title: {
                     display: true,
-                    text: `Watched Content by Genre (Past ${data.days || 7} days)`,
+                    text: `Watched Content by Genre (Past ${days || 7} days)`,
                     font: { size: 18 },
                     color: theme.text
                 },
@@ -178,9 +175,7 @@ function pieForWatchedContentByGenreByProfileID(days = 7) {
         'genrePieChart',
         `/api/stats/watchedContentByGenreByProfileID?days=${days}`,
         (data, theme) => {
-            // Pass the 'days' param to the config factory
-            data.days = days; 
-            return createGenrePieConfig(data, theme);
+            return createGenrePieConfig(data, theme, days);
         },
         `No watch activity in the past ${days} days.`
     );
