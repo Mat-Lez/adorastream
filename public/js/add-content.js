@@ -72,7 +72,7 @@ function addEpisodeForm() {
     </div>
     <div class="field"><label class="label">Episode Poster</label><input class="input" type="file" name="ep_poster_${episodeCount}" accept="image/*"></div>
     <div class="field"><label class="label">Episode Video (MP4)</label><input class="input" type="file" name="ep_video_${episodeCount}" accept="video/mp4" required></div>
-    <div class="field"><label class="label">Duration (seconds)</label><input name="ep_duration_${episodeCount}" class="input" type="number" min="0" placeholder="e.g. 3600" required /></div>
+    <div class="field"><label class="label">Duration (seconds)</label><input name="ep_duration_${episodeCount}" class="input" type="number" min="0" step="1" placeholder="e.g. 3600" required /></div>
     <div class="field"><button type="button" class="btn btn-danger" data-action="remove-episode">Remove Episode</button></div>
     <hr/>
   `;

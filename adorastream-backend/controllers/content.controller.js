@@ -53,7 +53,7 @@ exports.create = async (req, res) => {
     synopsis: description,
     posterUrl,
     videoUrl,
-    durationSec: Number(durationSec) || 0
+    durationSec: parseInt(durationSec, 10) || 0
   });
 
   // Fire-and-forget enrichment; do not block API response
@@ -209,7 +209,7 @@ exports.addEpisode = async (req, res) => {
     actors: actorsArr,
     posterUrl,
     videoUrl,
-    durationSec: Number(durationSec) || 0,
+    durationSec: parseInt(durationSec, 10) || 0,
     nextEpisode: nextEpisodeId || null
   };
   season.episodes.push(episodeDoc);
@@ -261,7 +261,7 @@ exports.addEpisodesBatch = async (req, res) => {
       actors: actorsArr,
       posterUrl,
       videoUrl,
-      durationSec: Number(ep.durationSec) || 0,
+      durationSec: parseInt(ep.durationSec, 10) || 0,
       nextEpisode: null
     });
     if ((series.numberOfSeasons || 0) < seasonNum) series.numberOfSeasons = seasonNum;
