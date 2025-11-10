@@ -16,6 +16,20 @@ exports.create = async (req, res) => {
     durationSec
   } = req.body;
 
+  const normalizedTitle = String(title || '').trim();
+  if (!normalizedTitle) {
+    const err = new Error('Title is required');
+    err.status = 400;
+    throw err;
+  }
+
+  const existingContent = await Content.findOne({ title: normalizedTitle }).lean();
+  if (existingContent) {
+    const err = new Error('Content with this title already exists');
+    err.status = 409;
+    throw err;
+  }
+
   // Parse genres
   const genresArr = typeof genres === 'string'
     ? genres.split(',').map(g => g.trim()).filter(Boolean)
@@ -44,7 +58,7 @@ exports.create = async (req, res) => {
 
   // Create content
   const content = await Content.create({
-    title,
+    title: normalizedTitle,
     type,
     year,
     genres: genresArr,
@@ -116,6 +130,20 @@ exports.remove = async (req, res) => {
 // POST /api/series - create a new series
 exports.createSeries = async (req, res) => {
   const { title, creators, numberOfSeasons, genres, description } = req.body;
+  const normalizedTitle = String(title || '').trim();
+
+  if (!normalizedTitle) {
+    const err = new Error('Title is required');
+    err.status = 400;
+    throw err;
+  }
+
+  const existingTitle = await Content.findOne({ title: normalizedTitle }).lean();
+  if (existingTitle) {
+    const err = new Error('Content with this title already exists');
+    err.status = 409;
+    throw err;
+  }
 
   let creatorsArr = [];
   if (creators) {
@@ -135,7 +163,7 @@ exports.createSeries = async (req, res) => {
 
   const seriesContent = await Content.create({
     type: 'series',
-    title,
+    title: normalizedTitle,
     synopsis: description || '',
     creators: creatorsArr,
     numberOfSeasons: Number(numberOfSeasons) || 0,
@@ -197,8 +225,10 @@ exports.addEpisode = async (req, res) => {
     season = { seasonNumber: seasonNum, episodes: [] };
     series.seasons.push(season);
   }
-  const exists = (season.episodes || []).some(e => e.episodeNumber === epNum);
-  if (exists) { const e = new Error('Episode already exists in this season'); e.status = 409; throw e; }
+    const exists = (season.episodes || []).some(e => e.episodeNumber === epNum);
+    if (exists) { const e = new Error('Episode already exists in this season'); e.status = 409; throw e; }
+    const titleExists = (season.episodes || []).some(e => e.title?.trim().toLowerCase() === String(title || '').trim().toLowerCase());
+    if (titleExists) { const e = new Error('Episode with this title already exists in this season'); e.status = 409; throw e; }
 
   const episodeDoc = {
     seasonNumber: seasonNum,
@@ -235,8 +265,42 @@ exports.addEpisodesBatch = async (req, res) => {
     throw err;
   }
 
-  const posters = (req.files && req.files.posters) || [];
-  const videos  = (req.files && req.files.videos)  || [];
+  const posters = [
+    ...((req.files && req.files.posters) || []),
+    ...((req.files && req.files.poster) || [])
+  ];
+  const videos  = [
+    ...((req.files && req.files.videos) || []),
+    ...((req.files && req.files.video) || [])
+  ];
+
+  const seasons = Array.isArray(series.seasons) ? series.seasons : (series.seasons = []);
+  const batchSeen = new Set();
+  for (const ep of episodes) {
+    const seasonNum = Number(ep.seasonNumber || 1);
+    const epNum = Number(ep.episodeNumber || 1);
+    const title = String(ep.title || '').trim().toLowerCase();
+    const key = `${seasonNum}:${epNum}`;
+
+    if (batchSeen.has(key)) {
+      const err = new Error(`Duplicate episode ${seasonNum}x${epNum} in request`);
+      err.status = 409;
+      throw err;
+    }
+    batchSeen.add(key);
+
+    const season = seasons.find(s => s.seasonNumber === seasonNum);
+    if (season && (season.episodes || []).some(e => e.episodeNumber === epNum)) {
+      const err = new Error(`Episode ${seasonNum}x${epNum} already exists`);
+      err.status = 409;
+      throw err;
+    }
+    if (season && title && (season.episodes || []).some(e => String(e.title || '').trim().toLowerCase() === title)) {
+      const err = new Error(`Episode title "${ep.title}" already exists in season ${seasonNum}`);
+      err.status = 409;
+      throw err;
+    }
+  }
 
   if (!Array.isArray(series.seasons)) series.seasons = [];
   episodes.forEach((ep, idx) => {
@@ -252,10 +316,11 @@ exports.addEpisodesBatch = async (req, res) => {
     const posterUrl = posters[idx] ? `/assets/posters/${posters[idx].filename}` : '';
     const videoUrl  = videos[idx]  ? `/assets/videos/${videos[idx].filename}`   : '';
     const actorsArr = Array.isArray(ep.actors) ? ep.actors : [];
+    const normalizedTitle = String(ep.title || '').trim();
     season.episodes.push({
       seasonNumber: seasonNum,
       episodeNumber: epNum,
-      title: ep.title || '',
+      title: normalizedTitle,
       synopsis: ep.description || '',
       director: ep.director || '',
       actors: actorsArr,
