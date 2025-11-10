@@ -1,4 +1,4 @@
-const WatchHistory = require('../models/watchHistory');
+const { WatchHistory, DailyWatch } = require('../models/watchHistory');
 const User = require('../models/user');
 
 
@@ -18,6 +18,9 @@ exports.upsertProgress = async (req, res) => {
     { $set: update },
     { upsert: true, new: true }
   );
+
+  logDailyWatch(userId, profileId, contentId);
+  
   res.json(history);
 };
 
@@ -65,3 +68,37 @@ exports.listMine = async (req, res) => {
 
   res.json({ histories: rows, total: rows.length });
 };
+
+/**
+ * @description Logs a distinct watch event for the day.
+ * Runs an upsert on the DailyWatch collection.
+ * This is designed to be "fire-and-forget" and not block the main request.
+ */
+async function logDailyWatch(userId, profileId, contentId) {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // YYYY-MM-DD 00:00:00
+
+    await DailyWatch.findOneAndUpdate(
+      {
+        userId: userId,
+        profileId: profileId,
+        contentId: contentId,
+        date: today
+      },
+      { 
+        $setOnInsert: { // Only insert when there is no already existing entry
+          userId: userId,
+          profileId: profileId,
+          contentId: contentId,
+          date: today
+        }
+      },
+      { upsert: true, new: true }
+    );
+  } catch (err) {
+    if (err.code !== 11000) { // 11000 is "duplicate key", which is fine
+      console.error("Failed to log daily watch:", err.message);
+    }
+  }
+}

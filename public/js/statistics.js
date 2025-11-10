@@ -113,6 +113,7 @@ async function createChart(canvasId, apiEndpoint, createChartConfig, noDataMessa
  * This is the "unique" part you identified.
  * @param {Array} data - The data from the API
  * @param {object} theme - The computed theme colors
+ * @param {Number} days - The number of days to compute backwards
  * @returns {object} A Chart.js config object
  */
 function createGenrePieConfig(data, theme, days) {
@@ -181,6 +182,111 @@ function pieForWatchedContentByGenreByProfileID(days = 7) {
     );
 }
 
+/**
+ * Creates the specific config for the Daily Watch Bar Chart.
+ * @param {Array} data - The data from the API
+ * @param {object} theme - The computed theme colors
+ * @param {Number} days - The number of days to compute backwards
+ * @returns {object} A Chart.js config object
+ */
+function createDailyWatchBarConfig(data, theme, days = 7) {
+    
+    // Fill missing days with zeros
+    const dataMap = new Map(data.map(item => [new Date(item.date).toDateString(), item.watchedCount]));
+    const labels = [];
+    const values = [];
+
+    for (let i = days - 1; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        
+        // Format label (e.g., "Nov 10")
+        const label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        labels.push(label);
+        
+        // Find the count for this day, or default to 0
+        const count = dataMap.get(date.toDateString()) || 0;
+        values.push(count);
+    }
+
+    return {
+        type: 'bar',
+        data: {
+            labels: labels, // e.g., ["Nov 4", "Nov 5", ...]
+            datasets: [{
+                label: 'Content Watched',
+                data: values, // e.g., [1, 0, 3, 0, 0, 1, 2]
+                backgroundColor: theme.primary,
+                borderColor: theme.primary600,
+                borderWidth: 2,
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        // Ensure only whole numbers are shown on the Y-axis
+                        precision: 0, 
+                        color: theme.muted
+                    },
+                    grid: {
+                        color: theme.border
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: theme.muted
+                    },
+                    grid: {
+                        display: false // Hide vertical grid lines
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: `Daily Watch Activity (Past ${days} days)`,
+                    font: { size: 18 },
+                    color: theme.text
+                },
+                legend: {
+                    display: false // Hide legend for a single dataset
+                },
+                tooltip: {
+                    backgroundColor: theme.panel,
+                    titleColor: theme.text,
+                    bodyColor: theme.muted,
+                    borderColor: theme.border,
+                    borderWidth: 1,
+                    callbacks: {
+                        label: ctx => `Watched: ${ctx.parsed.y} items`
+                    }
+                }
+            }
+        }
+    };
+}
+
+/**
+ * Renders the Daily Watch Bar Chart.
+ * @param {number} days - The number of days to fetch data for.
+ */
+function barChartForDailyWatchCount(days = 7) {
+    createChart(
+        'dailyWatchBarChart',
+        `/api/stats/getDailyWatchCountByProfile?days=${days}`,
+        (data, theme) => {
+            return createDailyWatchBarConfig(data, theme, days);
+        },
+        `No watch activity in the past ${days} days.`
+    );
+}
+
 export function initStatisticsCharts() {
     pieForWatchedContentByGenreByProfileID(7);
+    barChartForDailyWatchCount(7);
 }
