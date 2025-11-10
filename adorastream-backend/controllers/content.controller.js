@@ -12,7 +12,8 @@ exports.create = async (req, res) => {
     genres,
     director,
     actors,
-    description
+    description,
+    durationSec
   } = req.body;
 
   // Parse genres
@@ -51,7 +52,8 @@ exports.create = async (req, res) => {
     actors: actorsArr,
     synopsis: description,
     posterUrl,
-    videoUrl
+    videoUrl,
+    durationSec: parseInt(durationSec, 10) || 0
   });
 
   // Fire-and-forget enrichment; do not block API response
@@ -162,7 +164,7 @@ exports.getSeries = async (req, res) => {
 // POST /api/series/:id/episodes
 exports.addEpisode = async (req, res) => {
   const seriesId = req.params.id;
-  const { title, description, seasonNumber, episodeNumber, director, actors, nextEpisodeId } = req.body;
+  const { title, description, seasonNumber, episodeNumber, director, actors, nextEpisodeId, durationSec } = req.body;
 
   const series = await Content.findById(seriesId);
   if (!series || series.type !== 'series') { const e = new Error('Series not found'); e.status = 404; throw e; }
@@ -207,6 +209,7 @@ exports.addEpisode = async (req, res) => {
     actors: actorsArr,
     posterUrl,
     videoUrl,
+    durationSec: parseInt(durationSec, 10) || 0,
     nextEpisode: nextEpisodeId || null
   };
   season.episodes.push(episodeDoc);
@@ -258,6 +261,7 @@ exports.addEpisodesBatch = async (req, res) => {
       actors: actorsArr,
       posterUrl,
       videoUrl,
+      durationSec: parseInt(ep.durationSec, 10) || 0,
       nextEpisode: null
     });
     if ((series.numberOfSeasons || 0) < seasonNum) series.numberOfSeasons = seasonNum;
