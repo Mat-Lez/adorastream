@@ -99,7 +99,7 @@ async function showPage(req, res, page, renderPath) {
     return res.status(403).send('User not found');
   }
 
-  res.render(renderPath, {
+  const renderOptions = {
     layout: false,
     user,
     profiles,
@@ -107,7 +107,13 @@ async function showPage(req, res, page, renderPath) {
     topbarLayout: pageToLayoutMap[page].topbarLayout,
     topbarActionsLayout: pageToLayoutMap[page].topbarActionsLayout,
     initialSettingsPage: page === 'settings' ? (req.query.tab === 'statistics' ? 'statistics' : 'manage-profiles') : undefined
-  });  
+  };
+
+  if (page === 'home') {
+    renderOptions.genreSections = await getGenreSections();
+  }
+
+  res.render(renderPath, renderOptions);
 }
 
 function getRequestedPage(req, availablePages, defaultPage) {
