@@ -1,9 +1,14 @@
 const mongoose = require('mongoose');
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/streaming_app';
 
 async function connectDB() {
   mongoose.set('strictQuery', true);
-  await mongoose.connect(MONGODB_URI, { autoIndex: true });
+
+  if (!process.env.MONGODB_URI) {
+    throw new Error('MONGODB_URI environment variable is required');
+  }
+
+  const connectionString = process.env.MONGODB_URI;
+  await mongoose.connect(connectionString, { autoIndex: true });
 }
 
 module.exports = { connectDB, mongoose };

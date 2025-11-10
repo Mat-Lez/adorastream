@@ -1,14 +1,20 @@
-function notFound(req, res, next) {
+function notFound(_req, res, _next) {
   res.status(404).json({ error: 'Not found' });
 }
 
-function errorHandler(err, _req, res, _next) {
+function errorHandler(err, req, res, _next) {
   console.error(err);
-  // If unauthorized redirect to login page
-  if (err.status === 401) {
+  const status = err.status || 500;
+  const wantsJson =
+    req.xhr ||
+    req.originalUrl.startsWith('/api') ||
+    req.headers.accept?.includes('application/json');
+
+  if (!wantsJson && status === 401) {
     return res.redirect('/login');
   }
-  res.status(err.status || 500).json({ error: err.message || 'Server error' });
+
+  res.status(status).json({ error: err.message || 'Server error' });
 }
 
 module.exports = { notFound, errorHandler };
