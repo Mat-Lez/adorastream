@@ -126,6 +126,17 @@ async function sideNavbarPageSwapListener() {
       }
 
       await fetchPage(pageUrl, main, "loading");
+      if (btn.dataset.settingsTarget === 'statistics') {
+          try {
+              // Dynamically import the script
+              const { initStatisticsCharts } = await import('/js/statistics.js');
+              // Run the function that draws the charts
+              initStatisticsCharts();
+          } catch (err) {
+              console.error("Failed to load statistics scripts:", err);
+              main.innerHTML = `<p class="error">Failed to load statistics module.</p>`;
+          }
+      }
 
     });
   });
@@ -134,7 +145,7 @@ async function sideNavbarPageSwapListener() {
 // TO BE REMOVED ...
 const mockData = [
   { _id: "68fbd22e42639281fc130633", title: "Shironet", posterUrl: "/assets/posters/1761302557127_pr6.jpeg" },
-  { _id: "2", title: "American Psycho", posterUrl: "/assets/posters/psycho.jpg" },
+  { _id: "690f8977ccb3da41b9da6051", title: "Avengers Endgame", posterUrl: "/assets/posters/1762625910868_Avengers_Endgame.jpg" },
   { _id: "3", title: "The Terminator", posterUrl: "/assets/posters/terminator.jpg" },
   { _id: "4", title: "Snowfall", posterUrl: "/assets/posters/snowfall.jpg" },
 ];
