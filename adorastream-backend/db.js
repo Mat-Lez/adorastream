@@ -7,8 +7,7 @@ async function connectDB() {
     throw new Error('MONGODB_URI environment variable is required');
   }
 
-  const connectionString = process.env.MONGODB_URI;
-  await mongoose.connect(connectionString, { autoIndex: true });
+  await mongoose.connect(process.env.MONGODB_URI, { autoIndex: true });
 }
 
 module.exports = { connectDB, mongoose };
