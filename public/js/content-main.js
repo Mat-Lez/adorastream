@@ -160,6 +160,7 @@ function addCardClickListeners() {
     const cardEl = e.target.closest('.card');
     if (!cardEl) return;
     const contentId = cardEl.dataset.id;
+    if (!contentId) return;
     try {
       await api('/api/content/select-content', 'POST', { contentId });
       location.href = '/player';

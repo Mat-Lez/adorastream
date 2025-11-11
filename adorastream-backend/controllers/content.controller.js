@@ -314,11 +314,12 @@ exports.selectContent = async (req, res) => {
 }
 
 const DEFAULT_GENRE_LIMIT = Number(process.env.DEFAULT_GENRE_LIMIT) || 10;
+const GENRE_FETCH_LIMIT_MULTIPLIER = Number(process.env.GENRE_FETCH_LIMIT_MULTIPLIER) || 25;
 
 exports.getGenreSections = async (limit = DEFAULT_GENRE_LIMIT) => {
   const contents = await Content.find({})
     .sort({ createdAt: -1 })
-    .limit(limit * 25)
+    .limit(limit * GENRE_FETCH_LIMIT_MULTIPLIER)
     .lean();
 
   const genreMap = new Map();
