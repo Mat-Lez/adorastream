@@ -190,13 +190,13 @@ function buildCardMarkup(item = {}) {
 function initSearchFeature() {
   const searchInput = document.getElementById('search');
   const searchSection = document.getElementById('search-results-section');
-  const searchRow = document.getElementById('search-results-row');
+  const searchGrid = document.getElementById('search-results-grid');
   const searchEmpty = document.getElementById('search-results-empty');
   const mainEl = document.querySelector('.main');
   if (
     !searchInput ||
     !searchSection ||
-    !searchRow ||
+    !searchGrid ||
     !searchEmpty ||
     !mainEl ||
     searchInput.dataset.searchInit === 'true'
@@ -212,7 +212,7 @@ function initSearchFeature() {
   };
 
   const clearResults = () => {
-    searchRow.innerHTML = '';
+    searchGrid.innerHTML = '';
     searchEmpty.classList.add('is-hidden');
   };
 
@@ -236,7 +236,7 @@ function initSearchFeature() {
 
     setSearchActive(true);
     showMessage(`Searching for "${term}"…`);
-    searchRow.innerHTML = '';
+    searchGrid.innerHTML = '';
 
     try {
       const response = await api(`/api/content?q=${encodeURIComponent(term)}&limit=${SEARCH_RESULTS_LIMIT}`);
@@ -245,7 +245,7 @@ function initSearchFeature() {
         showMessage(`No results found for "${term}".`);
         return;
       }
-      searchRow.innerHTML = contents.map(buildCardMarkup).join('');
+    searchGrid.innerHTML = contents.map(buildCardMarkup).join('');
       searchEmpty.classList.add('is-hidden');
     } catch (error) {
       showMessage('Search failed. Please try again.');
