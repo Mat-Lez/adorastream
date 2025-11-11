@@ -363,51 +363,20 @@ exports.addEpisodesBatch = async (req, res) => {
   res.status(201).json(series);
 };
 
-// Get Id of the next episode based on the one currently playing
-exports.getNextEpisodeId = async (req, res) => {
-  // require an authenticated session user
-  if (!req.session?.user?.id) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
 
-  if (!req.session?.user?.profileId) {
-    return res.status(401).json({ error: 'No profile selected' });
-  }
-
-  const contentId = req.session.user.contentId;
-  const currentEpisodeId = req.session.user.currentEpisodeId;
-
-  if (!contentId) {
-    return res.status(400).json({ error: 'No content selected' });
-  }
+exports.getSeasonEpisodeById = async (req, res) => {
+  const contentId = req.params.id;
+  const episodeId = req.params.episodeId;
 
   const content = await Content.findById(contentId);
-  if (!content) { const e = new Error('Content not found'); e.status = 404; throw e; }
 
-  let currentEpisode = null;
-  let nextEpisode = null;
+  if (!content || content.type !== 'series' || !Array.isArray(content.seasons)) return null;
 
-  if (content.type === 'series') {
-    const allEpisodes = _getSortedEpisodes(content);
-
-    currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
-    const currentIndex = allEpisodes.indexOf(currentEpisode);
-    nextEpisode = allEpisodes[currentIndex + 1] || null;
-  }
-
-    // --- Fetch last watched time from WatchHistory ---
-  let lastPositionSec = 0;
-  try {
-    const history = await WatchHistory.findOne({
-      userId: req.session.user.id,
-      profileId: req.session.user.profileId,
-      contentId: contentId,
-      season: currentEpisode?.season || null,
-      episode: currentEpisode?.episode || null
-    });
-    if (history) lastPositionSec = history.lastPositionSec || 0;
-  } catch (err) {
-    console.error('Failed to get watch history:', err);
+  for (const season of content.seasons) {
+    const ep = season.episodes.find(e => e._id.toString() === episodeId.toString());
+    if (ep) {
+      return res.json({ seasonNumber: season.seasonNumber, episodeNumber: ep.episodeNumber });
+    }
   }
   // Save it in the session and persist
   req.session.user.contentId = content.id;

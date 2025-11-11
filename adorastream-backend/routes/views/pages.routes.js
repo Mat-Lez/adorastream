@@ -30,6 +30,7 @@ router.get('/content-main/:page', requireLogin, requireProfileSelection, require
 router.get('/content-main/preview/:contentId/episodes', requireLogin, requireProfileSelection, showEpisodesDetailedList);
 router.get('/content-main/preview/:contentId/actors', requireLogin, requireProfileSelection, showActorsList);
 
+<<<<<<< HEAD
 =======
 router.get('/content-main/:page', requireLogin, requireProfileSelection, showMainSpecificPage);
 >>>>>>> 13201a6 (resolve conflict)
@@ -37,5 +38,7 @@ router.get('/content-main/:page', requireLogin, requireProfileSelection, showMai
 router.get('/content-main', requireLogin, requireProfileSelection, noCache, showContentMainPage);
 router.get('/content-main/:page', requireLogin, requireProfileSelection, requireFetch, noCache, showMainSpecificPage);
 >>>>>>> 2fe1144 (resolve-conflicts)
+=======
+>>>>>>> 1ad04cb (fix issues in media preview and player)
 
 module.exports = router;

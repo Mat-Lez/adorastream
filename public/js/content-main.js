@@ -202,6 +202,7 @@ function initSearchFeature() {
     return;
   }
 
+
   if (!searchInput || !searchSection || !searchGrid || !searchEmpty || !mainEl) {
     console.error('Search feature could not be initialized: one or more required DOM elements are missing.');
     return;

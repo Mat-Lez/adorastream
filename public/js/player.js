@@ -253,10 +253,17 @@ async function saveProgress() {
   }
 }
 
+<<<<<<< HEAD
 // also save on pause or before leaving the page
 video.addEventListener('pause', saveProgress);
 video.addEventListener('seeked', saveProgress);
 window.addEventListener('beforeunload', saveProgress);
+=======
+  // also save on pause or before leaving the page
+  video.addEventListener('pause', saveProgress);
+  video.addEventListener('seeked', saveProgress);
+  window.addEventListener('beforeunload', saveProgress);
+>>>>>>> 1ad04cb (fix issues in media preview and player)
 
 
 // When metadata is loaded - duration and etc are known

@@ -106,6 +106,7 @@ exports.listMine = async (req, res) => {
   res.json({ histories: rows, total: rows.length });
 };
 
+
 // controllers/watchHistory.js
 exports.getProgress = async (req, res) => {
   try {
@@ -273,6 +274,6 @@ exports.resetProgress = async (req, res) => {
   await WatchHistory.updateMany(
   { userId, profileId, contentId },
   { $set: { completed: false, lastPositionSec: 0 } }
-);
+  );
   res.status(204).send();
 }

@@ -19,6 +19,10 @@ const seasonEpisodeEl = document.getElementById('preview-season-episode');
 // Handles playing content from preview
 export async function playContent(contentId, lastPositionSec = 0, currentEpisodeId = null) {
   try {
+<<<<<<< HEAD
+=======
+    // const { content, currentEpisodeId, lastPositionSec } = await api('/api/content/select-content', 'POST', { contentId });
+>>>>>>> 1ad04cb (fix issues in media preview and player)
     let redirectUrl = `/player?contentId=${contentId}&lastPositionSec=${lastPositionSec}`;
       if (currentEpisodeId) {
         redirectUrl += `&currentEpisodeId=${currentEpisodeId}`;
