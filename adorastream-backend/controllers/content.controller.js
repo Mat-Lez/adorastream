@@ -23,7 +23,7 @@ exports.create = async (req, res) => {
     throw err;
   }
 
-  const existingContent = await Content.findOne({ title: normalizedTitle }).lean();
+  const existingContent = await Content.findOne({ title: { $regex: new RegExp(`^${normalizedTitle}$`, 'i') } }).lean()
   if (existingContent) {
     const err = new Error('Content with this title already exists');
     err.status = 409;
@@ -138,7 +138,7 @@ exports.createSeries = async (req, res) => {
     throw err;
   }
 
-  const existingTitle = await Content.findOne({ title: normalizedTitle }).lean();
+  const existingTitle = await Content.findOne({ title: { $regex: new RegExp(`^${normalizedTitle}$`, 'i') } }).lean();
   if (existingTitle) {
     const err = new Error('Content with this title already exists');
     err.status = 409;
@@ -265,17 +265,12 @@ exports.addEpisodesBatch = async (req, res) => {
     throw err;
   }
 
-  const posters = [
-    ...((req.files && req.files.posters) || []),
-    ...((req.files && req.files.poster) || [])
-  ];
-  const videos  = [
-    ...((req.files && req.files.videos) || []),
-    ...((req.files && req.files.video) || [])
-  ];
+  const posters = (req.files && req.files.posters) || [];
+  const videos  = (req.files && req.files.videos)  || [];
 
   const seasons = Array.isArray(series.seasons) ? series.seasons : (series.seasons = []);
   const batchSeen = new Set();
+  const batchTitlesBySeason = new Map();
   for (const ep of episodes) {
     const seasonNum = Number(ep.seasonNumber || 1);
     const epNum = Number(ep.episodeNumber || 1);
@@ -288,6 +283,19 @@ exports.addEpisodesBatch = async (req, res) => {
       throw err;
     }
     batchSeen.add(key);
+
+    if (title) {
+      if (!batchTitlesBySeason.has(seasonNum)) {
+        batchTitlesBySeason.set(seasonNum, new Set());
+      }
+      const seasonTitles = batchTitlesBySeason.get(seasonNum);
+      if (seasonTitles.has(title)) {
+        const err = new Error(`Duplicate episode title "${ep.title}" in request for season ${seasonNum}`);
+        err.status = 409;
+        throw err;
+      }
+      seasonTitles.add(title);
+    }
 
     const season = seasons.find(s => s.seasonNumber === seasonNum);
     if (season && (season.episodes || []).some(e => e.episodeNumber === epNum)) {
