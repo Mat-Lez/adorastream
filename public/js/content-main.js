@@ -159,21 +159,29 @@ function addCardClickListeners() {
   });
 }
 
+function escapeHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function buildCardMarkup(item = {}) {
-  const id = item.id || item._id || '';
-  const title = item.title || 'Untitled';
-  const posterUrl = item.posterUrl || '/adorastream.png';
+  const id = escapeHtml(item.id || item._id || '');
+  const title = escapeHtml(item.title || 'Untitled');
+  const posterUrl = escapeHtml(item.posterUrl || '/adorastream.png');
   return `
     <div class="card" data-id="${id}">
       <div class="card-media">
         <img src="${posterUrl}" alt="${title}">
-        <div class="play-overlay">▶</div>
+        <div class="play-overlay">?-</div>
       </div>
       <div class="card-title">${title}</div>
     </div>
   `;
 }
-
 function initSearchFeature() {
   const searchInput = document.getElementById('search');
   const searchSection = document.getElementById('search-results-section');
