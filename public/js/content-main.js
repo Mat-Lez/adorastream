@@ -173,9 +173,9 @@ function escapeHtml(value = '') {
 }
 
 function buildCardMarkup(item = {}) {
-  const id = escapeHtml(item.id || item._id || '');
+  const id = item.id || item._id || '';
   const title = escapeHtml(item.title || 'Untitled');
-  const posterUrl = escapeHtml(item.posterUrl || '/adorastream.png');
+  const posterUrl = item.posterUrl || '/adorastream.png';
   return `
     <div class="card" data-id="${id}">
       <div class="card-media">
