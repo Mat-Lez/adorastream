@@ -25,8 +25,11 @@ router.get('/settings/profiles/:action', requireLogin, requireProfileSelection, 
 router.get('/player', requireLogin, requireProfileSelection, showMediaPlayerPage);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 router.get('/content-main', requireLogin, requireProfileSelection, noCache, showContentMainPage);
 router.get('/content-main/:page', requireLogin, requireProfileSelection, requireFetch, noCache, showMainSpecificPage);
+=======
+>>>>>>> eca6c5c (Fix issues in preview card)
 router.get('/content-main/preview/:contentId/episodes', requireLogin, requireProfileSelection, showEpisodesDetailedList);
 router.get('/content-main/preview/:contentId/actors', requireLogin, requireProfileSelection, showActorsList);
 

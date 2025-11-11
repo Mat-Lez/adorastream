@@ -1,5 +1,9 @@
 const Content = require('../models/content');
+<<<<<<< HEAD
 const { _getSortedEpisodes, getGenreSections, getContentGrid } = require('./content.controller');
+=======
+const { _getSortedEpisodes } = require('./content.controller');
+>>>>>>> eca6c5c (Fix issues in preview card)
 
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
@@ -216,7 +220,10 @@ exports.showMediaPlayerPage = async (req, res) => {
 
   if (media.type === 'series') {
     const allEpisodes = _getSortedEpisodes(media);
+<<<<<<< HEAD
 
+=======
+>>>>>>> eca6c5c (Fix issues in preview card)
 
     currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
   }
@@ -261,6 +268,7 @@ exports.showPreviewPage = async (req, res) => {
 
   if (media.type === 'series') {
     const allEpisodes = _getSortedEpisodes(media);
+<<<<<<< HEAD
 
     currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
   }
@@ -348,6 +356,8 @@ exports.showActorsList = async (req, res) => {
 
   if (media.type === 'series') {
     const allEpisodes = ContentController._getSortedEpisodes(media);
+=======
+>>>>>>> eca6c5c (Fix issues in preview card)
 
     currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
   }
@@ -374,7 +384,7 @@ exports.showEpisodesDetailedList = async (req, res) => {
       return res.status(404).send('No episodes found');
     }
 
-  const episodes = ContentController._getSortedEpisodes(content);
+  const episodes = _getSortedEpisodes(content);
   res.render('partials/preview-episodes-list', {
     episodes
   });

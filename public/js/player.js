@@ -41,6 +41,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const SAVE_INTERVAL = 10; // seconds
   let saveTimer;
 
+  // --- get currently played ---
+  let contentId, currentEpisodeId;
+  try {
+    const result = await api('/api/content/currently-played');
+    contentId = result.contentId;
+    currentEpisodeId = result.currentEpisodeId;
+  } catch (err) {
+    console.error('Failed to fetch content info:', err);
+  }
+
   // --- Utility functions ---
   function showSkipOverlay(text) {
     skipOverlay.textContent = text;
@@ -237,9 +247,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     });
   }
+<<<<<<< HEAD
 async function saveProgress() {
   const { contentId, currentEpisodeId } = await api('/api/content/currently-played');
 
+=======
+  async function saveProgress() {
+  if (!contentId || !currentEpisodeId) return; 
+>>>>>>> eca6c5c (Fix issues in preview card)
   try {
     await api(`/api/history/${contentId}/progress`, 'POST', {
       positionSec: Math.floor(video.currentTime),
