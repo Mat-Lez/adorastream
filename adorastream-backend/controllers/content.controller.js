@@ -306,51 +306,41 @@ exports.selectContent = async (req, res) => {
       nextEpisode = episodes[currentIndex + 1] || null;
     }
     // Save it in the session and persist
-  req.session.user.contentId = content.id;
-  await new Promise((resolve, reject) => {
-    req.session.save(err => (err ? reject(err) : resolve()));
-  });
-  res.json({ content, currentEpisode, nextEpisode });
+    req.session.user.contentId = content.id;
+    await new Promise((resolve, reject) => {
+      req.session.save(err => (err ? reject(err) : resolve()));
+    });
+    res.json({ content, currentEpisode, nextEpisode });
 }
 
-const DEFAULT_GENRE_LIMIT = 10;
+const DEFAULT_GENRE_LIMIT = Number(process.env.DEFAULT_GENRE_LIMIT) || 10;
 
 exports.getGenreSections = async (limit = DEFAULT_GENRE_LIMIT) => {
-  const genreSections = await Content.aggregate([
-    { $match: { genres: { $exists: true, $ne: [] } } },
-    {
-      $unwind: '$genres'
-    },
-    {
-      $addFields: {
-        genre: {
-          $trim: { input: { $ifNull: ['$genres', ''] } }
-        }
-      }
-    },
-    { $match: { genre: { $ne: '' } } },
-    { $sort: { createdAt: -1 } },
-    {
-      $group: {
-        _id: '$genre',
-        items: {
-          $push: {
-            id: { $toString: '$_id' },
-            title: { $ifNull: ['$title', 'Untitled'] },
-            posterUrl: { $ifNull: ['$posterUrl', '/adorastream.png'] },
-            type: { $ifNull: ['$type', 'Unknown'] }
-          }
-        }
-      }
-    },
-    {
-      $project: {
-        _id: 0,
-        genre: '$_id',
-        items: { $slice: ['$items', limit] }
-      }
-    },
-    { $sort: { genre: 1 } }
-  ]);
-  return genreSections;
+  const contents = await Content.find({})
+    .sort({ createdAt: -1 })
+    .limit(limit * 25)
+    .lean();
+
+  const genreMap = new Map();
+  for (const content of contents) {
+    const genres = Array.isArray(content.genres) ? content.genres : [];
+    for (const rawGenre of genres) {
+      const genre = String(rawGenre || '').trim();
+      if (!genre) continue;
+      const bucket = genreMap.get(genre) || [];
+      if (bucket.length >= limit) continue;
+      bucket.push({
+        id: String(content._id),
+        title: content.title || 'Untitled',
+        posterUrl: content.posterUrl || '/adorastream.png',
+        type: content.type || 'Unknown'
+      });
+      genreMap.set(genre, bucket);
+    }
+  }
+
+  return Array.from(genreMap.entries())
+    .map(([genre, items]) => ({ genre, items }))
+    .filter(section => section.items.length > 0)
+    .sort((a, b) => a.genre.localeCompare(b.genre));
 };

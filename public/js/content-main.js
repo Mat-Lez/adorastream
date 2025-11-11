@@ -160,11 +160,6 @@ function addCardClickListeners() {
     const cardEl = e.target.closest('.card');
     if (!cardEl) return;
     const contentId = cardEl.dataset.id;
-    const isValidObjectId = typeof contentId === 'string' && /^[a-fA-F0-9]{24}$/.test(contentId);
-    if (!isValidObjectId) {
-      console.warn('Skipping play request due to invalid content id', contentId);
-      return;
-    }
     try {
       await api('/api/content/select-content', 'POST', { contentId });
       location.href = '/player';
