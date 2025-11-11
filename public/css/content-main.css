@@ -341,6 +341,16 @@ span.action-btn {
   border-radius: 6px;
 }
 
+.search-results .cards-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  overflow: visible;
+  padding: 12px 0;
+}
+
 /* Profile dropdown container */
 .profile-dropdown {
   position: relative;
