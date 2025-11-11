@@ -91,6 +91,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  video.addEventListener('seeked', () => {
+    // If user jumps backward, reset lastSavedTime
+    if (video.currentTime < lastSavedTime) {
+      lastSavedTime = video.currentTime;
+    }
+  });
+
+  // when the video finishes, time updates no longet fire
+  video.addEventListener('ended', () => {
+    lastSavedTime = 0; // reset for rewatch
+  });
+
   if (timeline) {
     timeline.addEventListener('input', () => {
       timeline.dragging = true;
@@ -141,12 +153,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function saveProgress() {
-  console.log('saving progress');
+  const { contentId, currentEpisodeId } = await api('/api/content/currently-played');
   try {
-    await api('/api/history/progress', 'POST', {
+    await api(`/api/history/${contentId}/progress`, 'POST', {
       positionSec: Math.floor(video.currentTime),
-      completed: video.currentTime >= video.duration - 5
+      completed: video.currentTime >= video.duration - 5,
+      episodeId: currentEpisodeId
     });
+
     lastSavedTime = video.currentTime;
   } catch (err) {
     console.error('Failed to save progress:', err);
@@ -155,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // also save on pause or before leaving the page
   video.addEventListener('pause', saveProgress);
+  video.addEventListener('seeked', saveProgress);
   window.addEventListener('beforeunload', saveProgress);
 
 

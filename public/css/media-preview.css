@@ -71,7 +71,11 @@
   color: #ddd;
 }
 
-.preview-meta span + span::before {
+.preview-meta span.hidden {
+  display: none;
+}
+
+.preview-meta span:not(.hidden) + span:not(.hidden)::before{
   content: "•";
   color: #aaa;
   margin: 0 12px;
@@ -137,7 +141,7 @@
   padding: 5px 10px;
   cursor: pointer;
   border-radius: 4px;
-  z-index: 10001;
+  z-index: 20;
 }
 
 .preview-buttons {
@@ -221,4 +225,101 @@
   0% { transform: scale(1); }
   50% { transform: scale(1.4); }
   100% { transform: scale(1); }
+}
+
+
+/* css for detailed episodes list */
+
+.preview-season-episode:empty {
+  display: inline;
+  margin: 0;
+  height: 0;
+}
+
+.episodes-container {
+  margin-top: 16px;
+}
+
+.toggle-episodes-btn {
+  margin-bottom: 8px;
+}
+
+.episodes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.episode-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #111;
+  padding: 8px;
+  border-radius: 6px;
+  color: #ddd;
+  transition: background-color 0.2s ease;
+}
+
+.episode-card:hover {
+  background: #222;
+}
+
+.episode-card img {
+  width: 70px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.episode-card-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.episode-card-title {
+  font-weight: bold;
+}
+
+.episode-card-season-ep {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.episode-card-desc {
+  font-size: 0.9rem;
+  margin-top: 4px;
+  color: #ccc;
+}
+
+
+.actors-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px; /* space between "Actors:" and the chips */
+}
+
+.actors a {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffb347;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.actors a:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.actors span {
+  color: #aaa; /* fallback text for "No actors listed" */
+  font-style: italic;
 }

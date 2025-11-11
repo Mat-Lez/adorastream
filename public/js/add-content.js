@@ -258,8 +258,6 @@ function init() {
     actorsContainer.addEventListener('click', handleActorsContainerClick);
   }
   
-  // Do not add actor field by default; add only for movie mode on demand
-
   // Type toggle and series UI wiring
   const typeEl = document.getElementById('type');
   const seriesSection = document.getElementById('series-section');
@@ -332,7 +330,6 @@ function init() {
     }
   }
 
-  // removed unused handleSeriesActionChange
   if (typeEl) {
     typeEl.addEventListener('change', handleTypeChange);
     handleTypeChange();
