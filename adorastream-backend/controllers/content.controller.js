@@ -356,13 +356,14 @@ exports.selectContent = async (req, res) => {
     }
      // Save it in the session and persist
     req.session.user.contentId = content.id;
-    req.session.user.currentEpisodeId = nextEpisode ? nextEpisode._id : null;
+    let nextEpisodeId = nextEpisode ? nextEpisode._id : null;
+    req.session.user.currentEpisodeId = nextEpisodeId;
     
     await new Promise((resolve, reject) => {
       req.session.save(err => (err ? reject(err) : resolve()));
     });
 
-    res.json({ "contentId": contentId, "nextEpisodeId": nextEpisode ? nextEpisode._id : null });
+    res.json({ "contentId": contentId, "nextEpisodeId": nextEpisodeId });
   }
 
 
@@ -384,7 +385,7 @@ exports.currentlyPlayed = async (req, res) => {
 
 
 // Get all episodes of a certain sereis
-exports.getEpisodesForContent = async (req, res) => {
+exports.getEpisodesForSeries = async (req, res) => {
 
   const content = await Content.findById(req.params.id);
   if (!content) return res.status(404).json({ error: 'Content not found' });

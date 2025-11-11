@@ -187,7 +187,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             S${ep.seasonNumber}E${ep.episodeNumber}
           </div>
         `;
-        card.addEventListener('click', () => selectEpisode(ep._id));
+        card.addEventListener('click', () => {
+          try { 
+            location.href = `/player?contentId=${contentId}&currentEpisodeId=${ep._id}`;
+          } catch (e) {
+            console.error(`Failed to select episode: ${e.message}`);
+          }
+        });
         carousel.appendChild(card);
       });
       carouselContainer.classList.remove('hidden');
@@ -198,12 +204,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('carousel-next')?.addEventListener('click', () => {
         carousel.scrollBy({ left: 200, behavior: 'smooth' });
       });
-
     });
-
-    async function selectEpisode(episodeId) {
-        location.href = `/player?contentId=${contentId}&currentEpisodeId=${episodeId}`;
-    }
   }
-
 });
