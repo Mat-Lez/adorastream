@@ -1,4 +1,5 @@
 const Content = require('../models/content');
+const { getGenreSections } = require('./content.controller');
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
 const pageToLayoutMap = {
@@ -59,6 +60,10 @@ exports.showAddContentPage = (req, res) => {
     additional_css: ['addContent']  });
 }
 
+async function attachGenreSections(renderOptions) {
+  renderOptions.genreSections = await getGenreSections();
+}
+
 exports.showContentMainPage = async (req, res) => {   
   const { user, profiles, activeProfileId } = res.locals;
 
@@ -66,7 +71,7 @@ exports.showContentMainPage = async (req, res) => {
     return res.redirect('/login');
   }
 
-  res.render('pages/content-main', {
+  const renderOptions = {
     title: 'Main - AdoraStream',
     scripts: ['contentMain'],
     additional_css: ['contentMain', 'buttons'],
@@ -75,7 +80,11 @@ exports.showContentMainPage = async (req, res) => {
     activeProfileId,
     topbarLayout: pageToLayoutMap['home'].topbarLayout,
     topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout
-   });
+  };
+
+  await attachGenreSections(renderOptions);
+
+  res.render('pages/content-main', renderOptions);
 }
 
 exports.showMainSpecificPage = async (req, res) => {
@@ -95,7 +104,7 @@ async function showPage(req, res, page, renderPath) {
     return res.status(403).send('User not found');
   }
 
-  res.render(renderPath, {
+  const renderOptions = {
     layout: false,
     user,
     profiles,
@@ -103,7 +112,13 @@ async function showPage(req, res, page, renderPath) {
     topbarLayout: pageToLayoutMap[page].topbarLayout,
     topbarActionsLayout: pageToLayoutMap[page].topbarActionsLayout,
     initialSettingsPage: page === 'settings' ? (req.query.tab === 'statistics' ? 'statistics' : 'manage-profiles') : undefined
-  });  
+  };
+
+  if (page === 'home') {
+    await attachGenreSections(renderOptions);
+  }
+
+  res.render(renderPath, renderOptions);
 }
 
 function getRequestedPage(req, availablePages, defaultPage) {

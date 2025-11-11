@@ -142,42 +142,19 @@ async function sideNavbarPageSwapListener() {
   });
 }
 
-// TO BE REMOVED ...
-const mockData = [
-  { _id: "68fbd22e42639281fc130633", title: "Shironet", posterUrl: "/assets/posters/1761302557127_pr6.jpeg" },
-  { _id: "690f8977ccb3da41b9da6051", title: "Avengers Endgame", posterUrl: "/assets/posters/1762625910868_Avengers_Endgame.jpg" },
-  { _id: "3", title: "The Terminator", posterUrl: "/assets/posters/terminator.jpg" },
-  { _id: "4", title: "Snowfall", posterUrl: "/assets/posters/snowfall.jpg" },
-];
-
-function renderCards(containerId, data) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = data.map(item => `
-    <div class="card" data-id="${item._id}">
-      <img src="${item.posterUrl}" alt="${item.title}">
-      <div class="play-overlay">▶</div>
-      <div class="card-title">${item.title}</div>
-    </div>
-  `).join('');
-}
 
 function addCardClickListeners() {
-  const cards = document.querySelectorAll('.card');
-  cards.forEach(card => {
-    card.addEventListener('click', async (e) => {
-      e.target.closest('.card'); // adjust selector to match your card class
-      const cardEl = e.target.closest('.card');
-      if (!cardEl) return; // click was outside a card
-      const contentId = cardEl.dataset.id;
-      if (!contentId) return;
-      try {
-        // Call API to select content to be played
-        await api('/api/content/select-content', 'POST', { contentId: contentId });
-        location.href = '/player';
-      } catch (e) {
-          console.error(`Failed to select content: ${e.message}`);
-      }
-    });
+  document.body.addEventListener('click', async (e) => {
+    const cardEl = e.target.closest('.card');
+    if (!cardEl) return;
+    const contentId = cardEl.dataset.id;
+    if (!contentId) return;
+    try {
+      await api('/api/content/select-content', 'POST', { contentId });
+      location.href = '/player';
+    } catch (err) {
+      console.error(`Failed to select content: ${err.message}`);
+    }
   });
 }
 
@@ -185,7 +162,5 @@ document.addEventListener('DOMContentLoaded', () => {
   sideNavbarPageSwapListener();
   topbarProfilesDropdownActionsListener();
   logoutEventListener('logout-btn');
-  renderCards('continue-watching', mockData);
-  renderCards('popular', mockData);
   addCardClickListeners();
 });
