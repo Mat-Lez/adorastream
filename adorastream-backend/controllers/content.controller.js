@@ -328,7 +328,7 @@ exports.getSeasonEpisodeById = async (req, res) => {
 
   const content = await Content.findById(contentId);
 
-  if (!content || content.type !== 'series' || !Array.isArray(content.seasons)) return null;
+  if (!content || content.type !== 'series' || !Array.isArray(content.seasons)) return res.status(404).json({ error: 'Content is not a series or has no seasons' });
 
   for (const season of content.seasons) {
     const ep = season.episodes.find(e => e._id.toString() === episodeId.toString());
