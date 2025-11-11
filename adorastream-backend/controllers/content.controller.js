@@ -2,6 +2,8 @@ const Content = require('../models/content');
 const { enrichMovieRatings, enrichSeriesRatings, enrichSeriesEpisodesRatings } = require('../services/rating.service');
 const upload = require('../services/videoUpload.service');
 
+const escapeRegex = value => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // POST create new content
 exports.create = async (req, res) => {
    // Extract and parse fields
@@ -71,8 +73,10 @@ exports.list = async (req, res) => {
 
   const filter = {};
   if (q) {
-    const escapedQ = String(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    filter.title = { $regex: escapedQ, $options: 'i' };
+    const searchTerm = String(q).trim();
+    if (searchTerm) {
+      filter.title = { $regex: escapeRegex(searchTerm), $options: 'i' };
+    }
   }
 
   // genres is expected to be an array: ?genres=Drama&genres=Sci-Fi
