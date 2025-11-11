@@ -38,7 +38,7 @@ const DailyWatchSchema = new Schema(
     profileId: { type: Types.ObjectId, index: true, required: true },
     contentId: { type: Types.ObjectId, ref: 'Content', index: true, required: true },
     
-    // This field suppose to store the very start of the day (00:00:00)
+    // This field is supposed to store the very start of the day (00:00:00)
     date: { type: Date, index: true, required: true },
   },
   { timestamps: true }

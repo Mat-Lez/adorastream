@@ -79,21 +79,15 @@ async function logDailyWatch(userId, profileId, contentId) {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // YYYY-MM-DD 00:00:00
 
-    await DailyWatch.findOneAndUpdate(
-      {
+    const filter = {
         userId: userId,
         profileId: profileId,
         contentId: contentId,
         date: today
-      },
-      { 
-        $setOnInsert: { // Only insert when there is no already existing entry
-          userId: userId,
-          profileId: profileId,
-          contentId: contentId,
-          date: today
-        }
-      },
+    };
+    await DailyWatch.findOneAndUpdate(
+      filter,
+      { $setOnInsert: filter },
       { upsert: true, new: true }
     );
   } catch (err) {
