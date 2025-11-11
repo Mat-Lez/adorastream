@@ -126,7 +126,9 @@ async function sideNavbarPageSwapListener() {
       }
 
       await fetchPage(pageUrl, main, "loading");
-      initSearchFeature();
+      if (document.getElementById('search')) {
+        initSearchFeature();
+      }
       if (btn.dataset.settingsTarget === 'statistics') {
           try {
               // Dynamically import the script
@@ -176,19 +178,29 @@ function buildCardMarkup(item = {}) {
     <div class="card" data-id="${id}">
       <div class="card-media">
         <img src="${posterUrl}" alt="${title}">
-        <div class="play-overlay">?-</div>
+        <div class="play-overlay">▶</div>
       </div>
       <div class="card-title">${title}</div>
     </div>
   `;
 }
+
 function initSearchFeature() {
   const searchInput = document.getElementById('search');
   const searchSection = document.getElementById('search-results-section');
   const searchRow = document.getElementById('search-results-row');
   const searchEmpty = document.getElementById('search-results-empty');
   const mainEl = document.querySelector('.main');
-  if (!searchInput || !searchSection || !searchRow || !searchEmpty || !mainEl) return;
+  if (
+    !searchInput ||
+    !searchSection ||
+    !searchRow ||
+    !searchEmpty ||
+    !mainEl ||
+    searchInput.dataset.searchInit === 'true'
+  ) {
+    return;
+  }
 
   let timerId;
 
@@ -207,10 +219,16 @@ function initSearchFeature() {
     searchEmpty.classList.remove('is-hidden');
   };
 
+  const resetSearch = () => {
+    clearTimeout(timerId);
+    searchInput.value = '';
+    setSearchActive(false);
+    clearResults();
+  };
+
   const performSearch = async (term) => {
     if (!term) {
-      setSearchActive(false);
-      clearResults();
+      resetSearch();
       return;
     }
 
@@ -245,10 +263,6 @@ function initSearchFeature() {
   };
 
   searchInput.addEventListener('input', handleInput);
-  // Reset state on init so returning to the home page always shows the body content.
-  searchInput.value = '';
-  setSearchActive(false);
-  clearResults();
 
   searchInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
@@ -256,11 +270,11 @@ function initSearchFeature() {
       clearTimeout(timerId);
       performSearch(searchInput.value.trim());
     } else if (event.key === 'Escape') {
-      searchInput.value = '';
-      setSearchActive(false);
-      clearResults();
+      resetSearch();
     }
   });
+  resetSearch(); // ensure initial state
+  searchInput.dataset.searchInit = 'true';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -268,5 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
   topbarProfilesDropdownActionsListener();
   logoutEventListener('logout-btn');
   addCardClickListeners();
-  initSearchFeature();
+  if (document.getElementById('search')) {
+    initSearchFeature();
+  }
 });
