@@ -72,7 +72,7 @@ exports.list = async (req, res) => {
   const filter = {};
   if (q) {
     const escapedQ = String(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    filter.title = { $regex: `^${escapedQ}`, $options: 'i' };
+    filter.title = { $regex: escapedQ, $options: 'i' };
   }
 
   // genres is expected to be an array: ?genres=Drama&genres=Sci-Fi
