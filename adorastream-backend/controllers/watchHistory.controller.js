@@ -274,4 +274,5 @@ exports.resetProgress = async (req, res) => {
   { userId, profileId, contentId },
   { $set: { completed: false, lastPositionSec: 0 } }
 );
+  res.status(204).send();
 }
