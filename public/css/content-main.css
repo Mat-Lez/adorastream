@@ -214,7 +214,7 @@ span.action-btn {
 
 .search-empty {
   margin: 8px 0 0;
-  color: #c9d1d9;
+  color: var(--text);
   font-size: 15px;
 }
 
@@ -341,7 +341,7 @@ span.action-btn {
   border-radius: 6px;
 }
 
-.search-results .cards-row {
+.search-results .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   justify-content: center;

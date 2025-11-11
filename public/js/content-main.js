@@ -4,6 +4,8 @@ import { switchProfile } from '/utils/profilesManagement.js';
 import { fetchPage } from '../utils/pageManagement.js';
 import { animateOut } from "../utils/reuseableAnimations.js";
 
+const SEARCH_RESULTS_LIMIT = 50;
+
 
 // init functions
 (async () => {
@@ -237,7 +239,7 @@ function initSearchFeature() {
     searchRow.innerHTML = '';
 
     try {
-      const response = await api(`/api/content?q=${encodeURIComponent(term)}&limit=24`);
+      const response = await api(`/api/content?q=${encodeURIComponent(term)}&limit=${SEARCH_RESULTS_LIMIT}`);
       const contents = response.contents || [];
       if (contents.length === 0) {
         showMessage(`No results found for "${term}".`);
