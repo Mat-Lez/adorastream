@@ -72,6 +72,7 @@ function addEpisodeForm() {
     </div>
     <div class="field"><label class="label">Episode Poster</label><input class="input" type="file" name="ep_poster_${episodeCount}" accept="image/*"></div>
     <div class="field"><label class="label">Episode Video (MP4)</label><input class="input" type="file" name="ep_video_${episodeCount}" accept="video/mp4" required></div>
+    <div class="field"><label class="label">Duration (seconds)</label><input name="ep_duration_${episodeCount}" class="input" type="number" min="0" step="1" placeholder="e.g. 3600" required /></div>
     <div class="field"><button type="button" class="btn btn-danger" data-action="remove-episode">Remove Episode</button></div>
     <hr/>
   `;
@@ -179,13 +180,15 @@ async function handleFormSubmit(e) {
 
           if (name) actorsArr.push({ name, role, wikipedia });
         });
+        const durationInput = node.querySelector('input[name^="ep_duration_"]');
         episodes.push({
           title,
           description: desc,
           seasonNumber: season,
           episodeNumber: number,
           director: dir,
-          actors: actorsArr
+          actors: actorsArr,
+          durationSec: durationInput ? durationInput.value || '0' : '0'
         });
         const posterInput = node.querySelector('input[name^="ep_poster_"]');
         if (posterInput && posterInput.files && posterInput.files[0]) {
@@ -275,6 +278,8 @@ function init() {
   const titleField = document.getElementById('title-field');
   const genresField = document.getElementById('genres-field');
   const posterField = document.getElementById('poster-field');
+  const durationField = document.getElementById('duration-field');
+  const durationInput = durationField ? durationField.querySelector('input[name="durationSec"]') : null;
 
   async function loadSeriesOptions() {
     try {
@@ -302,6 +307,8 @@ function init() {
     if (yearField) yearField.style.display = isMovie ? '' : 'none';
     if (directorField) directorField.style.display = isMovie ? '' : 'none';
     if (videoField) videoField.style.display = isMovie ? '' : 'none';
+    if (durationField) durationField.style.display = isMovie ? '' : 'none';
+    if (durationInput) durationInput.required = isMovie;
     if (actorsSection) {
       actorsSection.style.display = isMovie ? '' : 'none';
       if (isMovie) {

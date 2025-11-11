@@ -14,6 +14,7 @@ const usersRoutes = require('./routes/api/user.routes');
 const contentRoutes = require('./routes/api/content.routes');
 const historyRoutes = require('./routes/api/watchHistory.routes');
 const seriesRoutes = require('./routes/api/series.routes');
+const statsRoutes = require('./routes/api/stats.routes');
 
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/streaming_app';
@@ -43,6 +44,7 @@ app.use('/api/users', usersRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api/series', seriesRoutes);
+app.use('/api/stats', statsRoutes);
 app.use('/', pagesRoutes);
 
 app.use(notFound);

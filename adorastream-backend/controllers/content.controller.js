@@ -14,7 +14,8 @@ exports.create = async (req, res) => {
     genres,
     director,
     actors,
-    description
+    description,
+    durationSec
   } = req.body;
 
   // Parse genres
@@ -53,7 +54,8 @@ exports.create = async (req, res) => {
     actors: actorsArr,
     synopsis: description,
     posterUrl,
-    videoUrl
+    videoUrl,
+    durationSec: parseInt(durationSec, 10) || 0
   });
 
   // Fire-and-forget enrichment; do not block API response
@@ -173,7 +175,7 @@ exports.getSeries = async (req, res) => {
 // POST /api/series/:id/episodes
 exports.addEpisode = async (req, res) => {
   const seriesId = req.params.id;
-  const { title, description, seasonNumber, episodeNumber, director, actors, nextEpisodeId } = req.body;
+  const { title, description, seasonNumber, episodeNumber, director, actors, nextEpisodeId, durationSec } = req.body;
 
   const series = await Content.findById(seriesId);
   if (!series || series.type !== 'series') { const e = new Error('Series not found'); e.status = 404; throw e; }
@@ -218,6 +220,7 @@ exports.addEpisode = async (req, res) => {
     actors: actorsArr,
     posterUrl,
     videoUrl,
+    durationSec: parseInt(durationSec, 10) || 0,
     nextEpisode: nextEpisodeId || null
   };
   season.episodes.push(episodeDoc);
@@ -269,6 +272,7 @@ exports.addEpisodesBatch = async (req, res) => {
       actors: actorsArr,
       posterUrl,
       videoUrl,
+      durationSec: parseInt(ep.durationSec, 10) || 0,
       nextEpisode: null
     });
     if ((series.numberOfSeasons || 0) < seasonNum) series.numberOfSeasons = seasonNum;
@@ -336,3 +340,43 @@ exports.getSeasonEpisodeById = async (req, res) => {
 }
 
 exports._getSortedEpisodes = _getSortedEpisodes;
+    // Save it in the session and persist
+    req.session.user.contentId = content.id;
+    await new Promise((resolve, reject) => {
+      req.session.save(err => (err ? reject(err) : resolve()));
+    });
+    res.json({ content, currentEpisode, nextEpisode });
+}
+
+const DEFAULT_GENRE_LIMIT = Number(process.env.DEFAULT_GENRE_LIMIT) || 10;
+const GENRE_FETCH_LIMIT_MULTIPLIER = Number(process.env.GENRE_FETCH_LIMIT_MULTIPLIER) || 25;
+
+exports.getGenreSections = async (limit = DEFAULT_GENRE_LIMIT) => {
+  const contents = await Content.find({})
+    .sort({ createdAt: -1 })
+    .limit(limit * GENRE_FETCH_LIMIT_MULTIPLIER)
+    .lean();
+
+  const genreMap = new Map();
+  for (const content of contents) {
+    const genres = Array.isArray(content.genres) ? content.genres : [];
+    for (const rawGenre of genres) {
+      const genre = String(rawGenre || '').trim();
+      if (!genre) continue;
+      const bucket = genreMap.get(genre) || [];
+      if (bucket.length >= limit) continue;
+      bucket.push({
+        id: String(content._id),
+        title: content.title || 'Untitled',
+        posterUrl: content.posterUrl || '/adorastream.png',
+        type: content.type || 'Unknown'
+      });
+      genreMap.set(genre, bucket);
+    }
+  }
+
+  return Array.from(genreMap.entries())
+    .map(([genre, items]) => ({ genre, items }))
+    .filter(section => section.items.length > 0)
+    .sort((a, b) => a.genre.localeCompare(b.genre));
+};

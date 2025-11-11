@@ -49,6 +49,17 @@ function settingsPageNavbarPageSwapListener() {
             const page = clickedLink.dataset.page;
             await fetchPage(`/settings/${page}`, contentArea, "loading");
 
+            if (page === 'statistics') {
+                try {
+                    // Dynamically import the script
+                    const { initStatisticsCharts } = await import('/js/statistics.js');
+                    // Run the function that draws the charts
+                    initStatisticsCharts();
+                } catch (err) {
+                    console.error("Failed to load statistics scripts:", err);
+                    contentArea.innerHTML = `<p class="error">Failed to load statistics module.</p>`;
+                }
+            }
         // Handle inside content area links
         } else if (isSettingsContentLink) {
             if (clickedLink.classList.contains('form-back-link')) {
