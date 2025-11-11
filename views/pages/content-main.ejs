@@ -19,6 +19,11 @@
 
     <!-- Main content -->
     <main class="main">
+      <section id="search-results-section" class="category search-results is-hidden">
+        <h2>Search Results</h2>
+        <div class="cards-row" id="search-results-row"></div>
+        <p class="search-empty is-hidden" id="search-results-empty"></p>
+      </section>
       <!-- By default display home page -->
       <%- include('../partials/main-home', {
         profiles: profiles,

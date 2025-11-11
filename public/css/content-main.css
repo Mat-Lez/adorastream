@@ -204,6 +204,23 @@ span.action-btn {
   color: var(--text);
 }
 
+.search-results {
+  margin-bottom: 24px;
+}
+
+.search-results.is-hidden {
+  display: none;
+}
+
+.search-empty {
+  margin: 8px 0 0;
+  color: #c9d1d9;
+  font-size: 15px;
+}
+
+.main.search-active .home-body {
+  display: none;
+}
 /* ====== Grid ====== */
 .grid {
   display: grid;

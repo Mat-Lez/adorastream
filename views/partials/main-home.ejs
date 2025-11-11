@@ -2,17 +2,18 @@
 <%- include('main-topbar') %>
 </header>
 
-<section class="category">
-	<h2>Continue Watching</h2>
-	<div class="grid" id="continue-watching"></div>
-</section>
+<div class="home-body">
+	<section class="category">
+		<h2>Continue Watching</h2>
+		<div class="grid" id="continue-watching"></div>
+	</section>
 
-<section class="category">
-	<h2>Popular</h2>
-	<div class="grid" id="popular"></div>
-</section>
+	<section class="category">
+		<h2>Popular</h2>
+		<div class="grid" id="popular"></div>
+	</section>
 
-<div id="genre-sections-root">
+	<div id="genre-sections-root">
 	<% (genreSections || []).forEach(section => { %>
 		<section class="category">
 			<h2><%= section.genre %></h2>
@@ -29,4 +30,6 @@
 			</div>
 		</section>
 	<% }); %>
+</div>
+
 </div>

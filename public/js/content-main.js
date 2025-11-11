@@ -158,9 +158,101 @@ function addCardClickListeners() {
   });
 }
 
+function buildCardMarkup(item = {}) {
+  const id = item.id || item._id || '';
+  const title = item.title || 'Untitled';
+  const posterUrl = item.posterUrl || '/adorastream.png';
+  return `
+    <div class="card" data-id="${id}">
+      <div class="card-media">
+        <img src="${posterUrl}" alt="${title}">
+        <div class="play-overlay">▶</div>
+      </div>
+      <div class="card-title">${title}</div>
+    </div>
+  `;
+}
+
+function initSearchFeature() {
+  const searchInput = document.getElementById('search');
+  const searchSection = document.getElementById('search-results-section');
+  const searchRow = document.getElementById('search-results-row');
+  const searchEmpty = document.getElementById('search-results-empty');
+  const mainEl = document.querySelector('.main');
+  if (!searchInput || !searchSection || !searchRow || !searchEmpty || !mainEl) return;
+
+  let timerId;
+
+  const setSearchActive = (active) => {
+    mainEl.classList.toggle('search-active', active);
+    searchSection.classList.toggle('is-hidden', !active);
+  };
+
+  const clearResults = () => {
+    searchRow.innerHTML = '';
+    searchEmpty.classList.add('is-hidden');
+  };
+
+  const showMessage = (message) => {
+    searchEmpty.textContent = message;
+    searchEmpty.classList.remove('is-hidden');
+  };
+
+  const performSearch = async (term) => {
+    if (!term) {
+      setSearchActive(false);
+      clearResults();
+      return;
+    }
+
+    setSearchActive(true);
+    showMessage(`Searching for "${term}"…`);
+    searchRow.innerHTML = '';
+
+    try {
+      const response = await api(`/api/content?q=${encodeURIComponent(term)}&limit=24`);
+      const contents = response.contents || [];
+      if (contents.length === 0) {
+        showMessage(`No results found for "${term}".`);
+        return;
+      }
+      searchRow.innerHTML = contents.map(buildCardMarkup).join('');
+      searchEmpty.classList.add('is-hidden');
+    } catch (error) {
+      showMessage('Search failed. Please try again.');
+      console.error('Search error:', error);
+    }
+  };
+
+  const handleInput = () => {
+    const term = searchInput.value.trim();
+    clearTimeout(timerId);
+    if (!term) {
+      setSearchActive(false);
+      clearResults();
+      return;
+    }
+    timerId = setTimeout(() => performSearch(term), 300);
+  };
+
+  searchInput.addEventListener('input', handleInput);
+  searchInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      clearTimeout(timerId);
+      performSearch(searchInput.value.trim());
+    } else if (event.key === 'Escape') {
+      searchInput.value = '';
+      setSearchActive(false);
+      clearResults();
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   sideNavbarPageSwapListener();
   topbarProfilesDropdownActionsListener();
   logoutEventListener('logout-btn');
   addCardClickListeners();
+  initSearchFeature();
 });
