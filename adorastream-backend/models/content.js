@@ -51,6 +51,7 @@ const ContentSchema = new Schema(
     actors: { type: [ActorSchema], default: [] },
     posterUrl: { type: String, default: '' },
     videoUrl: { type: String, default: '' },
+    durationSec: { type: Number, min: 0, default: 0 },
     ratings: {
       imdb: { type: Number, min: 0, max: 10, default: null },
       rottenTomatoes: { type: Number, min: 0, max: 100, default: null }

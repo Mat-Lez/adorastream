@@ -126,6 +126,17 @@ async function sideNavbarPageSwapListener() {
       }
 
       await fetchPage(pageUrl, main, "loading");
+      if (btn.dataset.settingsTarget === 'statistics') {
+          try {
+              // Dynamically import the script
+              const { initStatisticsCharts } = await import('/js/statistics.js');
+              // Run the function that draws the charts
+              initStatisticsCharts();
+          } catch (err) {
+              console.error("Failed to load statistics scripts:", err);
+              main.innerHTML = `<p class="error">Failed to load statistics module.</p>`;
+          }
+      }
 
     });
   });
