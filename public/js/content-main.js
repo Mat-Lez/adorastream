@@ -126,6 +126,7 @@ async function sideNavbarPageSwapListener() {
       }
 
       await fetchPage(pageUrl, main, "loading");
+      initSearchFeature();
       if (btn.dataset.settingsTarget === 'statistics') {
           try {
               // Dynamically import the script
@@ -236,6 +237,11 @@ function initSearchFeature() {
   };
 
   searchInput.addEventListener('input', handleInput);
+  // Reset state on init so returning to the home page always shows the body content.
+  searchInput.value = '';
+  setSearchActive(false);
+  clearResults();
+
   searchInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
