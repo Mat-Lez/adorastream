@@ -193,14 +193,13 @@ function initSearchFeature() {
   const searchGrid = document.getElementById('search-results-grid');
   const searchEmpty = document.getElementById('search-results-empty');
   const mainEl = document.querySelector('.main');
-  if (
-    !searchInput ||
-    !searchSection ||
-    !searchGrid ||
-    !searchEmpty ||
-    !mainEl ||
-    searchInput.dataset.searchInit === 'true'
-  ) {
+  
+  if (searchInput?.dataset.searchInit === 'true') {
+    return;
+  }
+
+  if (!searchInput || !searchSection || !searchGrid || !searchEmpty || !mainEl) {
+    console.error('Search feature could not be initialized: one or more required DOM elements are missing.');
     return;
   }
 
