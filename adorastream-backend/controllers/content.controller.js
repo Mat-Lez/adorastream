@@ -70,7 +70,10 @@ exports.list = async (req, res) => {
   const skip  = (page - 1) * limit;
 
   const filter = {};
-  if (q) filter.$text = { $search: q };
+  if (q) {
+    const escapedQ = String(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    filter.title = { $regex: `^${escapedQ}`, $options: 'i' };
+  }
 
   // genres is expected to be an array: ?genres=Drama&genres=Sci-Fi
   if (Array.isArray(genres) && genres.length > 0) {
