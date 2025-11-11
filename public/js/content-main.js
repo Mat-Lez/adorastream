@@ -131,29 +131,6 @@ async function sideNavbarPageSwapListener() {
   });
 }
 
-// TO BE REMOVED ...
-const mockData = [
-  { _id: "68fbd22e42639281fc130633", title: "Shironet", posterUrl: "/assets/posters/1761302557127_pr6.jpeg" },
-  { _id: "2", title: "American Psycho", posterUrl: "/assets/posters/psycho.jpg" },
-  { _id: "3", title: "The Terminator", posterUrl: "/assets/posters/terminator.jpg" },
-  { _id: "4", title: "Snowfall", posterUrl: "/assets/posters/snowfall.jpg" },
-];
-
-function renderCards(containerId, data) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = data.map(item => {
-    const id = item.id || item._id || '';
-    return `
-      <div class="card" data-id="${id}">
-        <div class="card-media">
-          <img src="${item.posterUrl}" alt="${item.title}">
-          <div class="play-overlay">▶</div>
-        </div>
-        <div class="card-title">${item.title}</div>
-      </div>
-    `;
-  }).join('');
-}
 
 function addCardClickListeners() {
   document.body.addEventListener('click', async (e) => {
@@ -174,7 +151,5 @@ document.addEventListener('DOMContentLoaded', () => {
   sideNavbarPageSwapListener();
   topbarProfilesDropdownActionsListener();
   logoutEventListener('logout-btn');
-  renderCards('continue-watching', mockData);
-  renderCards('popular', mockData);
   addCardClickListeners();
 });
