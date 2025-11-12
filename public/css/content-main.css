@@ -107,7 +107,8 @@ body {
   gap: 48px;
   max-width: 1280px;
   padding: 0 40px;
-  margin: 0 auto;
+  margin-left: 10em;
+  margin-right: 20em;
 }
 
 
@@ -272,9 +273,8 @@ span.action-btn {
 
 .content-grid {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  justify-content: center;
+  justify-content: start;
   max-width: 1240px;
-  margin: 0 auto;
 }
 
 /* ====== Movie/Series Card ====== */
