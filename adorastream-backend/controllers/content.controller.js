@@ -4,6 +4,46 @@ const upload = require('../services/videoUpload.service');
 
 const escapeRegex = value => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+async function fetchRandomizedContents(matchFilter, { limit, skip = 0, seed }) {
+  if (!limit || limit <= 0) {
+    return [];
+  }
+
+  const normalizedSeed = (typeof seed === 'string' && seed.trim()) || 'default';
+  const docs = await Content.find(matchFilter).lean();
+  if (!docs.length) {
+    return [];
+  }
+
+  const indices = Array.from({ length: docs.length }, (_value, index) => index);
+  const rng = createSeededRandom(normalizedSeed);
+
+  for (let i = indices.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(rng() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+
+  const selected = indices.slice(skip, skip + limit);
+  return selected.map((idx) => docs[idx]);
+}
+
+function createSeededRandom(seed) {
+  let hash = 2166136261;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash ^= seed.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  let state = hash >>> 0;
+  return function mulberry32() {
+    state += 0x6D2B79F5;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), 1 | t);
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 // POST create new content
 exports.create = async (req, res) => {
    // Extract and parse fields
@@ -87,6 +127,8 @@ exports.list = async (req, res) => {
 
   const filter = {};
   const rawType = req.query.type;
+  const rawSeed = typeof req.query.randomSeed === 'string' ? req.query.randomSeed.trim() : '';
+  const useRandomOrdering = rawSeed.length > 0;
   
   if (rawType) {
     const normalizedType = String(rawType).trim().toLowerCase();
@@ -110,7 +152,9 @@ exports.list = async (req, res) => {
   const sort = { [sortBy]: order === 'asc' ? 1 : -1 };
 
   const [contents, total] = await Promise.all([
-    Content.find(filter).sort(sort).skip(skip).limit(limit),
+    useRandomOrdering
+      ? fetchRandomizedContents(filter, { limit, skip, seed: rawSeed })
+      : Content.find(filter).sort(sort).skip(skip).limit(limit),
     Content.countDocuments(filter)
   ]);
 
@@ -450,3 +494,5 @@ exports.getContentGrid = async (typeFilter, limit = GRID_CONTENT_LIMIT) => {
     .limit(limit)
     .lean();
 };
+
+exports.fetchRandomizedContents = fetchRandomizedContents;

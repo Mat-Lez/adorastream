@@ -17,6 +17,7 @@
     data-page="<%= paginationPage %>"
     data-limit="<%= paginationLimit %>"
     data-total="<%= paginationTotal %>"
+    data-random-seed="<%= (gridPagination && gridPagination.randomSeed) ? gridPagination.randomSeed : '' %>"
   >
     <h2><%= gridTitle || 'Content' %></h2>
     <% if (!gridItems || !gridItems.length) { %>

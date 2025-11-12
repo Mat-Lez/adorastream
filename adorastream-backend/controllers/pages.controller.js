@@ -1,5 +1,6 @@
+const crypto = require('crypto');
 const Content = require('../models/content');
-const { getGenreSections } = require('./content.controller');
+const { getGenreSections, fetchRandomizedContents } = require('./content.controller');
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
 const pageToLayoutMap = {
@@ -74,10 +75,10 @@ const ENDLESS_SCROLLING_CONTENT_AMOUNT = Number(process.env.ENDLESS_SCROLLING_CO
 async function attachContentGrid(renderOptions, typeFilter) {
   const limit = ENDLESS_SCROLLING_CONTENT_AMOUNT;
   const filter = typeFilter ? { type: typeFilter } : {};
-  const sort = { createdAt: -1 };
+  const randomSeed = crypto.randomBytes(8).toString('hex');
 
   const [gridItems, total] = await Promise.all([
-    Content.find(filter).sort(sort).limit(limit).lean(),
+    fetchRandomizedContents(filter, { limit, seed: randomSeed }),
     Content.countDocuments(filter)
   ]);
 
@@ -87,7 +88,8 @@ async function attachContentGrid(renderOptions, typeFilter) {
     page: 1,
     limit,
     total,
-    type: typeFilter || ''
+    type: typeFilter || '',
+    randomSeed
   };
 }
 
