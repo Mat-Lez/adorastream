@@ -1,10 +1,5 @@
 const Content = require('../models/content');
-<<<<<<< HEAD
 const { _getSortedEpisodes, getGenreSections, getContentGrid } = require('./content.controller');
-=======
-const { _getSortedEpisodes } = require('./content.controller');
->>>>>>> eca6c5c (Fix issues in preview card)
-
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
 const pageToLayoutMap = {
@@ -13,11 +8,11 @@ const pageToLayoutMap = {
       topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
     shows: {
-      topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+      topbarLayout: ["SEARCH", "FILTERS", "TOPBAR_ACTIONS"],
       topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
     movies: {
-      topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+      topbarLayout: ["SEARCH", "FILTERS", "TOPBAR_ACTIONS"],
       topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
     settings: {
@@ -131,7 +126,7 @@ async function showPage(req, res, page, renderPath) {
   };
   renderOptions.searchScope = pageSearchScopes[page] || 'all';
 
-  if (page === 'home') {
+  if ((page === 'home' || renderOptions.topbarLayout?.includes("FILTERS")) && !renderOptions.genreSections) {
     await attachGenreSections(renderOptions);
   }
 
@@ -202,14 +197,11 @@ exports.showMediaPlayerPage = async (req, res) => {
 
   const { contentId, currentEpisodeId } = req.query;
   const lastPositionSec = Number(req.query.lastPositionSec) || 0; 
-<<<<<<< HEAD
-
-=======
->>>>>>> 1ad04cb (fix issues in media preview and player)
 
   if (!contentId) {
     return res.redirect('/content-main');
   }
+  
   // Fetch the content
   const media = await Content.findById(contentId).lean();
   if (!media) {
@@ -220,10 +212,6 @@ exports.showMediaPlayerPage = async (req, res) => {
 
   if (media.type === 'series') {
     const allEpisodes = _getSortedEpisodes(media);
-<<<<<<< HEAD
-
-=======
->>>>>>> eca6c5c (Fix issues in preview card)
 
     currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
   }
@@ -240,10 +228,6 @@ exports.showMediaPlayerPage = async (req, res) => {
     title: 'Play - AdoraStream',
     content: media,
     lastPositionSec: lastPositionSec,
-<<<<<<< HEAD
-
-=======
->>>>>>> 1ad04cb (fix issues in media preview and player)
     currentEpisode,
     scripts: ['player'],
     additional_css: ['player'] 
@@ -251,8 +235,6 @@ exports.showMediaPlayerPage = async (req, res) => {
 }
 
 exports.showPreviewPage = async (req, res) => {
-<<<<<<< HEAD
-<<<<<<< HEAD
   const { contentId, currentEpisodeId } = req.query;
 
   if (!contentId) {
@@ -268,7 +250,6 @@ exports.showPreviewPage = async (req, res) => {
 
   if (media.type === 'series') {
     const allEpisodes = _getSortedEpisodes(media);
-<<<<<<< HEAD
 
     currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
   }
@@ -280,6 +261,7 @@ exports.showPreviewPage = async (req, res) => {
     additional_css: ['player'] 
   });
 };
+
 
 exports.showEpisodesDetailedList = async (req, res) => {
   const { contentId } = req.params;
@@ -336,96 +318,3 @@ exports.showActorsList = async (req, res) => {
     return res.status(500).send('Internal server error');
   }
 };
-=======
-  const { id } = req.params;
-  const content = await Content.findById(id).lean();
-=======
-  const { contentId, currentEpisodeId } = req.query;
->>>>>>> 1ad04cb (fix issues in media preview and player)
-
-  if (!contentId) {
-    return res.redirect('/content-main');
-  }
-  // Fetch the content
-  const media = await Content.findById(contentId).lean();
-  if (!media) {
-    return res.status(404).send('Content not found');
-  }
-
-  let currentEpisode = null;
-
-  if (media.type === 'series') {
-    const allEpisodes = ContentController._getSortedEpisodes(media);
-=======
->>>>>>> eca6c5c (Fix issues in preview card)
-
-    currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
-  }
-   res.render('pages/player', {
-    title: 'Play - AdoraStream',
-    content: media,
-    currentEpisode,
-    scripts: ['player'],
-    additional_css: ['player'] 
-  });
-};
-<<<<<<< HEAD
->>>>>>> 6c9f3cf (resolve-conflicts)
-=======
-
-exports.showEpisodesDetailedList = async (req, res) => {
-  const { contentId } = req.params;
-  if (!contentId) {
-    return res.redirect('/content-main');
-  }
-
-  const content = await Content.findById(contentId).lean();
-    if (!content || content.type !== 'series') {
-      return res.status(404).send('No episodes found');
-    }
-
-  const episodes = _getSortedEpisodes(content);
-  res.render('partials/preview-episodes-list', {
-    episodes
-  });
-};
-
-
-exports.showActorsList = async (req, res) => {
-  try {
-    const  { contentId } = req.params;
-    const { episodeId } = req.query;
-
-    const content = await Content.findById(contentId).lean();
-    if (!content) {
-      return res.status(404).send('Content not found');
-    }
-
-    if (content.type === 'movie' || !episodeId) {
-      return res.render('partials/actors-list', {
-        layout: false,
-        actors: content.actors || []
-      });
-    }
-
-    let episode = null;
-    for (const season of content.seasons || []) {
-      episode = season.episodes.find(ep => String(ep._id) === episodeId);
-      if (episode) break;
-    }
-
-    if (!episode) {
-      return res.status(404).send('Episode not found');
-    }
-
-    return res.render('partials/actors-list', {
-      layout: false,
-      actors: episode.actors || []
-    });
-
-  } catch (err) {
-    console.error(err);
-    return res.status(500).send('Internal server error');
-  }
-};
->>>>>>> 1ad04cb (fix issues in media preview and player)

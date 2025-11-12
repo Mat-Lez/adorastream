@@ -9,7 +9,6 @@ router.post('/select-content', requireLogin, requireProfileSelection, (req, res,
 router.get('/:id/episodes', requireLogin, requireProfileSelection, (req, res, next) => Content.getEpisodesForSeries(req, res).catch(next));
 router.get('/currently-played', requireLogin, requireProfileSelection, (req, res, next) => Content.currentlyPlayed(req, res).catch(next));
 
-
 router.get('/:id',   (req, res, next) => Content.get(req, res).catch(next));
 router.get('/:id/:episodeId/season-episode',    (req, res, next) => Content.getSeasonEpisodeById(req, res).catch(next));
 router.get('/:id/episodes',    (req, res, next) => Content._getSortedEpisodes(req, res).catch(next));
