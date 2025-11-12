@@ -1,4 +1,6 @@
 const Content = require('../models/content');
+const ContentController = require('../controllers/content.controller');
+
 const { getGenreSections, getContentGrid } = require('./content.controller');
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
@@ -194,14 +196,30 @@ exports.showSettingsProfileActionPage = async (req, res) => {
 }
 
 exports.showMediaPlayerPage = async (req, res) => {    
-  const contentId = req.session.user.contentId;
+  const { contentId, currentEpisodeId } = req.query;
+
   if (!contentId) {
     return res.redirect('/content-main');
   }
-  const media = await Content.findOne({ _id: contentId }).lean();
+
+  // Fetch the content
+  const media = await Content.findById(contentId).lean();
+  if (!media) {
+    return res.status(404).send('Content not found');
+  }
+
+  let currentEpisode = null;
+
+  if (media.type === 'series') {
+    const allEpisodes = ContentController._getSortedEpisodes(media);
+
+    currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
+  }
+
   res.render('pages/player', {
     title: 'Play - AdoraStream',
     content: media,
+    currentEpisode,
     scripts: ['player'],
     additional_css: ['player'] 
   });
