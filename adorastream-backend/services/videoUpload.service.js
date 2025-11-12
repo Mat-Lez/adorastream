@@ -3,17 +3,27 @@ const multer = require('multer');
 
 const fs = require('fs');
 
+const isPosterField = (name = '') =>
+  name === 'poster' ||
+  name === 'posters' ||
+  name.startsWith('ep_poster_');
+
+const isVideoField = (name = '') =>
+  name === 'video' ||
+  name === 'videos' ||
+  name.startsWith('ep_video_');
+
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (_req, file, cb) => {
     try {
       const baseAssets = path.join(__dirname, '..', 'assets');
       let targetDir;
-      if (file.fieldname === 'poster' || file.fieldname === 'posters') {
+      if (isPosterField(file.fieldname)) {
         targetDir = path.join(baseAssets, 'posters');
-      } else if (file.fieldname === 'video' || file.fieldname === 'videos') {
+      } else if (isVideoField(file.fieldname)) {
         targetDir = path.join(baseAssets, 'videos');
       } else {
-        return cb(new Error('Unknown field'), null);
+        return cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', file.fieldname));
       }
       fs.mkdirSync(targetDir, { recursive: true });
       cb(null, targetDir);
@@ -27,4 +37,11 @@ const storage = multer.diskStorage({
   }
 });
 
-module.exports = multer({ storage, limits: { fileSize: 1024*1024*500 } }); // 500MB
+const fileFilter = (_req, file, cb) => {
+  if (isPosterField(file.fieldname) || isVideoField(file.fieldname)) {
+    return cb(null, true);
+  }
+  return cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', file.fieldname));
+};
+
+module.exports = multer({ storage, fileFilter, limits: { fileSize: 1024*1024*500 } }); // 500MB

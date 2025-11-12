@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="/css/settings-profile-forms.css">
+<a class="form-back-link" title="Back to manage profiles">
+  <i class="bi bi-arrow-left"></i>
+  <span>Back</span>
+</a>
+<h1 class="title">Add Profile</h1>
+<p class="subtitle">Create a new profile for this account</p>
+<form id="addProfileForm" enctype="multipart/form-data">
+  <div class="field">
+    <label class="label" for="name">Profile name</label>
+    <input id="name" class="input" type="text" required maxlength="30" />
+  </div>
+  <div class="field">
+    <label class="label" for="avatar">Avatar image (optional)</label>
+    <input id="avatar" name="avatar" class="input" type="file" accept="image/*" />
+    <small class="form-hint">Max 5MB. PNG, JPG, JPEG, GIF, WEBP.</small>
+  </div>
+  <button id="add-profile-submit-btn" class="btn" type="submit">Create profile</button>
+  <div id="msg"></div>
+</form>

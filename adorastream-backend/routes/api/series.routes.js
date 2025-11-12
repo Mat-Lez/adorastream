@@ -26,7 +26,7 @@ router.post(
   '/:id/episodes-batch',
   requireLogin,
   requireAdmin,
-  upload.fields([{ name: 'posters', maxCount: 50 }, { name: 'videos', maxCount: 50 }]),
+  upload.any(),
   (req, res, next) => SeriesCtl.addEpisodesBatch(req, res).catch(next)
 );
 

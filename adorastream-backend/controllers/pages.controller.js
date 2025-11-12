@@ -1,6 +1,32 @@
-const User = require('../models/user');
 const Content = require('../models/content');
 const ContentController = require('../controllers/content.controller');
+
+const { getGenreSections, getContentGrid } = require('./content.controller');
+
+const availablePages = ['home', 'movies', 'shows', 'settings'];
+const pageToLayoutMap = {
+    home: {
+      topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
+    },
+    shows: {
+      topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
+    },
+    movies: {
+      topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
+    },
+    settings: {
+      topbarLayout: ["TOPBAR_ACTIONS"],
+      topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
+    },
+};
+const pageSearchScopes = {
+  home: 'all',
+  movies: 'movie',
+  shows: 'series'
+};
 
 exports.showLoginPage = (req, res) => {
   if (req.session?.user?.id) {
@@ -41,28 +67,131 @@ exports.showAddContentPage = (req, res) => {
     additional_css: ['addContent']  });
 }
 
-exports.showContentMainPage = async (req, res) => {   
-  const user = await User.findOne({ _id: req.session.user.id }).lean();
+async function attachGenreSections(renderOptions) {
+  renderOptions.genreSections = await getGenreSections();
+}
 
-  res.render('pages/content-main', {
+async function attachContentGrid(renderOptions, typeFilter) {
+  renderOptions.gridItems = await getContentGrid(typeFilter);
+  renderOptions.gridTitle = typeFilter === 'movie' ? 'Movies' : 'Shows';
+}
+
+exports.showContentMainPage = async (req, res) => {   
+  const { user, profiles, activeProfileId } = res.locals;
+
+  if (!user) {
+    return res.redirect('/login');
+  }
+
+  const renderOptions = {
     title: 'Main - AdoraStream',
     scripts: ['contentMain'],
     additional_css: ['contentMain', 'buttons'],
-    profiles: user.profiles,
-    activeProfileId: req.session.user.profileId });
-} 
+    user,
+    profiles,
+    activeProfileId,
+    topbarLayout: pageToLayoutMap['home'].topbarLayout,
+    topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout,
+    searchScope: pageSearchScopes.home
+  };
+
+  await attachGenreSections(renderOptions);
+
+  res.render('pages/content-main', renderOptions);
+}
 
 exports.showMainSpecificPage = async (req, res) => {
-  const availablePages = ['home', 'movies', 'shows', 'settings'];
+  const page = getRequestedPage(req, availablePages, 'home');
+  await showPage(req, res, page, `partials/main-${page}`);
+}
+
+exports.showTopbar = async (req, res) => {
+  const page = getRequestedPage(req, availablePages, 'home');
+  await showPage(req, res, page, 'partials/main-topbar');
+}
+
+async function showPage(req, res, page, renderPath) {
+  const { user, profiles, activeProfileId } = res.locals;
+
+  if (!user) {
+    return res.status(403).send('User not found');
+  }
+
+  const renderOptions = {
+    layout: false,
+    user,
+    profiles,
+    activeProfileId,
+    topbarLayout: pageToLayoutMap[page].topbarLayout,
+    topbarActionsLayout: pageToLayoutMap[page].topbarActionsLayout,
+    initialSettingsPage: page === 'settings' ? (req.query.tab === 'statistics' ? 'statistics' : 'manage-profiles') : undefined
+  };
+  renderOptions.searchScope = pageSearchScopes[page] || 'all';
+
+  if (page === 'home') {
+    await attachGenreSections(renderOptions);
+  }
+
+  if (['movies', 'shows'].includes(page)) {
+    const typeFilter = page === 'movies' ? 'movie' : 'series';
+    await attachContentGrid(renderOptions, typeFilter);
+  }
+
+  res.render(renderPath, renderOptions);
+}
+
+function getRequestedPage(req, availablePages, defaultPage) {
   let { page } = req.params;
   if (page === undefined || !availablePages.includes(page)) {
-    page = "home";
+    page = defaultPage;
   }
-  const user = await User.findOne({ _id: req.session.user.id }).lean();
-  res.render(`partials/main-${page}`, {
+  return page;
+}
+
+exports.showSettingsSpecificPage = async (req, res) => {
+  const availablePages = ['manage-profiles', 'statistics'];
+  const page = getRequestedPage(req, availablePages, 'manage-profiles');
+
+  const { user, profiles, activeProfileId } = res.locals;
+
+  if (!user) {
+    return res.status(403).send('User not found');
+  }
+
+  res.render(`partials/main-settings-${page}`, {
     layout: false,
-    profiles: user.profiles,
-    activeProfileId: req.session.user.profileId 
+    user,
+    profiles,
+    activeProfileId,
+  });
+}
+
+// Reach here from /settings/profiles/:action
+exports.showSettingsProfileActionPage = async (req, res) => {
+  const availablePages = ['add', 'edit'];
+  let { action } = req.params;
+  const profileIdToEdit = req.query.id;
+  const { user, profiles, activeProfileId } = res.locals;
+
+  if (!user) {
+    return res.status(403).send('User not found');
+  }
+
+  if ((action === undefined || !availablePages.includes(action)) || (action === "edit" && !profileIdToEdit)) {
+    action = "manage-profiles";
+    res.render(`partials/main-settings-${action}`, {
+      layout: false,
+      profiles,
+      activeProfileId
+    });
+    return;
+  }  
+  
+  res.render(`partials/main-settings-${action}-profile`, {
+    layout: false,
+    profiles,
+    activeProfileId,
+    profile: profiles.find(p => String(p._id) === String(profileIdToEdit)) || undefined
   });
 }
 

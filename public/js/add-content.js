@@ -28,6 +28,10 @@ function addActor() {
         <label class="label">Role</label>
         <input name="actorRole_${actorCount}" class="input" type="text" placeholder="e.g., Bane" />
       </div>
+      <div class="field">
+        <label class="label">Wikipedia URL</label>
+        <input name="actorWikipedia_${actorCount}" class="input" type="url" placeholder="e.g., https://en.wikipedia.org/wiki/Tom_Hardy" />
+      </div>
       <button type="button" class="btn btn-danger" data-action="remove-actor">Remove</button>
     </div>
   `;
@@ -68,6 +72,7 @@ function addEpisodeForm() {
     </div>
     <div class="field"><label class="label">Episode Poster</label><input class="input" type="file" name="ep_poster_${episodeCount}" accept="image/*"></div>
     <div class="field"><label class="label">Episode Video (MP4)</label><input class="input" type="file" name="ep_video_${episodeCount}" accept="video/mp4" required></div>
+    <div class="field"><label class="label">Duration (seconds)</label><input name="ep_duration_${episodeCount}" class="input" type="number" min="0" step="1" placeholder="e.g. 3600" required /></div>
     <div class="field"><button type="button" class="btn btn-danger" data-action="remove-episode">Remove Episode</button></div>
     <hr/>
   `;
@@ -90,6 +95,7 @@ function handleEpisodesContainerClick(e) {
       <div class="field-row">
         <div class="field"><input class="input" type="text" placeholder="Actor Name"></div>
         <div class="field"><input class="input" type="text" placeholder="Role"></div>
+        <div class="field"><input class="input" type="url" placeholder="Wikipedia URL (optional)"></div>
         <button type="button" class="btn btn-danger" data-action="remove-ep-actor">Remove</button>
       </div>
     `;
@@ -121,11 +127,13 @@ async function handleFormSubmit(e) {
   actorFields.forEach(field => {
     const nameInput = field.querySelector('input[name^="actorName_"]');
     const roleInput = field.querySelector('input[name^="actorRole_"]');
+    const wikiInput = field.querySelector('input[name^="actorWikipedia_"]');
     
     if (nameInput && roleInput && nameInput.value.trim() && roleInput.value.trim()) {
       actors.push({
         name: nameInput.value.trim(),
-        role: roleInput.value.trim()
+        role: roleInput.value.trim(),
+        wikipedia: (wikiInput?.value || '').trim()
       });
     }
   });
@@ -134,7 +142,7 @@ async function handleFormSubmit(e) {
   formData.set('actors', JSON.stringify(actors));
   
   // Remove individual actor fields from form data
-  const actorInputs = form.querySelectorAll('input[name^="actorName_"], input[name^="actorRole_"]');
+  const actorInputs = form.querySelectorAll('input[name^="actorName_"], input[name^="actorRole_"], input[name^="actorWikipedia_"]');
   actorInputs.forEach(input => formData.delete(input.name));
   
   try {
@@ -168,15 +176,19 @@ async function handleFormSubmit(e) {
         epActorRows.forEach(row => {
           const name = (row.querySelector('input[placeholder="Actor Name"]')?.value || '').trim();
           const role = (row.querySelector('input[placeholder="Role"]')?.value || '').trim();
-          if (name) actorsArr.push({ name, role });
+          const wikipedia = (row.querySelector('input[placeholder="Wikipedia URL (optional)"]')?.value || '').trim();
+
+          if (name) actorsArr.push({ name, role, wikipedia });
         });
+        const durationInput = node.querySelector('input[name^="ep_duration_"]');
         episodes.push({
           title,
           description: desc,
           seasonNumber: season,
           episodeNumber: number,
           director: dir,
-          actors: actorsArr
+          actors: actorsArr,
+          durationSec: durationInput ? durationInput.value || '0' : '0'
         });
         const posterInput = node.querySelector('input[name^="ep_poster_"]');
         if (posterInput && posterInput.files && posterInput.files[0]) {
@@ -268,6 +280,8 @@ function init() {
   const titleField = document.getElementById('title-field');
   const genresField = document.getElementById('genres-field');
   const posterField = document.getElementById('poster-field');
+  const durationField = document.getElementById('duration-field');
+  const durationInput = durationField ? durationField.querySelector('input[name="durationSec"]') : null;
 
   async function loadSeriesOptions() {
     try {
@@ -295,6 +309,8 @@ function init() {
     if (yearField) yearField.style.display = isMovie ? '' : 'none';
     if (directorField) directorField.style.display = isMovie ? '' : 'none';
     if (videoField) videoField.style.display = isMovie ? '' : 'none';
+    if (durationField) durationField.style.display = isMovie ? '' : 'none';
+    if (durationInput) durationInput.required = isMovie;
     if (actorsSection) {
       actorsSection.style.display = isMovie ? '' : 'none';
       if (isMovie) {

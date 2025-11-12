@@ -1,38 +1,34 @@
-<header class="topbar">
-  <% 
-    // ----------------------------
-    // CONFIGURATION
-    // ----------------------------
-    const availableTopbarParts = {
-      search: "SEARCH",
-      topbarActions: "TOPBAR_ACTIONS"
-    };
+<% 
+  // ----------------------------
+  // CONFIGURATION
+  // ----------------------------
+  const availableTopbarParts = {
+    search: "SEARCH",
+    topbarActions: "TOPBAR_ACTIONS"
+  };
 
     const availableTopbarActions = {
       logoutButton: "LOGOUT_BUTTON",
-      profileDropdown: "PROFILE_DROPDOWN"
+      profileDropdown: "PROFILE_DROPDOWN",
+      addContentButton: "ADD_CONTENT_BUTTON"
     };
 
-    const topbarPartsOrder = [
-      availableTopbarParts.search,
-      availableTopbarParts.topbarActions
-    ];
+  const topbarPartsOrder = [
+    availableTopbarParts.search,
+    availableTopbarParts.topbarActions
+  ];
 
-    // Determine which topbar sections to render
-    let topbarPartsToDisplay = [];
-    if (topbarLayout && topbarLayout.length) {
-      topbarPartsToDisplay = topbarPartsOrder.filter(item => topbarLayout.includes(item));
-    } else {
-      topbarPartsToDisplay = topbarPartsOrder;
-    }
+  // Determine which topbar sections to render
+  let topbarPartsToDisplay = [];
+  if (topbarLayout && topbarLayout.length) {
+    topbarPartsToDisplay = topbarPartsOrder.filter(item => topbarLayout.includes(item));
+  }
 
-    // Determine which actions appear inside topbar-actions
-    let topbarActionsToDisplay = [];
-    if (topbarActionsLayout && topbarActionsLayout.length) {
-      topbarActionsToDisplay = Object.values(availableTopbarActions).filter(a => topbarActionsLayout.includes(a));
-    } else {
-      topbarActionsToDisplay = Object.values(availableTopbarActions);
-    }
+  // Determine which actions appear inside topbar-actions
+  let topbarActionsToDisplay = [];
+  if (topbarActionsLayout && topbarActionsLayout.length) {
+    topbarActionsToDisplay = Object.values(availableTopbarActions).filter(a => topbarActionsLayout.includes(a));
+  }
 
     // ----------------------------
     // RENDERING
@@ -50,6 +46,8 @@
               <%- include('main-topbar-logout.ejs') %>
             <% } else if (action === availableTopbarActions.profileDropdown) { %>
               <%- include('main-topbar-profiles-dropdown.ejs') %>
+            <% } else if (action === availableTopbarActions.addContentButton && user && user.isAdmin) { %>
+              <%- include('main-topbar-add-content.ejs') %>
             <% } %>
           <% }) %>
         </div>

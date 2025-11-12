@@ -5,6 +5,8 @@ cookie.txt
 adorastream-backend/assets/videos/*
 adorastream-backend/assets/posters/*
 adorastream-backend/assets/profile-photos/*
+adorastream-backend/assets/tmp-uploads/*
 !adorastream-backend/assets/videos/.gitkeep
 !adorastream-backend/assets/posters/.gitkeep
 !adorastream-backend/assets/profile-photos/.gitkeep
+.vscode
