@@ -10,11 +10,11 @@ const pageToLayoutMap = {
       topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
     shows: {
-      topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+      topbarLayout: ["SEARCH", "FILTERS", "TOPBAR_ACTIONS"],
       topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
     movies: {
-      topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+      topbarLayout: ["SEARCH", "FILTERS", "TOPBAR_ACTIONS"],
       topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
     settings: {
@@ -128,7 +128,7 @@ async function showPage(req, res, page, renderPath) {
   };
   renderOptions.searchScope = pageSearchScopes[page] || 'all';
 
-  if (page === 'home') {
+  if (renderOptions.topbarLayout?.includes && renderOptions.topbarLayout.includes("FILTERS") && !renderOptions.genreSections) {
     await attachGenreSections(renderOptions);
   }
 

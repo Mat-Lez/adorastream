@@ -4,6 +4,7 @@
   // ----------------------------
   const availableTopbarParts = {
     search: "SEARCH",
+    filters: "FILTERS",
     topbarActions: "TOPBAR_ACTIONS"
   };
 
@@ -15,6 +16,7 @@
 
   const topbarPartsOrder = [
     availableTopbarParts.search,
+    availableTopbarParts.filters,
     availableTopbarParts.topbarActions
   ];
 
@@ -38,6 +40,10 @@
   %>
         <%- include('main-topbar-search.ejs') %>
   <% 
+      } else if (part === availableTopbarParts.filters) {
+  %>
+        <%- include('main-topbar-genre-filter') %>
+  <%
       } else if (part === availableTopbarParts.topbarActions) {
   %>
         <div class="topbar-actions">
