@@ -20,6 +20,11 @@ const pageToLayoutMap = {
       topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
 };
+const pageSearchScopes = {
+  home: 'all',
+  movies: 'movie',
+  shows: 'series'
+};
 
 exports.showLoginPage = (req, res) => {
   if (req.session?.user?.id) {
@@ -84,7 +89,8 @@ exports.showContentMainPage = async (req, res) => {
     profiles,
     activeProfileId,
     topbarLayout: pageToLayoutMap['home'].topbarLayout,
-    topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout
+    topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout,
+    searchScope: pageSearchScopes.home
   };
 
   await attachGenreSections(renderOptions);
@@ -118,6 +124,7 @@ async function showPage(req, res, page, renderPath) {
     topbarActionsLayout: pageToLayoutMap[page].topbarActionsLayout,
     initialSettingsPage: page === 'settings' ? (req.query.tab === 'statistics' ? 'statistics' : 'manage-profiles') : undefined
   };
+  renderOptions.searchScope = pageSearchScopes[page] || 'all';
 
   if (page === 'home') {
     await attachGenreSections(renderOptions);

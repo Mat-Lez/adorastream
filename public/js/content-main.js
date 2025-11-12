@@ -203,6 +203,8 @@ function initSearchFeature() {
     return;
   }
 
+  const normalizedSearchScope = (searchSection.dataset.scope || 'all').toLowerCase();
+
   let timerId;
 
   const setSearchActive = (active) => {
@@ -238,7 +240,10 @@ function initSearchFeature() {
     searchGrid.innerHTML = '';
 
     try {
-      const response = await api(`/api/content?q=${encodeURIComponent(term)}&limit=${SEARCH_RESULTS_LIMIT}`);
+      const typeFilterParam = normalizedSearchScope !== 'all'
+        ? `&type=${encodeURIComponent(normalizedSearchScope)}`
+        : '';
+      const response = await api(`/api/content?q=${encodeURIComponent(term)}&limit=${SEARCH_RESULTS_LIMIT}${typeFilterParam}`);
       const contents = response.contents || [];
       if (contents.length === 0) {
         showMessage(`No results found for "${term}".`);

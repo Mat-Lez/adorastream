@@ -72,6 +72,15 @@ exports.list = async (req, res) => {
   const skip  = (page - 1) * limit;
 
   const filter = {};
+  const rawType = req.query.type;
+  
+  if (rawType) {
+    const normalizedType = String(rawType).trim().toLowerCase();
+    if (['movie', 'series'].includes(normalizedType)) {
+      filter.type = normalizedType;
+    }
+  }
+
   if (q) {
     const searchTerm = String(q).trim();
     if (searchTerm) {
