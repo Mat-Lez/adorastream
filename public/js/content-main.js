@@ -220,7 +220,7 @@ function initEndlessScroll() {
       observer.disconnect();
       observer = null;
     }
-    sentinel.remove();
+    sentinel?.remove();
   };
 
   const loadMore = async () => {

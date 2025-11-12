@@ -6,16 +6,21 @@ const escapeRegex = value => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'
 
 async function fetchRandomizedContents(matchFilter, { limit, skip = 0, seed }) {
   if (!limit || limit <= 0) {
-    return [];
+    return { contents: [], total: 0 };
   }
 
   const normalizedSeed = (typeof seed === 'string' && seed.trim()) || 'default';
-  const docs = await Content.find(matchFilter).lean();
-  if (!docs.length) {
-    return [];
+
+  // 1. Fetch only IDs to save memory
+  const allIds = await Content.find(matchFilter).select('_id').lean();
+  const total = allIds.length;
+
+  if (!total) {
+    return { contents: [], total: 0 };
   }
 
-  const indices = Array.from({ length: docs.length }, (_value, index) => index);
+  // 2. Shuffle indices to get a random-but-stable order based on the seed
+  const indices = Array.from({ length: total }, (_value, index) => index);
   const rng = createSeededRandom(normalizedSeed);
 
   for (let i = indices.length - 1; i > 0; i -= 1) {
@@ -23,8 +28,22 @@ async function fetchRandomizedContents(matchFilter, { limit, skip = 0, seed }) {
     [indices[i], indices[j]] = [indices[j], indices[i]];
   }
 
-  const selected = indices.slice(skip, skip + limit);
-  return selected.map((idx) => docs[idx]);
+  // 3. Get IDs for the current page
+  const selectedIndices = indices.slice(skip, skip + limit);
+  const pageIds = selectedIndices.map(idx => allIds[idx]._id);
+
+  if (!pageIds.length) {
+    return { contents: [], total };
+  }
+
+  // 4. Fetch full documents for only the current page
+  const pageContents = await Content.find({ _id: { $in: pageIds } }).lean();
+
+  // 5. Preserve the shuffled order, as $in doesn't guarantee it
+  const contentMap = new Map(pageContents.map(doc => [String(doc._id), doc]));
+  const orderedContents = pageIds.map(id => contentMap.get(String(id)));
+
+  return { contents: orderedContents, total };
 }
 
 function createSeededRandom(seed) {
@@ -151,12 +170,18 @@ exports.list = async (req, res) => {
 
   const sort = { [sortBy]: order === 'asc' ? 1 : -1 };
 
-  const [contents, total] = await Promise.all([
-    useRandomOrdering
-      ? fetchRandomizedContents(filter, { limit, skip, seed: rawSeed })
-      : Content.find(filter).sort(sort).skip(skip).limit(limit),
-    Content.countDocuments(filter)
-  ]);
+  let contents;
+  let total;
+  if (useRandomOrdering) {
+    const result = await fetchRandomizedContents(filter, { limit, skip, seed: rawSeed });
+    contents = result.contents;
+    total = result.total;
+  } else {
+    [contents, total] = await Promise.all([
+      Content.find(filter).sort(sort).skip(skip).limit(limit),
+      Content.countDocuments(filter),
+    ]);
+  }
 
   res.json({ contents, total, page, pages: Math.ceil(total / limit) });
 };

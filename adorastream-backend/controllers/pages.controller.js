@@ -77,10 +77,7 @@ async function attachContentGrid(renderOptions, typeFilter) {
   const filter = typeFilter ? { type: typeFilter } : {};
   const randomSeed = crypto.randomBytes(8).toString('hex');
 
-  const [gridItems, total] = await Promise.all([
-    fetchRandomizedContents(filter, { limit, seed: randomSeed }),
-    Content.countDocuments(filter)
-  ]);
+  const { contents: gridItems, total } = await fetchRandomizedContents(filter, { limit, seed: randomSeed });
 
   renderOptions.gridItems = gridItems;
   renderOptions.gridTitle = typeFilter === 'movie' ? 'Movies' : 'Shows';
