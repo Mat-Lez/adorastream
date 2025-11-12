@@ -1,0 +1,12 @@
+<%- include('search-results', { searchScope: searchScope || 'all' }) %>
+
+<div class="home-body">
+  <section class="category search-results">
+    <h2><%= gridTitle || 'Content' %></h2>
+    <% if (!gridItems || !gridItems.length) { %>
+      <p class="empty">No content available yet.</p>
+    <% } else { %>
+      <%- include('content-card-grid', { items: gridItems }) %>
+    <% } %>
+  </section>
+</div>
