@@ -202,7 +202,7 @@ span.action-btn {
 .category {
   width: 100%;
   max-width: 1400px;
-  margin-bottom: 56px;
+  margin: 0 auto 56px;
 }
 
 .genre-sections-wrapper,
@@ -218,7 +218,7 @@ span.action-btn {
 }
 
 .search-results {
-  margin-bottom: 24px;
+  margin: 0 auto 24px;
 }
 
 .search-results.is-hidden {
