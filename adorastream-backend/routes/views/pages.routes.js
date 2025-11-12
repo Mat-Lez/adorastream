@@ -23,25 +23,8 @@ router.get('/content-main/:page', requireLogin, requireProfileSelection, require
 router.get('/settings/:page', requireLogin, requireProfileSelection, noCache, requireFetch, loadUserContext, showSettingsSpecificPage);
 router.get('/settings/profiles/:action', requireLogin, requireProfileSelection, noCache, requireFetch, loadUserContext, showSettingsProfileActionPage);
 router.get('/player', requireLogin, requireProfileSelection, showMediaPlayerPage);
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-router.get('/content-main', requireLogin, requireProfileSelection, noCache, showContentMainPage);
-router.get('/content-main/:page', requireLogin, requireProfileSelection, requireFetch, noCache, showMainSpecificPage);
-=======
->>>>>>> eca6c5c (Fix issues in preview card)
 router.get('/content-main/preview/:contentId/episodes', requireLogin, requireProfileSelection, showEpisodesDetailedList);
 router.get('/content-main/preview/:contentId/actors', requireLogin, requireProfileSelection, showActorsList);
 
-<<<<<<< HEAD
-=======
-router.get('/content-main/:page', requireLogin, requireProfileSelection, showMainSpecificPage);
->>>>>>> 13201a6 (resolve conflict)
-=======
-router.get('/content-main', requireLogin, requireProfileSelection, noCache, showContentMainPage);
-router.get('/content-main/:page', requireLogin, requireProfileSelection, requireFetch, noCache, showMainSpecificPage);
->>>>>>> 2fe1144 (resolve-conflicts)
-=======
->>>>>>> 1ad04cb (fix issues in media preview and player)
 
 module.exports = router;
