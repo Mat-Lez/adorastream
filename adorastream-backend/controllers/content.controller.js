@@ -462,7 +462,6 @@ exports.getSeasonEpisodeById = async (req, res) => {
   }
 }
 
-
 // Get all episodes of a certain sereis
 exports.getEpisodesForSeries = async (req, res) => {
 

@@ -1,5 +1,4 @@
 import { apiRequest as api } from '/utils/api-utils.js';
-import { apiRequest as api } from '/utils/api-utils.js';
 import { logoutEventListener } from '../utils/reuseableEventListeners.js';
 import { switchProfile } from '/utils/profilesManagement.js';
 import { fetchPage } from '../utils/pageManagement.js';

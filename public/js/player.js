@@ -18,14 +18,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!video) return console.error('video element not found'); 
   const lastPosition = parseFloat(video.dataset.lastPosition || 0);
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
   // video.currentTime = lastPosition;
 >>>>>>> 109e32c (Add a few fixes to functionality and UI)
+=======
+>>>>>>> da110d3 (fix broken after rebasing)
 
   // --- global variables ---
   let hideControlsTimeout;
   let carouselTimeout; 
 
+<<<<<<< HEAD
   // --- get currently played ---
   let contentId, currentEpisodeId, type;
   try {
@@ -41,17 +45,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (type === 'series') {
     initSeries();
   }
+=======
+>>>>>>> da110d3 (fix broken after rebasing)
   let lastSavedTime = 0;
   const SAVE_INTERVAL = 10; // seconds
 
   // --- get currently played ---
-  let contentId, currentEpisodeId;
+  let contentId, currentEpisodeId, type;
   try {
     const result = await api('/api/content/currently-played');
     contentId = result.contentId;
     currentEpisodeId = result.currentEpisodeId;
+    type = result.type;
   } catch (err) {
     console.error('Failed to fetch content info:', err);
+  }
+
+    // --- Initialize series if applicable ---
+  if (type === 'series') {
+    initSeries();
   }
 
   // --- Utility functions ---
@@ -251,6 +263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 <<<<<<< HEAD
+<<<<<<< HEAD
 async function saveProgress() {
   const { contentId, currentEpisodeId } = await api('/api/content/currently-played');
 
@@ -262,6 +275,11 @@ async function saveProgress() {
 =======
   if (!contentId) return; 
 >>>>>>> 109e32c (Add a few fixes to functionality and UI)
+=======
+async function saveProgress() {
+  const { contentId, currentEpisodeId } = await api('/api/content/currently-played');
+
+>>>>>>> da110d3 (fix broken after rebasing)
   try {
     await api(`/api/history/${contentId}/progress`, 'POST', {
       positionSec: Math.floor(video.currentTime),
@@ -308,8 +326,20 @@ window.addEventListener('beforeunload', saveProgress);
 // When metadata is loaded - duration and etc are known
 video.addEventListener('loadedmetadata', () => {
   if (lastPosition > 0 && lastPosition < video.duration) {
-    video.currentTime = lastPosition; // resume from saved time
+    // Wait until the video is actually seekable
+    const seekToLast = () => {
+      if (video.seekable.length > 0) {
+        video.currentTime = lastPosition;
+        video.play().catch(err => console.warn('Autoplay failed:', err));
+      } else {
+        setTimeout(seekToLast, 100);
+      }
+    };
+    seekToLast();
+  } else {
+    video.play().catch(err => console.warn('Autoplay failed:', err));
   }
+<<<<<<< HEAD
   video.play().catch(err => {
     console.warn('Autoplay failed (maybe browser restriction):', err);
 >>>>>>> 109e32c (Add a few fixes to functionality and UI)
@@ -319,5 +349,12 @@ video.addEventListener('loadedmetadata', () => {
     video.dispatchEvent(new Event('loadedmetadata'));
   }
 
+=======
+>>>>>>> da110d3 (fix broken after rebasing)
 });
+
+  if (video.readyState >= 1) {
+    video.dispatchEvent(new Event('loadedmetadata'));
+  }
+
 });
