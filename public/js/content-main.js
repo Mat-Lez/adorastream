@@ -5,6 +5,8 @@ import { fetchPage } from '../utils/pageManagement.js';
 import { animateOut } from "../utils/reuseableAnimations.js";
 import { openPreview } from "./media-preview.js"
 
+const SEARCH_RESULTS_LIMIT = 50;
+
 
 // init functions
 (async () => {
@@ -127,6 +129,9 @@ async function sideNavbarPageSwapListener() {
       }
 
       await fetchPage(pageUrl, main, "loading");
+      if (document.getElementById('search')) {
+        initSearchFeature();
+      }
       if (btn.dataset.settingsTarget === 'statistics') {
           try {
               // Dynamically import the script
@@ -188,9 +193,127 @@ function addCardClickListeners() {
 } 
 
 
+function escapeHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function buildCardMarkup(item = {}) {
+  const id = item.id || item._id || '';
+  const title = escapeHtml(item.title || 'Untitled');
+  const posterUrl = item.posterUrl || '/adorastream.png';
+  return `
+    <div class="card" data-id="${id}">
+      <div class="card-media">
+        <img src="${posterUrl}" alt="${title}">
+        <div class="play-overlay">▶</div>
+      </div>
+      <div class="card-title">${title}</div>
+    </div>
+  `;
+}
+
+function initSearchFeature() {
+  const searchInput = document.getElementById('search');
+  const searchSection = document.getElementById('search-results-section');
+  const searchGrid = document.getElementById('search-results-grid');
+  const searchEmpty = document.getElementById('search-results-empty');
+  const mainEl = document.querySelector('.main');
+  
+  if (searchInput?.dataset.searchInit === 'true') {
+    return;
+  }
+
+  if (!searchInput || !searchSection || !searchGrid || !searchEmpty || !mainEl) {
+    console.error('Search feature could not be initialized: one or more required DOM elements are missing.');
+    return;
+  }
+
+  let timerId;
+
+  const setSearchActive = (active) => {
+    mainEl.classList.toggle('search-active', active);
+    searchSection.classList.toggle('is-hidden', !active);
+  };
+
+  const clearResults = () => {
+    searchGrid.innerHTML = '';
+    searchEmpty.classList.add('is-hidden');
+  };
+
+  const showMessage = (message) => {
+    searchEmpty.textContent = message;
+    searchEmpty.classList.remove('is-hidden');
+  };
+
+  const resetSearch = () => {
+    clearTimeout(timerId);
+    searchInput.value = '';
+    setSearchActive(false);
+    clearResults();
+  };
+
+  const performSearch = async (term) => {
+    if (!term) {
+      resetSearch();
+      return;
+    }
+
+    setSearchActive(true);
+    showMessage(`Searching for "${term}"…`);
+    searchGrid.innerHTML = '';
+
+    try {
+      const response = await api(`/api/content?q=${encodeURIComponent(term)}&limit=${SEARCH_RESULTS_LIMIT}`);
+      const contents = response.contents || [];
+      if (contents.length === 0) {
+        showMessage(`No results found for "${term}".`);
+        return;
+      }
+    searchGrid.innerHTML = contents.map(buildCardMarkup).join('');
+      searchEmpty.classList.add('is-hidden');
+    } catch (error) {
+      showMessage('Search failed. Please try again.');
+      console.error('Search error:', error);
+    }
+  };
+
+  const handleInput = () => {
+    const term = searchInput.value.trim();
+    clearTimeout(timerId);
+    if (!term) {
+      setSearchActive(false);
+      clearResults();
+      return;
+    }
+    timerId = setTimeout(() => performSearch(term), 300);
+  };
+
+  searchInput.addEventListener('input', handleInput);
+
+  searchInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      clearTimeout(timerId);
+      performSearch(searchInput.value.trim());
+    } else if (event.key === 'Escape') {
+      resetSearch();
+    }
+  });
+  resetSearch(); // ensure initial state
+  searchInput.dataset.searchInit = 'true';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   sideNavbarPageSwapListener();
   topbarProfilesDropdownActionsListener();
   logoutEventListener('logout-btn');
   addCardClickListeners();
+  if (document.getElementById('search')) {
+    initSearchFeature();
+  }
 });
