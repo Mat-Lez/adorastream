@@ -4,7 +4,7 @@ function notFound(_req, res, _next) {
   res.status(404).json({ error: 'Not found' });
 }
 
-const SENSITIVE_REGEX = /(password|token|secret|authorization)/i;
+const SENSITIVE_REGEX = /(password|token|secret|authorization|apikey|session)/i;
 
 function sanitizeObject(source) {
   if (!source || typeof source !== 'object' || Buffer.isBuffer(source)) {
@@ -15,16 +15,20 @@ function sanitizeObject(source) {
     return source.map(sanitizeObject);
   }
 
-  return Object.entries(source).reduce((acc, [key, value]) => {
-    if (SENSITIVE_REGEX.test(key)) {
-      acc[key] = '[redacted]';
-    } else if (value && typeof value === 'object' && !Buffer.isBuffer(value)) {
-      acc[key] = sanitizeObject(value);
-    } else {
-      acc[key] = value;
+  const sanitized = {};
+  for (const key in source) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      const value = source[key];
+      if (SENSITIVE_REGEX.test(key)) {
+        sanitized[key] = '[redacted]';
+      } else if (value && typeof value === 'object' && !Buffer.isBuffer(value)) {
+        sanitized[key] = sanitizeObject(value);
+      } else {
+        sanitized[key] = value;
+      }
     }
-    return acc;
-  }, {});
+  }
+  return sanitized;
 }
 
 function persistErrorLog(err, req, status) {
@@ -40,8 +44,8 @@ function persistErrorLog(err, req, status) {
     request: {
       method: req.method,
       path: req.originalUrl,
-      query: sanitizeObject(req.query),
-      body: sanitizeObject(req.body),
+      query: JSON.stringify(sanitizeObject(req.query)),
+      body: JSON.stringify(sanitizeObject(req.body)),
       headers: {
         'user-agent': req.headers['user-agent'],
         'x-request-id': req.headers['x-request-id']

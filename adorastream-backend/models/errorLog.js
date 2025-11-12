@@ -16,8 +16,8 @@ const ErrorLogSchema = new Schema({
   request: {
     method: String,
     path: String,
-    query: Schema.Types.Mixed,
-    body: Schema.Types.Mixed,
+    query: String,
+    body: String,
     headers: {
       'user-agent': String,
       'x-request-id': String
