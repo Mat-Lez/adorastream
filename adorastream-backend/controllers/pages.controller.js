@@ -1,6 +1,7 @@
 const Content = require('../models/content');
 const { _getSortedEpisodes, getGenreSections, getContentGrid } = require('./content.controller');
 
+
 const availablePages = ['home', 'movies', 'shows', 'settings'];
 const pageToLayoutMap = {
     home: {
@@ -198,6 +199,7 @@ exports.showMediaPlayerPage = async (req, res) => {
   const { contentId, currentEpisodeId } = req.query;
   const lastPositionSec = Number(req.query.lastPositionSec) || 0; 
 
+
   if (!contentId) {
     return res.redirect('/content-main');
   }
@@ -211,6 +213,7 @@ exports.showMediaPlayerPage = async (req, res) => {
 
   if (media.type === 'series') {
     const allEpisodes = _getSortedEpisodes(media);
+
 
     currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
   }
@@ -227,6 +230,7 @@ exports.showMediaPlayerPage = async (req, res) => {
     title: 'Play - AdoraStream',
     content: media,
     lastPositionSec: lastPositionSec,
+
     currentEpisode,
     scripts: ['player'],
     additional_css: ['player'] 

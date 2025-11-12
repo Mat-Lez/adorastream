@@ -213,6 +213,7 @@ function buildCardMarkup(item = {}) {
         <div class="play-overlay">▶</div>
       </div>
       <div class="card-title">${title}</div>
+
     </div>
   `;
 }

@@ -1,6 +1,10 @@
 import { apiRequest as api } from '../utils/api-utils.js';
 
+<<<<<<< HEAD
 document.addEventListener('DOMContentLoaded', () => {
+=======
+document.addEventListener('DOMContentLoaded', async () => {
+>>>>>>> 749ca3d (Feat: Player page work for series (#60))
   const video = document.getElementById('video-player');
   const controls = document.getElementById('custom-controls');
   const playPause = document.getElementById('play-pause');
@@ -13,16 +17,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const timeDisplay = document.getElementById('time-display');
   const wrapper = document.querySelector('.video-wrapper');
   const timeline = document.getElementById('timeline');
-
   if (!video) return console.error('video element not found'); 
   const lastPosition = parseFloat(video.dataset.lastPosition || 0);
   video.currentTime = lastPosition;
 
   // --- global variables ---
   let hideControlsTimeout;
+<<<<<<< HEAD
   let lastSavedTime = 0;
   const SAVE_INTERVAL = 10; // seconds
   let saveTimer;
+=======
+  const { contentId, episodeId, type } = await api('/api/content/currently-played');
+  let carouselTimeout; 
+
+  // --- Initialize series if applicable ---
+  if (type === 'series') {
+    initSeries();
+  }
+>>>>>>> 749ca3d (Feat: Player page work for series (#60))
 
   // --- Utility functions ---
   function showSkipOverlay(text) {
@@ -182,4 +195,72 @@ document.addEventListener('DOMContentLoaded', () => {
       console.warn('Autoplay failed (maybe browser restriction):', err);
     });
   });
+
+  function initSeries() {
+    const showEpisodesBtn = document.getElementById('show-episodes');
+    const nextEpisodeBtn = document.getElementById('next-episode');
+    const carouselContainer = document.getElementById('episode-carousel-container');
+
+    const showCarousel = () => {
+      clearTimeout(carouselTimeout);
+      carouselContainer.classList.remove('hidden');
+    };
+
+    const hideCarousel = () => {
+      carouselTimeout = setTimeout(() => carouselContainer.classList.add('hidden'), 300);
+    };
+
+    carouselContainer.addEventListener('mouseenter', showCarousel);
+    carouselContainer.addEventListener('mouseleave', hideCarousel);
+
+    nextEpisodeBtn?.addEventListener('click', async () => {
+      try {
+        const { contentId, nextEpisodeId } = await api('/api/content/next-episode');
+        if (!contentId) return;
+        if (!nextEpisodeId) return;
+          location.href = `/player?contentId=${contentId}&currentEpisodeId=${nextEpisodeId}`;
+      } catch (e) {
+          console.error(`Failed to select content: ${e.message}`);
+      }
+    });
+
+    showEpisodesBtn?.addEventListener('click', async () => {
+      if (!carouselContainer) return;
+      const carousel = carouselContainer.querySelector('.carousel');
+      if (!carousel) return;
+
+      const res = await api(`/api/content/${contentId}/episodes`);
+      const data = await res.json();
+
+      carousel.innerHTML = '';
+      data.episodes.forEach(ep => {
+        const card = document.createElement('div');
+        card.className = 'episode-card';
+        card.innerHTML = `
+          <div class="poster-wrapper">
+            <img src="${ep.posterUrl}" alt="${ep.title}">
+          </div>
+          <div class="episode-title" data-episode-id="${ep._id}">
+            S${ep.seasonNumber}E${ep.episodeNumber}
+          </div>
+        `;
+        card.addEventListener('click', () => {
+          try { 
+            location.href = `/player?contentId=${contentId}&currentEpisodeId=${ep._id}`;
+          } catch (e) {
+            console.error(`Failed to select episode: ${e.message}`);
+          }
+        });
+        carousel.appendChild(card);
+      });
+      carouselContainer.classList.remove('hidden');
+
+      document.getElementById('carousel-prev')?.addEventListener('click', () => {
+        carousel.scrollBy({ left: -200, behavior: 'smooth' });
+      });
+      document.getElementById('carousel-next')?.addEventListener('click', () => {
+        carousel.scrollBy({ left: 200, behavior: 'smooth' });
+      });
+    });
+  }
 });
