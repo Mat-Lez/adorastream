@@ -128,9 +128,7 @@ async function sideNavbarPageSwapListener() {
       }
 
       await fetchPage(pageUrl, main, "loading");
-      if (document.getElementById('search')) {
-        initSearchFeature();
-      }
+      setupPageEnhancements();
       if (btn.dataset.settingsTarget === 'statistics') {
           try {
               // Dynamically import the script
@@ -283,12 +281,36 @@ function initSearchFeature() {
   searchInput.dataset.searchInit = 'true';
 }
 
+function initGenreFilter() {
+  const genreSelect = document.getElementById('genre-filter');
+  if (!genreSelect || genreSelect.dataset.genreFilterInit === 'true') {
+    return;
+  }
+  genreSelect.dataset.genreFilterInit = 'true';
+
+  genreSelect.addEventListener('change', async () => {
+    const page = document.querySelector('.nav-item.active')?.dataset.page || 'movies';
+    const main = document.querySelector('.main');
+    let pageUrl = `/content-main/${page}`;
+    if (genreSelect.value) {
+      pageUrl += `?genre=${encodeURIComponent(genreSelect.value)}`;
+    }
+    await fetchPage(pageUrl, main, 'loading');
+    setupPageEnhancements();
+  });
+}
+
+function setupPageEnhancements() {
+  if (document.getElementById('search')) {
+    initSearchFeature();
+  }
+  initGenreFilter();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   sideNavbarPageSwapListener();
   topbarProfilesDropdownActionsListener();
   logoutEventListener('logout-btn');
   addCardClickListeners();
-  if (document.getElementById('search')) {
-    initSearchFeature();
-  }
+  setupPageEnhancements();
 });

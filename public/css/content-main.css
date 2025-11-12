@@ -101,12 +101,10 @@ body {
 }
 
 .home-body {
-  width: 100%;
   align-self: stretch;
   display: flex;
   flex-direction: column;
   gap: 48px;
-  align-items: stretch;
   max-width: 1280px;
   padding: 0 40px;
   margin: 0 auto;
@@ -183,6 +181,37 @@ body {
   outline: none;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
   transition: background 0.12s, box-shadow 0.12s;
+}
+
+.topbar .search-filter-group {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.topbar .genre-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.topbar .genre-filter label {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.topbar .genre-filter select {
+  min-width: 150px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--button-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
 }
 
 .topbar-actions {

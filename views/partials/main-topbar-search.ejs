@@ -1,1 +1,21 @@
-<input type="text" id="search" placeholder="Search..." />
+<%
+  const pageName = (typeof currentPage === 'string' ? currentPage : '').toLowerCase();
+  const rawGenreList = typeof availableGenres !== 'undefined' ? availableGenres : [];
+  const genreOptions = Array.isArray(rawGenreList) ? rawGenreList : [];
+  const normalizedSelectedGenre = typeof selectedGenre === 'string' ? selectedGenre : '';
+  const genreFilterVisible = ['movies', 'shows'].includes(pageName) && genreOptions.length > 0;
+%>
+<div class="search-filter-group">
+  <input type="text" id="search" placeholder="Search..." />
+  <% if (genreFilterVisible) { %>
+    <div class="genre-filter">
+      <label for="genre-filter">Genre</label>
+      <select id="genre-filter">
+        <option value="" <%= !normalizedSelectedGenre ? 'selected' : '' %>>All genres</option>
+        <% genreOptions.forEach(genre => { %>
+          <option value="<%= genre %>" <%= genre === normalizedSelectedGenre ? 'selected' : '' %>><%= genre %></option>
+        <% }) %>
+      </select>
+    </div>
+  <% } %>
+</div>

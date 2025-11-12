@@ -367,10 +367,21 @@ exports.getGenreSections = async (limit = DEFAULT_GENRE_LIMIT) => {
     .sort((a, b) => a.genre.localeCompare(b.genre));
 };
 
-exports.getContentGrid = async (typeFilter, limit = GRID_CONTENT_LIMIT) => {
+exports.getDistinctGenres = async () => {
+  const rawGenres = await Content.distinct('genres');
+  return rawGenres
+    .map(raw => String(raw || '').trim())
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+};
+
+exports.getContentGrid = async (typeFilter, limit = GRID_CONTENT_LIMIT, genreFilter) => {
   const filter = {};
   if (typeFilter) {
     filter.type = typeFilter;
+  }
+  if (genreFilter) {
+    filter.genres = genreFilter;
   }
   return Content.find(filter)
     .sort({ createdAt: -1 })

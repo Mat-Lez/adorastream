@@ -1,5 +1,5 @@
 const Content = require('../models/content');
-const { getGenreSections, getContentGrid } = require('./content.controller');
+const { getGenreSections, getContentGrid, getDistinctGenres } = require('./content.controller');
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
 const pageToLayoutMap = {
@@ -20,6 +20,7 @@ const pageToLayoutMap = {
       topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
 };
+
 const pageSearchScopes = {
   home: 'all',
   movies: 'movie',
@@ -69,8 +70,14 @@ async function attachGenreSections(renderOptions) {
   renderOptions.genreSections = await getGenreSections();
 }
 
-async function attachContentGrid(renderOptions, typeFilter) {
-  renderOptions.gridItems = await getContentGrid(typeFilter);
+async function attachContentGrid(renderOptions, typeFilter, genreFilter) {
+  const allGenres = await getDistinctGenres();
+  const normalizedRequest = typeof genreFilter === 'string' ? genreFilter.trim() : '';
+  const matchedGenre = allGenres.find(g => g.toLowerCase() === normalizedRequest.toLowerCase()) || '';
+  renderOptions.availableGenres = allGenres;
+  renderOptions.selectedGenre = matchedGenre;
+
+  renderOptions.gridItems = await getContentGrid(typeFilter, undefined, matchedGenre || undefined);
   renderOptions.gridTitle = typeFilter === 'movie' ? 'Movies' : 'Shows';
 }
 
@@ -90,7 +97,8 @@ exports.showContentMainPage = async (req, res) => {
     activeProfileId,
     topbarLayout: pageToLayoutMap['home'].topbarLayout,
     topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout,
-    searchScope: pageSearchScopes.home
+    searchScope: pageSearchScopes.home,
+    currentPage: 'home'
   };
 
   await attachGenreSections(renderOptions);
@@ -124,6 +132,7 @@ async function showPage(req, res, page, renderPath) {
     topbarActionsLayout: pageToLayoutMap[page].topbarActionsLayout,
     initialSettingsPage: page === 'settings' ? (req.query.tab === 'statistics' ? 'statistics' : 'manage-profiles') : undefined
   };
+  renderOptions.currentPage = page;
   renderOptions.searchScope = pageSearchScopes[page] || 'all';
 
   if (page === 'home') {
@@ -132,7 +141,8 @@ async function showPage(req, res, page, renderPath) {
 
   if (['movies', 'shows'].includes(page)) {
     const typeFilter = page === 'movies' ? 'movie' : 'series';
-    await attachContentGrid(renderOptions, typeFilter);
+    const requestedGenre = typeof req.query.genre === 'string' ? req.query.genre : '';
+    await attachContentGrid(renderOptions, typeFilter, requestedGenre);
   }
 
   res.render(renderPath, renderOptions);
