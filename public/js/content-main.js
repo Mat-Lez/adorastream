@@ -416,3 +416,4 @@ document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('search')) {
     initSearchFeature();
   }
+});
