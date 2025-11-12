@@ -1,0 +1,22 @@
+<%- include('search-results') %>
+
+<div class="home-body">
+  <section class="category search-results">
+    <h2><%= gridTitle || 'Content' %></h2>
+    <% if (!gridItems || !gridItems.length) { %>
+      <p class="empty">No content available yet.</p>
+    <% } else { %>
+      <div class="grid content-grid">
+        <% gridItems.forEach(item => { %>
+          <div class="card" data-id="<%= item.id || item._id %>">
+            <div class="card-media">
+              <img src="<%= item.posterUrl || '/adorastream.png' %>" alt="<%= item.title || 'Untitled' %>">
+              <div class="play-overlay">▶</div>
+            </div>
+            <div class="card-title"><%= item.title || 'Untitled' %></div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </section>
+</div>

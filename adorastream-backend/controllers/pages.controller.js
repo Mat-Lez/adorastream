@@ -1,5 +1,5 @@
 const Content = require('../models/content');
-const { getGenreSections } = require('./content.controller');
+const { getGenreSections, getContentGrid } = require('./content.controller');
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
 const pageToLayoutMap = {
@@ -64,6 +64,11 @@ async function attachGenreSections(renderOptions) {
   renderOptions.genreSections = await getGenreSections();
 }
 
+async function attachContentGrid(renderOptions, typeFilter) {
+  renderOptions.gridItems = await getContentGrid(typeFilter);
+  renderOptions.gridTitle = typeFilter === 'movie' ? 'Movies' : 'Shows';
+}
+
 exports.showContentMainPage = async (req, res) => {   
   const { user, profiles, activeProfileId } = res.locals;
 
@@ -116,6 +121,11 @@ async function showPage(req, res, page, renderPath) {
 
   if (page === 'home') {
     await attachGenreSections(renderOptions);
+  }
+
+  if (['movies', 'shows'].includes(page)) {
+    const typeFilter = page === 'movies' ? 'movie' : 'series';
+    await attachContentGrid(renderOptions, typeFilter);
   }
 
   res.render(renderPath, renderOptions);

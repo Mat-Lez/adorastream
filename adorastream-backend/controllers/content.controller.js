@@ -326,6 +326,7 @@ exports.selectContent = async (req, res) => {
 
 const DEFAULT_GENRE_LIMIT = Number(process.env.DEFAULT_GENRE_LIMIT) || 10;
 const GENRE_FETCH_LIMIT_MULTIPLIER = Number(process.env.GENRE_FETCH_LIMIT_MULTIPLIER) || 25;
+const GRID_CONTENT_LIMIT = Number(process.env.GRID_CONTENT_LIMIT) || 36;
 
 exports.getGenreSections = async (limit = DEFAULT_GENRE_LIMIT) => {
   const contents = await Content.find({})
@@ -355,4 +356,15 @@ exports.getGenreSections = async (limit = DEFAULT_GENRE_LIMIT) => {
     .map(([genre, items]) => ({ genre, items }))
     .filter(section => section.items.length > 0)
     .sort((a, b) => a.genre.localeCompare(b.genre));
+};
+
+exports.getContentGrid = async (typeFilter, limit = GRID_CONTENT_LIMIT) => {
+  const filter = {};
+  if (typeFilter) {
+    filter.type = typeFilter;
+  }
+  return Content.find(filter)
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .lean();
 };
