@@ -266,9 +266,15 @@ span.action-btn {
 /* ====== Grid ====== */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 24px;
   width: 100%;
+}
+
+.content-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  justify-content: center;
+  max-width: 1240px;
+  margin: 0 auto;
 }
 
 /* ====== Movie/Series Card ====== */
