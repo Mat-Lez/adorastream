@@ -17,6 +17,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (!video) return console.error('video element not found'); 
   const lastPosition = parseFloat(video.dataset.lastPosition || 0);
+<<<<<<< HEAD
+=======
+  // video.currentTime = lastPosition;
+>>>>>>> 109e32c (Add a few fixes to functionality and UI)
 
   // --- global variables ---
   let hideControlsTimeout;
@@ -39,7 +43,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   let lastSavedTime = 0;
   const SAVE_INTERVAL = 10; // seconds
-  let saveTimer;
 
   // --- get currently played ---
   let contentId, currentEpisodeId;
@@ -253,8 +256,12 @@ async function saveProgress() {
 
 =======
   async function saveProgress() {
+<<<<<<< HEAD
   if (!contentId || !currentEpisodeId) return; 
 >>>>>>> eca6c5c (Fix issues in preview card)
+=======
+  if (!contentId) return; 
+>>>>>>> 109e32c (Add a few fixes to functionality and UI)
   try {
     await api(`/api/history/${contentId}/progress`, 'POST', {
       positionSec: Math.floor(video.currentTime),
@@ -269,10 +276,14 @@ async function saveProgress() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 109e32c (Add a few fixes to functionality and UI)
 // also save on pause or before leaving the page
 video.addEventListener('pause', saveProgress);
 video.addEventListener('seeked', saveProgress);
 window.addEventListener('beforeunload', saveProgress);
+<<<<<<< HEAD
 =======
   // also save on pause or before leaving the page
   video.addEventListener('pause', saveProgress);
@@ -280,9 +291,12 @@ window.addEventListener('beforeunload', saveProgress);
   window.addEventListener('beforeunload', saveProgress);
 >>>>>>> 1ad04cb (fix issues in media preview and player)
 
+=======
+>>>>>>> 109e32c (Add a few fixes to functionality and UI)
 
 // When metadata is loaded - duration and etc are known
 
+<<<<<<< HEAD
   video.addEventListener('loadedmetadata', () => {
     if (lastPosition > 0 && lastPosition < video.duration) {
       video.currentTime = lastPosition; // resume from saved time
@@ -290,10 +304,20 @@ window.addEventListener('beforeunload', saveProgress);
     video.play().catch(err => {
       console.warn('Autoplay failed (maybe browser restriction):', err);
     });
+=======
+// When metadata is loaded - duration and etc are known
+video.addEventListener('loadedmetadata', () => {
+  if (lastPosition > 0 && lastPosition < video.duration) {
+    video.currentTime = lastPosition; // resume from saved time
+  }
+  video.play().catch(err => {
+    console.warn('Autoplay failed (maybe browser restriction):', err);
+>>>>>>> 109e32c (Add a few fixes to functionality and UI)
   });
 
   if (video.readyState >= 1) {
     video.dispatchEvent(new Event('loadedmetadata'));
   }
 
+});
 });

@@ -15,6 +15,10 @@ exports.upsertProgress = async (req, res) => {
   const content = await Content.findById(contentId).lean();
   if (!content) return res.status(404).json({ error: 'Content not found' });
 
+  if (content.type === 'series') {
+    if (!episodeId) return res.status(404).json({ error: 'Content not found' });
+  }
+
   const update = {
   lastPositionSec: Math.max(0, positionSec || 0),
   completed: !!completed,
@@ -107,13 +111,11 @@ exports.listMine = async (req, res) => {
 };
 
 
-// controllers/watchHistory.js
 exports.getProgress = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const profileId = req.session.user.profileId;
     const contentId = req.params.id;
-
 
     // Get the content
     const content = await Content.findById(contentId).lean();

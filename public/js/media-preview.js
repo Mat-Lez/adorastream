@@ -20,9 +20,12 @@ const seasonEpisodeEl = document.getElementById('preview-season-episode');
 export async function playContent(contentId, lastPositionSec = 0, currentEpisodeId = null) {
   try {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     // const { content, currentEpisodeId, lastPositionSec } = await api('/api/content/select-content', 'POST', { contentId });
 >>>>>>> 1ad04cb (fix issues in media preview and player)
+=======
+>>>>>>> 109e32c (Add a few fixes to functionality and UI)
     let redirectUrl = `/player?contentId=${contentId}&lastPositionSec=${lastPositionSec}`;
       if (currentEpisodeId) {
         redirectUrl += `&currentEpisodeId=${currentEpisodeId}`;
@@ -62,9 +65,8 @@ function showProgressBar(container, progressSeconds, durationSeconds) {
   // Time
   const timeText = document.createElement('span');
   timeText.className = 'progress-time';
-  const minutesPast = Math.floor(progressSeconds / 60);
-  const totalMinutes = Math.ceil(durationSeconds / 60);
-  timeText.textContent = `${minutesPast} / ${totalMinutes} min`;
+  timeText.textContent = `${formatDuration(progressSeconds)} / ${formatDuration(durationSeconds)}`;
+
 
   progressWrapper.appendChild(bar);
   progressWrapper.appendChild(timeText);
@@ -189,6 +191,15 @@ async function controlButtonsContainer(contentId, heartBtnTemplate, contentType)
     actionsContainer.appendChild(actionsRow);
   }
 
+  // Format duration helper
+  function formatDuration(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const hrs = Math.floor(mins / 60);
+    const remainingMins = mins % 60;
+    if (hrs > 0) return `${hrs}h ${remainingMins}m`;
+    return `${mins}m`;
+  }
+
 
 async function openPreview(contentId) {
   try {
@@ -197,24 +208,30 @@ async function openPreview(contentId) {
     if (!content) { const e = new Error('Content not found'); e.status = 404; throw e; }
 
     let currentEpisodeId = null;
+    
     const progressData = await getProgress(contentId);
     currentEpisodeId = progressData?.episodeId;
-    
-    // Format duration helper
-    function formatDuration(seconds) {
-      const mins = Math.floor(seconds / 60);
-      const hrs = Math.floor(mins / 60);
-      const remainingMins = mins % 60;
-      if (hrs > 0) return `${hrs}h ${remainingMins}m`;
-      return `${mins}m`;
+    let currentEpisode = null;
+    let seasonNumber = null;
+    let episodeNumber = null;
+
+    if (content.type === 'series' && currentEpisodeId) {
+      try {
+        const episodeData = await api(`/api/content/${contentId}/${currentEpisodeId}/season-episode`);
+        currentEpisode = episodeData.episode;
+        seasonNumber = episodeData.seasonNumber;
+        episodeNumber = episodeData.episodeNumber;
+      } catch (e) {
+        console.warn('No current episode info available:', e.message);
+      }
     }
 
-    function showDuration(content) {
+    function showDuration(content, currentEpisode) {
       let durationText = '';
       if (content.type === 'movie' && content.durationSec) {
         durationText = formatDuration(content.durationSec);
-      } else if (content.type === 'series' && Array.isArray(content.episodes) && content.episodes.length > 0) {
-        const epDuration = content.episodes[0].durationSec || 0;
+      } else if (content.type === 'series') {
+        const epDuration = currentEpisode?.durationSec || 0;
         durationText = epDuration ? formatDuration(epDuration) : 'N/A';
       }
       return durationText;
@@ -227,39 +244,39 @@ async function openPreview(contentId) {
 
     if (seasonEpisodeEl) {
       if (content.type === 'series') {
-        if (currentEpisodeId) {
-          const info = await api(`/api/content/${contentId}/${currentEpisodeId}/season-episode`);
-          seasonEpisodeEl.textContent = info 
-            ? `Season ${info.seasonNumber} Episode ${info.episodeNumber}`
-            : '';
+        if (seasonNumber && episodeNumber) {
+          seasonEpisodeEl.textContent = `Season ${seasonNumber} Episode ${episodeNumber}`;
         } else {
           seasonEpisodeEl.textContent = '';
         }
       }
     }
 
-    if (content.type === 'movie') {
-      if (yearEl) {
+    if (yearEl) {
+      if (content.type === 'movie') {
         yearEl.textContent = content.year ? `(${content.year})` : '';
         yearEl.classList.remove('hidden');
       }
-      if (durationEl) {
-        durationEl.textContent = showDuration(content);
-        durationEl.classList.remove('hidden');
+    
+      else {
+        yearEl.textContent = ''; 
+        yearEl.classList.add('hidden');
       }
-    } else if (content.type === 'series') {
-      if (yearEl) yearEl.classList.add('hidden');
-        if (durationEl) durationEl.classList.add('hidden');
     }
 
-    // Show rating only if available
-    if (ratingEl) {
-      if (content.ratings?.imdb) {
-        ratingEl.textContent = `⭐ IMDB: ${content.ratings.imdb}/10`;
-      } else {
-        ratingEl.textContent = "No rating available";
-      }
+  if (durationEl) {
+      durationEl.textContent = showDuration(content, currentEpisode);
+      durationEl.classList.remove('hidden');
     }
+
+  // Show rating only if available
+  if (ratingEl) {
+    if (content.ratings?.imdb) {
+      ratingEl.textContent = `⭐ IMDB: ${content.ratings.imdb}/10`;
+    } else {
+      ratingEl.textContent = "No rating available";
+    }
+  }
 
   // Actors with clickable Wikipedia links
     const actorsContainer = document.getElementById('preview-actors');
@@ -275,7 +292,7 @@ async function openPreview(contentId) {
 
 
     // Episodes (for series)
-    if (content.type === 'series' && Array.isArray(content.episodes)) {
+    if (content.type === 'series' && Array.isArray(content.seasons)) {
       const episodesContainer = document.getElementById('episodes-container');
       episodesContainer.classList.remove('hidden');
 
