@@ -1,5 +1,5 @@
 const Content = require('../models/content');
-const { _getSortedEpisodes, getGenreSections } = require('./content.controller');
+const { _getSortedEpisodes, getGenreSections, getContentGrid } = require('./content.controller');
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
 const pageToLayoutMap = {
@@ -19,6 +19,11 @@ const pageToLayoutMap = {
       topbarLayout: ["TOPBAR_ACTIONS"],
       topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
+};
+const pageSearchScopes = {
+  home: 'all',
+  movies: 'movie',
+  shows: 'series'
 };
 
 exports.showLoginPage = (req, res) => {
@@ -64,6 +69,11 @@ async function attachGenreSections(renderOptions) {
   renderOptions.genreSections = await getGenreSections();
 }
 
+async function attachContentGrid(renderOptions, typeFilter) {
+  renderOptions.gridItems = await getContentGrid(typeFilter);
+  renderOptions.gridTitle = typeFilter === 'movie' ? 'Movies' : 'Shows';
+}
+
 exports.showContentMainPage = async (req, res) => {   
   const { user, profiles, activeProfileId } = res.locals;
 
@@ -79,7 +89,8 @@ exports.showContentMainPage = async (req, res) => {
     profiles,
     activeProfileId,
     topbarLayout: pageToLayoutMap['home'].topbarLayout,
-    topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout
+    topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout,
+    searchScope: pageSearchScopes.home
   };
 
   await attachGenreSections(renderOptions);
@@ -113,9 +124,15 @@ async function showPage(req, res, page, renderPath) {
     topbarActionsLayout: pageToLayoutMap[page].topbarActionsLayout,
     initialSettingsPage: page === 'settings' ? (req.query.tab === 'statistics' ? 'statistics' : 'manage-profiles') : undefined
   };
+  renderOptions.searchScope = pageSearchScopes[page] || 'all';
 
   if (page === 'home') {
     await attachGenreSections(renderOptions);
+  }
+
+  if (['movies', 'shows'].includes(page)) {
+    const typeFilter = page === 'movies' ? 'movie' : 'series';
+    await attachContentGrid(renderOptions, typeFilter);
   }
 
   res.render(renderPath, renderOptions);

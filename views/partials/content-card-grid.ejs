@@ -1,0 +1,20 @@
+<%
+  const cardItems = Array.isArray(items) ? items : [];
+  const classList = ['grid', 'content-grid'];
+  const normalizedGridClass = typeof gridClass === 'string' ? gridClass.trim() : '';
+  if (normalizedGridClass) {
+    classList.push(normalizedGridClass);
+  }
+  const resolvedGridId = typeof gridId === 'string' ? gridId : '';
+%>
+<div class="<%= classList.join(' ') %>" <%= resolvedGridId ? `id="${resolvedGridId}"` : '' %>>
+  <% cardItems.forEach(item => { %>
+    <div class="card" data-id="<%= item.id || item._id %>">
+      <div class="card-media">
+        <img src="<%= item.posterUrl || '/adorastream.png' %>" alt="<%= item.title || 'Untitled' %>">
+        <div class="play-overlay">▶</div>
+      </div>
+      <div class="card-title"><%= item.title || 'Untitled' %></div>
+    </div>
+  <% }) %>
+</div>
