@@ -128,7 +128,7 @@ async function showPage(req, res, page, renderPath) {
   };
   renderOptions.searchScope = pageSearchScopes[page] || 'all';
 
-  if (renderOptions.topbarLayout?.includes && renderOptions.topbarLayout.includes("FILTERS") && !renderOptions.genreSections) {
+  if (renderOptions.topbarLayout?.includes("FILTERS") && !renderOptions.genreSections) {
     await attachGenreSections(renderOptions);
   }
 

@@ -1,6 +1,6 @@
 <% 
   const genreOptionsRaw = (genreSections || []).map(section => section.genre);
-  const uniqueGenres = genreOptionsRaw.filter((genre, index, array) => array.indexOf(genre) === index);
+  const uniqueGenres = [...new Set(genreOptionsRaw)];
   const genreOptions = uniqueGenres.length ? uniqueGenres : ['Action', 'Comedy', 'Drama', 'Documentary', 'Sci-Fi', 'Thriller'];
 %>
 <div class="topbar-filter topbar-filter-genre">
