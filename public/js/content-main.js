@@ -131,6 +131,7 @@ async function sideNavbarPageSwapListener() {
       if (document.getElementById('search')) {
         initSearchFeature();
       }
+      initEndlessScroll();
       if (btn.dataset.settingsTarget === 'statistics') {
           try {
               // Dynamically import the script
@@ -185,6 +186,145 @@ function buildCardMarkup(item = {}) {
       <div class="card-title">${title}</div>
     </div>
   `;
+}
+
+function initEndlessScroll() {
+  const container = document.querySelector('.media-grid[data-endless-scroll="true"]');
+  if (!container || container.dataset.scrollInit === 'true') {
+    return;
+  }
+
+  const grid = container.querySelector('.content-grid');
+  const sentinel = container.querySelector('.endless-scroll-sentinel');
+  const limit = Number(container.dataset.limit || 0);
+  const type = container.dataset.type || '';
+  let total = Number(container.dataset.total || 0);
+  let page = Number(container.dataset.page || 1);
+
+  if (!grid || !sentinel || limit <= 0) {
+    sentinel?.remove();
+    return;
+  }
+
+  let loading = false;
+  let observer;
+
+  const computeTotalPages = () => {
+    return Number.isFinite(total) && total > 0 && limit > 0
+      ? Math.max(1, Math.ceil(total / limit))
+      : null;
+  };
+
+  let totalPages = computeTotalPages();
+  const visitedPages = new Set();
+  if (Number.isFinite(page) && page > 0 && totalPages && page <= totalPages) {
+    visitedPages.add(page);
+  }
+
+  const pickNextPage = () => {
+    totalPages = computeTotalPages();
+    if (!totalPages) {
+      return (Number.isFinite(page) ? page : 0) + 1;
+    }
+
+    if (visitedPages.size >= totalPages) {
+      visitedPages.clear();
+    }
+
+    const available = [];
+    for (let i = 1; i <= totalPages; i += 1) {
+      if (!visitedPages.has(i)) {
+        available.push(i);
+      }
+    }
+
+    if (!available.length) {
+      for (let i = 1; i <= totalPages; i += 1) {
+        available.push(i);
+      }
+    }
+
+    const nextPage = available[Math.floor(Math.random() * available.length)] || 1;
+    visitedPages.add(nextPage);
+    return nextPage;
+  };
+
+  const detachObserver = () => {
+    if (observer) {
+      observer.disconnect();
+      observer = null;
+    }
+    sentinel.remove();
+  };
+
+  const loadMore = async () => {
+    if (loading) return;
+
+    const currentTotal = Number.isFinite(Number(container.dataset.total))
+      ? Number(container.dataset.total)
+      : total;
+
+    if (!Number.isFinite(currentTotal) || currentTotal <= 0) {
+      detachObserver();
+      return;
+    }
+
+    loading = true;
+    const nextPage = pickNextPage();
+
+    try {
+      container.classList.add('loading-more');
+      const params = new URLSearchParams({
+        page: String(nextPage),
+        limit: String(limit)
+      });
+      if (type) {
+        params.set('type', type);
+      }
+
+      const response = await api(`/api/content?${params.toString()}`);
+      const contents = Array.isArray(response.contents) ? response.contents : [];
+      if (!contents.length) {
+        detachObserver();
+        return;
+      }
+
+      grid.insertAdjacentHTML('beforeend', contents.map(buildCardMarkup).join(''));
+      page = nextPage;
+      container.dataset.page = String(page);
+
+      if (typeof response.total === 'number') {
+        total = response.total;
+        container.dataset.total = String(total);
+        const previousTotalPages = totalPages;
+        totalPages = computeTotalPages();
+        if (!totalPages) {
+          visitedPages.clear();
+        } else if (totalPages !== previousTotalPages) {
+          visitedPages.clear();
+          if (Number.isFinite(page) && page > 0 && page <= totalPages) {
+            visitedPages.add(page);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load additional content:', error);
+      detachObserver();
+      return;
+    } finally {
+      loading = false;
+      container.classList.remove('loading-more');
+    }
+  };
+
+  observer = new IntersectionObserver((entries) => {
+    if (entries.some(entry => entry.isIntersecting)) {
+      loadMore();
+    }
+  }, { rootMargin: '200px' });
+
+  observer.observe(sentinel);
+  container.dataset.scrollInit = 'true';
 }
 
 function initSearchFeature() {
@@ -288,6 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
   topbarProfilesDropdownActionsListener();
   logoutEventListener('logout-btn');
   addCardClickListeners();
+  initEndlessScroll();
   if (document.getElementById('search')) {
     initSearchFeature();
   }

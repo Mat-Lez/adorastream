@@ -1,5 +1,5 @@
 const Content = require('../models/content');
-const { getGenreSections, getContentGrid } = require('./content.controller');
+const { getGenreSections } = require('./content.controller');
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
 const pageToLayoutMap = {
@@ -69,9 +69,26 @@ async function attachGenreSections(renderOptions) {
   renderOptions.genreSections = await getGenreSections();
 }
 
+const ENDLESS_SCROLLING_CONTENT_AMOUNT = Number(process.env.ENDLESS_SCROLLING_CONTENT_AMOUNT) || 20;
+
 async function attachContentGrid(renderOptions, typeFilter) {
-  renderOptions.gridItems = await getContentGrid(typeFilter);
+  const limit = ENDLESS_SCROLLING_CONTENT_AMOUNT;
+  const filter = typeFilter ? { type: typeFilter } : {};
+  const sort = { createdAt: -1 };
+
+  const [gridItems, total] = await Promise.all([
+    Content.find(filter).sort(sort).limit(limit).lean(),
+    Content.countDocuments(filter)
+  ]);
+
+  renderOptions.gridItems = gridItems;
   renderOptions.gridTitle = typeFilter === 'movie' ? 'Movies' : 'Shows';
+  renderOptions.gridPagination = {
+    page: 1,
+    limit,
+    total,
+    type: typeFilter || ''
+  };
 }
 
 exports.showContentMainPage = async (req, res) => {   
