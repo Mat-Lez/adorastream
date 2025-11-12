@@ -204,6 +204,23 @@ span.action-btn {
   color: var(--text);
 }
 
+.search-results {
+  margin-bottom: 24px;
+}
+
+.search-results.is-hidden {
+  display: none;
+}
+
+.search-empty {
+  margin: 8px 0 0;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.main.search-active .home-body {
+  display: none;
+}
 /* ====== Grid ====== */
 .grid {
   display: grid;
@@ -322,6 +339,16 @@ span.action-btn {
 .cards-row::-webkit-scrollbar-thumb {
   background: rgba(255,255,255,0.04);
   border-radius: 6px;
+}
+
+.search-results .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 220px);
+  justify-content: start;
+  gap: 16px;
+  width: 100%;
+  overflow: visible;
+  padding: 12px 0;
 }
 
 /* Profile dropdown container */
