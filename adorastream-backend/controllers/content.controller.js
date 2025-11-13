@@ -706,6 +706,43 @@ exports.getContentGrid = async (typeFilter, limit = GRID_CONTENT_LIMIT) => {
     .lean();
 };
 
+
+exports.getSimilarContent = async (req, res) => {
+  const contentId = req.params.id;
+  const current = await Content.findById(contentId).lean();
+
+  if (!current) {
+    return res.status(404).json({ error: 'Content not found' });
+  }
+
+  // Use the same genres as similarity basis
+  const genres = Array.isArray(current.genres) ? current.genres : [];
+
+  if (genres.length === 0) {
+    return res.json({ randomSimilar: [] });
+  }
+
+  // Find other content that shares at least one genre
+  const similar = await Content.find({
+    _id: { $ne: current._id }, // exclude current
+    genres: { $in: genres },
+    type: current.type, // same media type
+  })
+    .limit(20)
+    .lean();
+
+  // Shuffle array in place
+  for (let i = similar.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [similar[i], similar[j]] = [similar[j], similar[i]];
+  }
+
+  // Pick first 10 contents
+  const randomSimilar = similar.slice(0, 10);
+
+  res.json({ randomSimilar });
+};
+
 exports.fetchRandomizedContents = fetchRandomizedContents;
 exports.getPopularContents = getPopularContents;
 exports.getUnwatchedContents = getUnwatchedContents;
