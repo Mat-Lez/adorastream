@@ -59,13 +59,22 @@ exports.toggleLike = async (req, res) => {
     if (!content) return res.status(404).json({ success: false, error: 'Content not found' });
 
     let filter = { userId, profileId, contentId, episodeId: null };
-    if (content.type === 'series')
+    if (content.type === 'series') {
       filter.type = 'series-like';
+    } else {
+      filter.type = 'progress';
+    }
+
+    const currentEntry = await WatchHistory.findOne(filter).lean();
+    const toggledLiked = !currentEntry?.liked;
 
     const entry = await WatchHistory.findOneAndUpdate(
       filter,
-      [{ $set: { liked: { $not: '$liked' } } }],
-      { new: true, upsert: true }
+      {
+        $set: { liked: toggledLiked },
+        $setOnInsert: { type: filter.type }
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
     );
 
     res.json({ success: true, liked: entry.liked });
