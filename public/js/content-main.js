@@ -135,7 +135,7 @@ async function sideNavbarPageSwapListener() {
       if (page === 'movies' || page === 'shows') {
         initEndlessScroll();
       }
-      initGenreFilter();
+      initTopbarFilters();
       if (btn.dataset.settingsTarget === 'statistics') {
           try {
               // Dynamically import the script
@@ -199,45 +199,59 @@ function getActivePageName() {
 
 function getSelectedGenreFilterValue() {
   const genreSelect = document.getElementById('genre-filter');
-  const value = genreSelect?.value?.trim() || '';
-  return value;
+  return genreSelect?.value?.trim() || '';
 }
 
-function initGenreFilter() {
-  const genreSelect = document.getElementById('genre-filter');
-  if (!genreSelect) {
+function getSelectedFilterValue() {
+  const filterSelect = document.getElementById('filter-select');
+  return filterSelect?.value?.trim() || '';
+}
+
+async function applyActiveFilters() {
+  const activePage = getActivePageName();
+  if (!['movies', 'shows'].includes(activePage)) {
     return;
   }
-  if (genreSelect.dataset.genreFilterInit === 'true') {
+
+  const mainElem = document.querySelector('.main');
+  if (!mainElem) {
     return;
   }
-  genreSelect.dataset.genreFilterInit = 'true';
 
-  genreSelect.addEventListener('change', async () => {
-    const selectedGenre = genreSelect.value.trim();
-    const activePage = getActivePageName();
-    if (!['movies', 'shows'].includes(activePage)) {
+  const params = new URLSearchParams();
+  const genreValue = getSelectedGenreFilterValue();
+  if (genreValue) {
+    params.set('genre', genreValue);
+  }
+  const filterValue = getSelectedFilterValue();
+  if (filterValue) {
+    params.set('filterBy', filterValue);
+  }
+  const basePath = `/content-main/${activePage}`;
+  const targetUrl = params.toString() ? `${basePath}?${params.toString()}` : basePath;
+
+  await fetchPage(targetUrl, mainElem, 'loading');
+  if (document.getElementById('search')) {
+    initSearchFeature();
+  }
+  initEndlessScroll();
+  initTopbarFilters();
+}
+
+function initTopbarFilters() {
+  const filterSelectors = ['genre-filter', 'filter-select'];
+  filterSelectors.forEach((selectorId) => {
+    const filterElement = document.getElementById(selectorId);
+    if (!filterElement) {
       return;
     }
-
-    const mainElem = document.querySelector('.main');
-    if (!mainElem) {
+    if (filterElement.dataset.filterInit === 'true') {
       return;
     }
-
-    const params = new URLSearchParams();
-    if (selectedGenre) {
-      params.set('genre', selectedGenre);
-    }
-    const basePath = `/content-main/${activePage}`;
-    const targetUrl = params.toString() ? `${basePath}?${params.toString()}` : basePath;
-
-    await fetchPage(targetUrl, mainElem, 'loading');
-    if (document.getElementById('search')) {
-      initSearchFeature();
-    }
-    initEndlessScroll();
-    initGenreFilter();
+    filterElement.dataset.filterInit = 'true';
+    filterElement.addEventListener('change', () => {
+      applyActiveFilters();
+    });
   });
 }
 
@@ -252,6 +266,7 @@ function initEndlessScroll() {
   const limit = Number(container.dataset.limit || 0);
   const type = container.dataset.type || '';
   const genre = container.dataset.genre || '';
+  const filterBy = container.dataset.filter || '';
   let total = Number(container.dataset.total || 0);
   let lastServedPage = Number(container.dataset.page || 1);
   let currentSeed = container.dataset.randomSeed || Math.random().toString(36).slice(2);
@@ -308,6 +323,9 @@ function initEndlessScroll() {
       }
       if (genre) {
         params.set('genres', genre);
+      }
+      if (filterBy) {
+        params.set('filterBy', filterBy);
       }
 
       const response = await api(`/api/content?${params.toString()}`);
@@ -458,5 +476,5 @@ document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('search')) {
     initSearchFeature();
   }
-  initGenreFilter();
+  initTopbarFilters();
 });

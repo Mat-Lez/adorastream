@@ -1,4 +1,5 @@
 const Content = require('../models/content');
+const WatchHistory = require('../models/watchHistory');
 const { enrichMovieRatings, enrichSeriesRatings, enrichSeriesEpisodesRatings } = require('../services/rating.service');
 const upload = require('../services/videoUpload.service');
 
@@ -61,6 +62,61 @@ function createSeededRandom(seed) {
     t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+async function getPopularContents({ limit = 10, typeFilter, genreFilter } = {}) {
+  const sanitizedLimit = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
+  const pipeline = [
+    { $match: { liked: true } },
+    { $group: { _id: '$contentId', likes: { $sum: 1 } } },
+    { $sort: { likes: -1 } },
+    {
+      $lookup: {
+        from: 'contents',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'content'
+      }
+    },
+    { $unwind: '$content' }
+  ];
+
+  if (typeFilter) {
+    pipeline.push({ $match: { 'content.type': typeFilter } });
+  }
+
+  if (genreFilter) {
+    pipeline.push({ $match: { 'content.genres': genreFilter } });
+  }
+
+  pipeline.push({ $limit: sanitizedLimit });
+
+  const results = await WatchHistory.aggregate(pipeline).exec();
+  return results.map(item => ({
+    ...item.content,
+    likes: item.likes
+  }));
+}
+
+async function getUnwatchedContents(profileId, { limit = 10, typeFilter, genreFilter } = {}) {
+  if (!profileId) {
+    return [];
+  }
+  const sanitizedLimit = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
+  const watchedIds = await WatchHistory.find({ profileId }).distinct('contentId');
+  const filter = {
+    _id: { $nin: watchedIds }
+  };
+  if (typeFilter) {
+    filter.type = typeFilter;
+  }
+  if (genreFilter) {
+    filter.genres = genreFilter;
+  }
+  return Content.find(filter)
+    .sort({ createdAt: -1 })
+    .limit(sanitizedLimit)
+    .lean();
 }
 
 // POST create new content
@@ -611,3 +667,6 @@ exports.getContentGrid = async (typeFilter, limit = GRID_CONTENT_LIMIT) => {
 };
 
 exports.fetchRandomizedContents = fetchRandomizedContents;
+exports.getPopularContents = getPopularContents;
+exports.getUnwatchedContents = getUnwatchedContents;
+exports.getPopularContents = getPopularContents;

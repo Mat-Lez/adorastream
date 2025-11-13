@@ -5,7 +5,8 @@
   const paginationPage = typeof pagination.page === 'number' ? pagination.page : 1;
   const paginationType = typeof pagination.type === 'string' ? pagination.type : '';
   const paginationGenre = typeof pagination.genre === 'string' ? pagination.genre.trim() : '';
-  const endlessScrollEnabled = paginationLimit > 0 && paginationTotal >= 0 && !paginationGenre;
+  const paginationFilter = typeof pagination.filterBy === 'string' ? pagination.filterBy.trim() : '';
+  const endlessScrollEnabled = paginationLimit > 0 && paginationTotal >= 0 && !paginationGenre && !paginationFilter;
 %>
 
 <%- include('search-results', { searchScope: searchScope || 'all' }) %>
@@ -16,6 +17,7 @@
     data-endless-scroll="<%= endlessScrollEnabled ? 'true' : 'false' %>"
     data-type="<%= paginationType %>"
     data-genre="<%= paginationGenre %>"
+    data-filter="<%= paginationFilter %>"
     data-page="<%= paginationPage %>"
     data-limit="<%= paginationLimit %>"
     data-total="<%= paginationTotal %>"
