@@ -65,15 +65,17 @@ exports.toggleLike = async (req, res) => {
       filter.type = 'progress';
     }
 
-    const currentEntry = await WatchHistory.findOne(filter).lean();
-    const toggledLiked = !currentEntry?.liked;
-
     const entry = await WatchHistory.findOneAndUpdate(
       filter,
-      {
-        $set: { liked: toggledLiked },
-        $setOnInsert: { type: filter.type }
-      },
+      [
+        {
+          $set: {
+            type: { $ifNull: ['$type', filter.type] },
+            liked: { $ifNull: ['$liked', false] },
+          },
+        },
+        { $set: { liked: { $not: '$liked' } } },
+      ],
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
 
