@@ -1,8 +1,14 @@
-<% 
+<%
   const genreOptionsRaw = (genreSections || []).map(section => section.genre);
   const uniqueGenres = [...new Set(genreOptionsRaw)];
   const genreOptions = uniqueGenres.length ? uniqueGenres : ['Action', 'Comedy', 'Drama', 'Documentary', 'Sci-Fi', 'Thriller'];
   const selectedGenreValue = typeof selectedGenre === 'string' ? selectedGenre.trim() : '';
+  const selectedFilterValue = typeof selectedFilter === 'string' ? selectedFilter.trim() : '';
+  const filterOptions = [
+    { value: '', label: 'No Filter' },
+    { value: 'popular', label: 'Popular' },
+    { value: 'unwatched', label: 'Unwatched' }
+  ];
 %>
 <div class="topbar-filter topbar-filter-genre">
   <label for="genre-filter">Genre</label>
@@ -10,6 +16,15 @@
     <option value="" <%= selectedGenreValue === '' ? 'selected' : '' %>>All Genres</option>
     <% genreOptions.forEach(genre => { %>
       <option value="<%= genre %>" <%= genre === selectedGenreValue ? 'selected' : '' %>><%= genre %></option>
+    <% }) %>
+  </select>
+</div>
+
+<div class="topbar-filter topbar-filter-popularity">
+  <label for="filter-select">Filter by</label>
+  <select id="filter-select" name="filterBy">
+    <% filterOptions.forEach(option => { %>
+      <option value="<%= option.value %>" <%= option.value === selectedFilterValue ? 'selected' : '' %>><%= option.label %></option>
     <% }) %>
   </select>
 </div>
