@@ -134,6 +134,7 @@ async function sideNavbarPageSwapListener() {
       if (page === 'movies' || page === 'shows') {
         initEndlessScroll();
       }
+      initGenreFilter();
       if (btn.dataset.settingsTarget === 'statistics') {
           try {
               // Dynamically import the script
@@ -190,6 +191,55 @@ function buildCardMarkup(item = {}) {
   `;
 }
 
+function getActivePageName() {
+  const activeBtn = document.querySelector('.nav-item.active');
+  return activeBtn ? activeBtn.dataset.page : '';
+}
+
+function getSelectedGenreFilterValue() {
+  const genreSelect = document.getElementById('genre-filter');
+  const value = genreSelect?.value?.trim() || '';
+  return value;
+}
+
+function initGenreFilter() {
+  const genreSelect = document.getElementById('genre-filter');
+  if (!genreSelect) {
+    return;
+  }
+  if (genreSelect.dataset.genreFilterInit === 'true') {
+    return;
+  }
+  genreSelect.dataset.genreFilterInit = 'true';
+
+  genreSelect.addEventListener('change', async () => {
+    const selectedGenre = genreSelect.value.trim();
+    const activePage = getActivePageName();
+    if (!['movies', 'shows'].includes(activePage)) {
+      return;
+    }
+
+    const mainElem = document.querySelector('.main');
+    if (!mainElem) {
+      return;
+    }
+
+    const params = new URLSearchParams();
+    if (selectedGenre) {
+      params.set('genre', selectedGenre);
+    }
+    const basePath = `/content-main/${activePage}`;
+    const targetUrl = params.toString() ? `${basePath}?${params.toString()}` : basePath;
+
+    await fetchPage(targetUrl, mainElem, 'loading');
+    if (document.getElementById('search')) {
+      initSearchFeature();
+    }
+    initEndlessScroll();
+    initGenreFilter();
+  });
+}
+
 function initEndlessScroll() {
   const container = document.querySelector('.media-grid[data-endless-scroll="true"]');
   if (!container || container.dataset.scrollInit === 'true') {
@@ -200,6 +250,7 @@ function initEndlessScroll() {
   const sentinel = container.querySelector('.endless-scroll-sentinel');
   const limit = Number(container.dataset.limit || 0);
   const type = container.dataset.type || '';
+  const genre = container.dataset.genre || '';
   let total = Number(container.dataset.total || 0);
   let lastServedPage = Number(container.dataset.page || 1);
   let currentSeed = container.dataset.randomSeed || Math.random().toString(36).slice(2);
@@ -253,6 +304,9 @@ function initEndlessScroll() {
       });
       if (type) {
         params.set('type', type);
+      }
+      if (genre) {
+        params.set('genres', genre);
       }
 
       const response = await api(`/api/content?${params.toString()}`);
@@ -343,10 +397,18 @@ function initSearchFeature() {
     searchGrid.innerHTML = '';
 
     try {
-      const typeFilterParam = normalizedSearchScope !== 'all'
-        ? `&type=${encodeURIComponent(normalizedSearchScope)}`
-        : '';
-      const response = await api(`/api/content?q=${encodeURIComponent(term)}&limit=${SEARCH_RESULTS_LIMIT}${typeFilterParam}`);
+      const params = new URLSearchParams({
+        q: term,
+        limit: String(SEARCH_RESULTS_LIMIT)
+      });
+      if (normalizedSearchScope !== 'all') {
+        params.set('type', normalizedSearchScope);
+      }
+      const selectedGenre = getSelectedGenreFilterValue();
+      if (selectedGenre) {
+        params.set('genres', selectedGenre);
+      }
+      const response = await api(`/api/content?${params.toString()}`);
       const contents = response.contents || [];
       if (contents.length === 0) {
         showMessage(`No results found for "${term}".`);
@@ -395,4 +457,5 @@ document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('search')) {
     initSearchFeature();
   }
+  initGenreFilter();
 });

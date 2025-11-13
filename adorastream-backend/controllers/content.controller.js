@@ -139,7 +139,8 @@ exports.create = async (req, res) => {
 
 //
 exports.list = async (req, res) => {
-  const { q, genres = [], sortBy = 'createdAt', order = 'desc' } = req.query;
+  const { q = '', sortBy = 'createdAt', order = 'desc' } = req.query;
+  const rawGenres = req.query.genres;
   const page  = Math.max(1, parseInt(req.query.page || '1', 10));
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || '20', 10)));
   const skip  = (page - 1) * limit;
@@ -163,9 +164,11 @@ exports.list = async (req, res) => {
     }
   }
 
-  // genres is expected to be an array: ?genres=Drama&genres=Sci-Fi
-  if (Array.isArray(genres) && genres.length > 0) {
-    filter.genres = { $in: genres };
+  const resolvedGenres = Array.isArray(rawGenres)
+    ? rawGenres
+    : (typeof rawGenres === 'string' && rawGenres.trim() ? [rawGenres.trim()] : []);
+  if (resolvedGenres.length > 0) {
+    filter.genres = { $in: resolvedGenres };
   }
 
   const sort = { [sortBy]: order === 'asc' ? 1 : -1 };

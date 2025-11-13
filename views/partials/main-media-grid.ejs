@@ -4,7 +4,8 @@
   const paginationLimit = typeof pagination.limit === 'number' ? pagination.limit : 0;
   const paginationPage = typeof pagination.page === 'number' ? pagination.page : 1;
   const paginationType = typeof pagination.type === 'string' ? pagination.type : '';
-  const endlessScrollEnabled = paginationLimit > 0 && paginationTotal >= 0;
+  const paginationGenre = typeof pagination.genre === 'string' ? pagination.genre.trim() : '';
+  const endlessScrollEnabled = paginationLimit > 0 && paginationTotal >= 0 && !paginationGenre;
 %>
 
 <%- include('search-results', { searchScope: searchScope || 'all' }) %>
@@ -12,8 +13,9 @@
 <div class="home-body">
   <section
     class="category search-results media-grid"
-    data-endless-scroll="<%= endlessScrollEnabled %>"
+    data-endless-scroll="<%= endlessScrollEnabled ? 'true' : 'false' %>"
     data-type="<%= paginationType %>"
+    data-genre="<%= paginationGenre %>"
     data-page="<%= paginationPage %>"
     data-limit="<%= paginationLimit %>"
     data-total="<%= paginationTotal %>"
