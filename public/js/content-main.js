@@ -177,11 +177,11 @@ function escapeHtml(value = '') {
 function buildCardMarkup(item = {}) {
   const id = item.id || item._id || '';
   const title = escapeHtml(item.title || 'Untitled');
-  const posterUrl = item.posterUrl || '/adorastream.png';
+  const posterUrl = item.posterUrl || '/assets/no_poster.svg';
   return `
     <div class="card" data-id="${id}">
       <div class="card-media">
-        <img src="${posterUrl}" alt="${title}">
+        <img src="${posterUrl}" alt="${title}" onerror="this.src='/assets/no_poster.svg';">
         <div class="play-overlay">▶</div>
       </div>
       <div class="card-title">${title}</div>
