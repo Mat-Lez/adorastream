@@ -39,7 +39,7 @@ exports.upsertProgress = async (req, res) => {
     { upsert: true, new: true }
   );
 
-  logDailyWatch(userId, profileId, contentId);
+  logDailyWatch(userId, profileId, contentId, episodeId);
   
   res.json(history);
 };

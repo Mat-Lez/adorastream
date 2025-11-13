@@ -41,6 +41,7 @@ const DailyWatchSchema = new Schema(
     userId: { type: Types.ObjectId, ref: 'User', index: true, required: true },
     profileId: { type: Types.ObjectId, index: true, required: true },
     contentId: { type: Types.ObjectId, ref: 'Content', index: true, required: true },
+    episodeId: { type: Types.ObjectId, default: null },
     
     // This field is supposed to store the very start of the day (00:00:00)
     date: { type: Date, index: true, required: true },
@@ -49,8 +50,8 @@ const DailyWatchSchema = new Schema(
 );
 
 DailyWatchSchema.index(
-  { userId: 1, profileId: 1, contentId: 1, date: 1 },
-  { unique: true, name: 'uniq_user_profile_content_day' }
+  { userId: 1, profileId: 1, contentId: 1, episodeId: 1, date: 1 },
+  { unique: true, name: 'uniq_user_profile_content_episode_day' }
 );
 
 DailyWatchSchema.plugin(cleanMongoResponse);
