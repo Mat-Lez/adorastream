@@ -72,7 +72,7 @@ exports.toggleLike = async (req, res) => {
         },
         { $set: { liked: { $not: '$liked' } } },
       ],
-      { new: true, upsert: true, setDefaultsOnInsert: true }
+      { new: true, upsert: true }
     );
 
     res.json({ success: true, liked: entry.liked });
