@@ -5,7 +5,7 @@
     <% items.forEach(item => { %>
       <div class="card" data-id="<%= item.id %>">
         <div class="card-media">
-          <img src="<%= item.posterUrl %>" alt="<%= item.title %>" onerror="this.src='https://placehold.co/200x280/0d1117/8b949e?text=No+Poster';">
+          <img src="<%= item.posterUrl %>" alt="<%= item.title %>" onerror="this.src='/assets/no_poster.svg';">
           <div class="play-overlay">▶</div>
         </div>
         <div class="card-title"><%= item.title %></div>
