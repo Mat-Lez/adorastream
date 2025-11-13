@@ -529,7 +529,7 @@ span.action-btn {
 }
 
 .topbar-filter select:hover {
-  border-color: #484f58; /* Slightly lighter border on hover */
+  border-color: var(--button-border-hover, #484f58); /* Slightly lighter border on hover */
 }
 
 .topbar-filter select:focus {
