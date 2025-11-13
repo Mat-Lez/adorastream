@@ -1,5 +1,7 @@
+const crypto = require('crypto');
 const Content = require('../models/content');
-const { _getSortedEpisodes, getGenreSections, getContentGrid } = require('./content.controller');
+const { _getSortedEpisodes, getGenreSections, getContentGrid, fetchRandomizedContents } = require('./content.controller');
+
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
 const pageToLayoutMap = {
@@ -69,9 +71,24 @@ async function attachGenreSections(renderOptions) {
   renderOptions.genreSections = await getGenreSections();
 }
 
+const ENDLESS_SCROLLING_CONTENT_AMOUNT = Number(process.env.ENDLESS_SCROLLING_CONTENT_AMOUNT) || 20;
+
 async function attachContentGrid(renderOptions, typeFilter) {
-  renderOptions.gridItems = await getContentGrid(typeFilter);
+  const limit = ENDLESS_SCROLLING_CONTENT_AMOUNT;
+  const filter = typeFilter ? { type: typeFilter } : {};
+  const randomSeed = crypto.randomBytes(8).toString('hex');
+
+  const { contents: gridItems, total } = await fetchRandomizedContents(filter, { limit, seed: randomSeed });
+
+  renderOptions.gridItems = gridItems;
   renderOptions.gridTitle = typeFilter === 'movie' ? 'Movies' : 'Shows';
+  renderOptions.gridPagination = {
+    page: 1,
+    limit,
+    total,
+    type: typeFilter || '',
+    randomSeed
+  };
 }
 
 exports.showContentMainPage = async (req, res) => {   
