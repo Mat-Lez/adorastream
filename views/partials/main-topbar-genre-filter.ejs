@@ -2,13 +2,14 @@
   const genreOptionsRaw = (genreSections || []).map(section => section.genre);
   const uniqueGenres = [...new Set(genreOptionsRaw)];
   const genreOptions = uniqueGenres.length ? uniqueGenres : ['Action', 'Comedy', 'Drama', 'Documentary', 'Sci-Fi', 'Thriller'];
+  const selectedGenreValue = typeof selectedGenre === 'string' ? selectedGenre.trim() : '';
 %>
 <div class="topbar-filter topbar-filter-genre">
   <label for="genre-filter">Genre</label>
   <select id="genre-filter" name="genreFilter">
-    <option value="">All Genres</option>
+    <option value="" <%= selectedGenreValue === '' ? 'selected' : '' %>>All Genres</option>
     <% genreOptions.forEach(genre => { %>
-      <option value="<%= genre.toLowerCase().replace(/\s+/g, '-') %>"><%= genre %></option>
+      <option value="<%= genre %>" <%= genre === selectedGenreValue ? 'selected' : '' %>><%= genre %></option>
     <% }) %>
   </select>
 </div>

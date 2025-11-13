@@ -14,6 +14,7 @@
     class="category search-results media-grid"
     data-endless-scroll="<%= endlessScrollEnabled %>"
     data-type="<%= paginationType %>"
+    data-genre="<%= (gridPagination && gridPagination.genre) ? gridPagination.genre : '' %>"
     data-page="<%= paginationPage %>"
     data-limit="<%= paginationLimit %>"
     data-total="<%= paginationTotal %>"

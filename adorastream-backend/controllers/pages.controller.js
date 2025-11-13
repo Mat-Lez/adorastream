@@ -75,10 +75,14 @@ async function attachGenreSections(renderOptions) {
 
 const ENDLESS_SCROLLING_CONTENT_AMOUNT = Number(process.env.ENDLESS_SCROLLING_CONTENT_AMOUNT) || 20;
 
-async function attachContentGrid(renderOptions, typeFilter) {
+async function attachContentGrid(renderOptions, typeFilter, genreFilter) {
   const limit = ENDLESS_SCROLLING_CONTENT_AMOUNT;
   const filter = typeFilter ? { type: typeFilter } : {};
   const randomSeed = crypto.randomBytes(8).toString('hex');
+  const normalizedGenre = typeof genreFilter === 'string' && genreFilter.trim() ? genreFilter.trim() : '';
+  if (normalizedGenre) {
+    filter.genres = { $in: [normalizedGenre] };
+  }
 
   const { contents: gridItems, total } = await fetchRandomizedContents(filter, { limit, seed: randomSeed });
 
@@ -89,7 +93,8 @@ async function attachContentGrid(renderOptions, typeFilter) {
     limit,
     total,
     type: typeFilter || '',
-    randomSeed
+    randomSeed,
+    genre: normalizedGenre
   };
 }
 
@@ -160,9 +165,12 @@ async function showPage(req, res, page, renderPath) {
     await attachRecommendations(renderOptions, user._id, activeProfileId);
   }
 
+  const requestedGenre = typeof req.query.genre === 'string' ? req.query.genre.trim() : '';
+  renderOptions.selectedGenre = requestedGenre || '';
+
   if (['movies', 'shows'].includes(page)) {
     const typeFilter = page === 'movies' ? 'movie' : 'series';
-    await attachContentGrid(renderOptions, typeFilter);
+    await attachContentGrid(renderOptions, typeFilter, requestedGenre);
   }
 
   res.render(renderPath, renderOptions);
