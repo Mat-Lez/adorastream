@@ -28,7 +28,7 @@ Create environment configuration by copying `.env-template` to `.env` and fillin
 
 ```bash
 PORT=3000
-SESSION_SECRET=dev-secret
+SESSION_SECRET=
 MONGODB_URI=mongodb://127.0.0.1:27017/adorastream
 OMDB_API_KEY=
 ADMIN_USERNAME=
