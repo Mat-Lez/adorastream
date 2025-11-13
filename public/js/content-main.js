@@ -131,7 +131,9 @@ async function sideNavbarPageSwapListener() {
       if (document.getElementById('search')) {
         initSearchFeature();
       }
-      initEndlessScroll();
+      if (page === 'movies' || page === 'shows') {
+        initEndlessScroll();
+      }
       if (btn.dataset.settingsTarget === 'statistics') {
           try {
               // Dynamically import the script
