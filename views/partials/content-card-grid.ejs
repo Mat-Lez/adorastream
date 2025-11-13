@@ -11,7 +11,7 @@
   <% cardItems.forEach(item => { %>
     <div class="card" data-id="<%= item.id || item._id %>">
       <div class="card-media">
-        <img src="<%= item.posterUrl || '/assets/no_poster.svg' %>" alt="<%= item.title || 'Untitled' %>" onerror="this.src='/assets/no_poster.svg';">
+        <img src="<%= item.posterUrl || '/assets/no_poster.svg' %>" alt="<%= item.title || 'Untitled' %>" onerror="this.onerror=null;this.src='/assets/no_poster.svg';">
         <div class="play-overlay">▶</div>
       </div>
       <div class="card-title"><%= item.title || 'Untitled' %></div>
