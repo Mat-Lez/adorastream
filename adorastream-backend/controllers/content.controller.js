@@ -194,7 +194,6 @@ exports.get = async (req, res) => {
   res.json(content);
 };
 
-
 // PATCH update content by ID
 exports.update = async (req, res) => {
   const content = await Content.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -432,7 +431,25 @@ exports.addEpisodesBatch = async (req, res) => {
   res.status(201).json(series);
 };
 
-exports.selectContent = async (req, res) => {
+
+
+exports.currentlyPlayed = async (req, res) => {
+  if (!req.session?.user?.id || !req.session?.user?.profileId) {
+    return res.status(401).json({ error: 'Not authenticated or profile not selected' });
+  }
+
+  const contentId = req.session.user.contentId;
+  const currentEpisodeId = req.session.user.currentEpisodeId || null;
+  if (!contentId) return res.status(400).json({ error: 'No content selected' });
+  const content = await Content.findById(contentId);
+  if (!content) throw Object.assign(new Error('Content not found'), { status: 404 });
+
+  return res.json({ contentId: contentId, currentEpisodeId: currentEpisodeId, type: content.type });
+};
+
+
+// Get Id of the next episode based on the one currently playing
+  exports.getNextEpisodeId = async (req, res) => {
     // require an authenticated session user
     if (!req.session?.user?.id) {
       return res.status(401).json({ error: 'Not authenticated' });
@@ -441,11 +458,13 @@ exports.selectContent = async (req, res) => {
     if (!req.session?.user?.profileId) {
       return res.status(401).json({ error: 'No profile selected' });
     }
-    const { contentId } = req.body;
+
+    const contentId = req.session.user.contentId;
+    const currentEpisodeId = req.session.user.currentEpisodeId;
+
     if (!contentId) {
-      return res.status(400).json({ error: 'ContentId is required' });
+      return res.status(400).json({ error: 'No content selected' });
     }
-    const { season, episode } = req.query; // for series
 
     const content = await Content.findById(contentId);
     if (!content) { const e = new Error('Content not found'); e.status = 404; throw e; }
@@ -454,26 +473,94 @@ exports.selectContent = async (req, res) => {
     let nextEpisode = null;
 
     if (content.type === 'series') {
-      const episodes = content.episodes.sort((a, b) => {
-        if (a.season === b.season) return a.episode - b.episode;
-        return a.season - b.season;
-      });
+      const allEpisodes = _getSortedEpisodes(content);
 
-      currentEpisode = episodes.find(
-        (e) => e.season === season && e.episode === episode
-      ) || episodes[0]; // default to first episode
-
-      // Find next episode if available
-      const currentIndex = episodes.indexOf(currentEpisode);
-      nextEpisode = episodes[currentIndex + 1] || null;
+      currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
+      const currentIndex = allEpisodes.indexOf(currentEpisode);
+      nextEpisode = allEpisodes[currentIndex + 1] || null;
     }
-    // Save it in the session and persist
+     // Save it in the session and persist
     req.session.user.contentId = content.id;
+    let nextEpisodeId = nextEpisode ? nextEpisode._id : null;
+    req.session.user.currentEpisodeId = nextEpisodeId;
+    
     await new Promise((resolve, reject) => {
       req.session.save(err => (err ? reject(err) : resolve()));
     });
-    res.json({ content, currentEpisode, nextEpisode });
+
+    res.json({ "contentId": contentId, "nextEpisodeId": nextEpisodeId });
+  }
+
+
+// helper function
+function _getSortedEpisodes(content) {
+  if (!content?.seasons || !Array.isArray(content.seasons)) return [];
+
+  const episodes = [];
+  for (const season of content.seasons) {
+    if (!season?.episodes) continue;
+    for (const ep of season.episodes) {
+      episodes.push({
+        ...ep.toObject?.() ?? ep,
+        seasonNumber: season.seasonNumber ?? 1,
+      });
+    }
+  }
+
+  return episodes.sort((a, b) =>
+    a.seasonNumber === b.seasonNumber
+      ? a.episodeNumber - b.episodeNumber
+      : a.seasonNumber - b.seasonNumber
+  );
 }
+
+
+exports.getSeasonEpisodeById = async (req, res) => {
+  const contentId = req.params.id;
+  const episodeId = req.params.episodeId;
+
+  const content = await Content.findById(contentId);
+
+  if (!content || content.type !== 'series' || !Array.isArray(content.seasons)) return null;
+
+  for (const season of content.seasons) {
+    const ep = season.episodes.find(e => e._id.toString() === episodeId.toString());
+    if (ep) {
+      return res.json({ episode: ep, seasonNumber: season.seasonNumber, episodeNumber: ep.episodeNumber });
+    }
+  }
+}
+
+// Get all episodes of a certain sereis
+exports.getEpisodesForSeries = async (req, res) => {
+
+  const content = await Content.findById(req.params.id);
+  if (!content) return res.status(404).json({ error: 'Content not found' });
+
+  if (!req.session?.user?.id) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  if (!req.session?.user?.profileId) {
+    return res.status(401).json({ error: 'No profile selected' });
+  }
+
+  if (content.type !== 'series') return res.json({ episodes: [] });
+
+  const episodes = _getSortedEpisodes(content);
+  
+  // Determine current episode from session
+  const currentEpisodeId = req.session.user.currentEpisodeId;
+  const currentEpisodeIndex = episodes.findIndex(ep => ep._id.toString() === currentEpisodeId);
+
+  res.json({
+    episodes,
+    currentEpisodeIndex,
+    totalSeasons: content.seasons.length
+  });
+};
+
+
+exports._getSortedEpisodes = _getSortedEpisodes;
 
 const DEFAULT_GENRE_LIMIT = Number(process.env.DEFAULT_GENRE_LIMIT) || 10;
 const GENRE_FETCH_LIMIT_MULTIPLIER = Number(process.env.GENRE_FETCH_LIMIT_MULTIPLIER) || 25;

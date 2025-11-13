@@ -1,0 +1,326 @@
+.preview-overlay {
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.8);
+  transition: opacity 0.3s ease;
+}
+
+.preview-card {
+  position: relative;
+  font-size: 20px;
+  background-color: #111;
+  border-radius: 8px;
+  padding: 20px;
+  width: 600px;
+  max-width: 90%;
+  display: flex;
+  flex-direction: column;
+  /* gap: 15px; */
+  /* margin: 0; */
+  z-index: 10; 
+  color: #fff;
+  max-height: 95vh; 
+  overflow-y: auto; 
+  box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.preview-card::-webkit-scrollbar {
+  width: 8px;
+}
+.preview-card::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 5px;
+}
+
+.preview-poster {
+  width: 100%;
+  border-radius: 6px;
+  object-fit: cover;
+  display: block;
+}
+
+.preview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 0;
+}
+
+.preview-info > * {
+  margin: 0; /* remove default browser margin */
+}
+
+.preview-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-top: 24px
+}
+
+
+.preview-meta {
+  display: flex;
+  align-items: center;
+  color: #ddd;
+}
+
+.preview-meta span.hidden {
+  display: none;
+}
+
+.preview-meta span:not(.hidden) + span:not(.hidden)::before{
+  content: "•";
+  color: #aaa;
+  margin: 0 12px;
+}
+
+.preview-description {
+  color: #ddd;
+}
+
+
+.preview-actors a {
+  color: #1db954;
+  text-decoration: none;
+  margin-right: 6px;
+}
+.preview-actors a:hover {
+  text-decoration: underline;
+}
+
+.actions-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  max-width: 600px; 
+}
+
+.preview-actions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.control-btn {
+  background-color: #333; /* dark gray */
+  border: 1px solid var(--primary);
+  line-height: 2;
+  padding: 6px 20px;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 20px;
+  transition: background-color 0.2s ease;
+  display: inline-block;
+  white-space: normal;  /* allows text to wrap if too long */
+  width: auto;
+  text-align: center; ;
+}
+
+.control-btn:hover {
+  background-color: var(--primary);;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0,0,0,0.7);
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  z-index: 20;
+}
+
+
+.preview-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap; /* if buttons are too many, wrap to next line */
+}
+
+.progress-wrapper {
+  width: 100%;
+  background-color: #555;
+  border-radius: 5px;
+  height: 5px;
+  margin: 0 8px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: var(--primary);
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.progress-time {
+  font-size: 0.9rem;
+  color: #ccc;
+  min-width: 60px;
+  text-align: right;
+}
+
+.heart-btn {
+  display: inline-flex;
+  align-items: center;       /* vertical center */
+  justify-content: center;   /* horizontal center */
+  width: 44px;
+  height: 44px;
+  padding: 6px;                /* remove extra padding */
+  margin: 0;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #ccc;
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.heart-btn i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  line-height: 1;            /* key to remove extra vertical space */
+  vertical-align: middle;    /* helps with icon alignment */
+  transform: translateY(1px); /* adjust this until it’s visually centered */
+}
+
+.heart-btn:hover {
+  color: #fff;
+  transform: scale(1.15);
+}
+
+.heart-btn.liked {
+  color: #e0245e;
+  transform: scale(1.25);
+}
+
+.heart-btn.liked i {
+  animation: pop 0.35s ease;
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
+
+/* css for detailed episodes list */
+
+.preview-season-episode:empty {
+  display: inline;
+  margin: 0;
+  height: 0;
+}
+
+.episodes-container {
+  margin-top: 16px;
+}
+
+.toggle-episodes-btn {
+  margin-bottom: 8px;
+}
+
+.episodes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.episode-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #111;
+  padding: 8px;
+  border-radius: 6px;
+  color: #ddd;
+  transition: background-color 0.2s ease;
+}
+
+.episode-card:hover {
+  background: #222;
+}
+
+.episode-card img {
+  width: 70px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.episode-card-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.episode-card-title {
+  font-weight: bold;
+}
+
+.episode-card-season-ep {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.episode-card-desc {
+  font-size: 0.9rem;
+  margin-top: 4px;
+  color: #ccc;
+}
+
+
+.actors-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px; /* space between "Actors:" and the chips */
+}
+
+.actors a {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffb347;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.actors a:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.actors span {
+  color: #aaa; /* fallback text for "No actors listed" */
+  font-style: italic;
+}

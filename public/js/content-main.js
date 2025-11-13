@@ -3,9 +3,9 @@ import { logoutEventListener } from '../utils/reuseableEventListeners.js';
 import { switchProfile } from '/utils/profilesManagement.js';
 import { fetchPage } from '../utils/pageManagement.js';
 import { animateOut } from "../utils/reuseableAnimations.js";
+import { openPreview } from "./media-preview.js"
 
 const SEARCH_RESULTS_LIMIT = 50;
-
 
 // init functions
 (async () => {
@@ -150,7 +150,6 @@ async function sideNavbarPageSwapListener() {
   });
 }
 
-
 function addCardClickListeners() {
   document.body.addEventListener('click', async (e) => {
     const cardEl = e.target.closest('.card');
@@ -158,13 +157,13 @@ function addCardClickListeners() {
     const contentId = cardEl.dataset.id;
     if (!contentId) return;
     try {
-      await api('/api/content/select-content', 'POST', { contentId });
-      location.href = '/player';
+        openPreview(contentId);
     } catch (err) {
       console.error(`Failed to select content: ${err.message}`);
     }
   });
 }
+
 
 function escapeHtml(value = '') {
   return String(value)
@@ -186,6 +185,7 @@ function buildCardMarkup(item = {}) {
         <div class="play-overlay">▶</div>
       </div>
       <div class="card-title">${title}</div>
+
     </div>
   `;
 }

@@ -52,8 +52,7 @@ html, body {
 
 /* Buttons styling */
 .custom-controls button {
-  background: rgba(255, 255, 255, 0.1); /* semi-transparent background */
-  border-radius: 50%;                   /* round buttons */
+  background: none;
   width: 40px;
   height: 40px;
   display: flex;
@@ -67,13 +66,25 @@ html, body {
 
 .custom-controls button:hover {
   transform: scale(1.2);
-  background: rgba(255, 255, 255, 0.2); /* brighter hover */
+
 }
 
 /* Bootstrap icons sizing */
 .custom-controls i {
   font-size: 24px;
   line-height: 1;
+}
+
+#fullscreen i {
+  font-size: 20px;
+} 
+
+#play-pause i {
+  font-size: 30px;
+}
+
+#mute-toggle i {
+  font-size: 30px;  
 }
 
 /* Progress bar */
@@ -118,7 +129,7 @@ html, body {
 }
 
 /* Hide controls on inactivity */
-.video-wrapper.hide-controls .custom-controls {
+.custom-controls.hide-controls  {
   opacity: 0;
   pointer-events: none;
 }
@@ -184,4 +195,115 @@ html, body {
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
+}
+
+/* Container hidden state */
+#episode-carousel-container.hidden {
+  display: none;
+}
+
+/* Carousel container */
+#episode-carousel-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  overflow-x: auto;
+  gap: 12px;           /* space between cards */
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.7); /* semi-transparent overlay */
+  position: absolute;    /* overlay on video */
+  bottom: 60px;          /* adjust to sit above controls */
+  left: 0;
+  right: 0;
+  z-index: 10;
+  border-radius: 8px;
+  scrollbar-width: thin;
+}
+
+#episode-carousel-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+#episode-carousel-container::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+}
+
+/* Inner carousel */
+.carousel {
+  display: flex;
+  gap: 12px;
+}
+
+.episode-card {
+  width: 120px;
+  height: 180px;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.episode-card .poster-wrapper {
+  width: 100%;
+  height: 150px; /* fixed image area */
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.episode-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.episode-title {
+  flex-grow: 1;
+  font-size: 0.85rem;
+  color: white;
+  margin: 4px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.episode-card:hover {
+  transform: scale(1.05);
+  border: 2px solid green;
+}
+
+/* Carousel navigation buttons */
+#carousel-prev,
+#carousel-next {
+  background: rgba(0,0,0,0.6);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 11;
+}
+
+#carousel-prev {
+  left: 8px;
+}
+
+#carousel-next {
+  right: 8px;
 }

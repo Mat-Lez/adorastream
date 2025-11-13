@@ -17,6 +17,8 @@
                   ? currentEpisode.videoUrl
                   : '/videos/not-found.mp4' %>"
         type="video/mp4"
+        data-last-position="<%= lastPositionSec || 0 %>"
+        playsinline webkit-playsinline
       ></video>
 
       <!-- Overlay for skip seconds feedback -->
@@ -24,11 +26,11 @@
 
       <!-- Overlay controls -->
       <div class="custom-controls" id="custom-controls">
-        <button id="backward" title="Back 10 seconds"><i class="bi bi-skip-backward-fill"></i></button>
-        <button id="play-pause" title="Play/Pause"> <i class="bi bi-play-fill"></i></button>
-        <button id="forward" title="Forward 10 seconds"> <i class="bi bi-fast-forward-fill"></i></button>
+        <button id="backward" title="Back 10 seconds"><i class="bi bi-arrow-counterclockwise"></i></button>
+        <button id="play-pause" title="Play/Pause"> <i class="bi bi-pause-fill"></i></button>
+        <button id="forward" title="Forward 10 seconds"> <i class="bi bi-arrow-clockwise"></i></button>
         <% if (content.type !== 'movie') { %>
-          <button id="skip-forward" title="next-episode"> <i class="bi bi-skip-forward-fill"></i></button>
+          <%- include ('../partials/showEpisodes' ) %>
         <% } %>
         <span id="time-display">0:00 / 0:00</span>
         <input type="range" id="timeline" min="0" max="100" value="0">
