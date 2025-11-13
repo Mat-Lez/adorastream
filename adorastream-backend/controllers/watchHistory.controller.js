@@ -138,6 +138,7 @@ async function logDailyWatch(userId, profileId, contentId) {
       console.error("Failed to log daily watch:", err.message);
     }
   }
+}
 
 exports.getProgress = async (req, res) => {
   try {
