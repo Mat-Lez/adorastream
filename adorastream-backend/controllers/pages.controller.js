@@ -1,8 +1,9 @@
 const crypto = require('crypto');
 const Content = require('../models/content');
+const WatchHistory = require('../models/watchHistory');
 const StatsController = require('../controllers/stats.controller');
 
-const { _getSortedEpisodes, getGenreSections, getContentGrid, fetchRandomizedContents } = require('./content.controller');
+const { _getSortedEpisodes, getGenreSections, fetchRandomizedContents } = require('./content.controller');
 
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
@@ -74,6 +75,7 @@ async function attachGenreSections(renderOptions) {
 }
 
 const ENDLESS_SCROLLING_CONTENT_AMOUNT = Number(process.env.ENDLESS_SCROLLING_CONTENT_AMOUNT) || 20;
+const CONTINUE_WATCHING_LIMIT = Number(process.env.CONTINUE_WATCHING_LIMIT) || 12;
 
 async function attachContentGrid(renderOptions, typeFilter, genreFilter) {
   const limit = ENDLESS_SCROLLING_CONTENT_AMOUNT;
@@ -107,6 +109,49 @@ async function attachRecommendations(renderOptions, userId, profileId) {
   }
 }
 
+async function attachContinueWatching(renderOptions, userId, profileId) {
+  renderOptions.continueWatching = [];
+  if (!userId || !profileId) {
+    return;
+  }
+
+  const histories = await WatchHistory.find({
+    userId,
+    profileId,
+    completed: false,
+    type: 'progress'
+  })
+    .sort({ updatedAt: -1, lastWatchedAt: -1 })
+    .limit(CONTINUE_WATCHING_LIMIT * 3)
+    .populate({
+      path: 'contentId',
+      select: 'title posterUrl durationSec type'
+    })
+    .lean();
+
+  const seen = new Set();
+  const items = [];
+  for (const history of histories) {
+    const content = history.contentId;
+    if (!content) continue;
+    const id = String(content._id);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    items.push({
+      id,
+      title: content.title || 'Untitled',
+      posterUrl: content.posterUrl || '/assets/no_poster.svg',
+      progress: history.lastPositionSec || 0,
+      duration: content.durationSec || 0,
+      updatedAt: history.updatedAt || history.lastWatchedAt || history.createdAt || new Date(0)
+    });
+    if (items.length >= CONTINUE_WATCHING_LIMIT) break;
+  }
+
+  items.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  renderOptions.continueWatching = items;
+}
+
 exports.showContentMainPage = async (req, res) => {   
   const { user, profiles, activeProfileId } = res.locals;
 
@@ -125,9 +170,11 @@ exports.showContentMainPage = async (req, res) => {
     topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout,
     searchScope: pageSearchScopes.home
   };
+  renderOptions.continueWatching = [];
 
   await attachGenreSections(renderOptions);
   await attachRecommendations(renderOptions, user._id, activeProfileId);
+  await attachContinueWatching(renderOptions, user._id, activeProfileId);
 
   res.render('pages/content-main', renderOptions);
 }
@@ -156,11 +203,16 @@ async function showPage(req, res, page, renderPath) {
     activeProfileId,
     topbarLayout: pageToLayoutMap[page].topbarLayout,
     topbarActionsLayout: pageToLayoutMap[page].topbarActionsLayout,
-    initialSettingsPage: page === 'settings' ? (req.query.tab === 'statistics' ? 'statistics' : 'manage-profiles') : undefined
+    initialSettingsPage: page === 'settings' ? (req.query.tab === 'statistics' ? 'statistics' : 'manage-profiles') : undefined,
+    continueWatching: []
   };
   renderOptions.searchScope = pageSearchScopes[page] || 'all';
 
-  if ((page === 'home' || renderOptions.topbarLayout?.includes("FILTERS")) && !renderOptions.genreSections) {
+  if (page === 'home') {
+    await attachGenreSections(renderOptions);
+    await attachRecommendations(renderOptions, user._id, activeProfileId);
+    await attachContinueWatching(renderOptions, user._id, activeProfileId);
+  } else if (renderOptions.topbarLayout?.includes("FILTERS")) {
     await attachGenreSections(renderOptions);
     await attachRecommendations(renderOptions, user._id, activeProfileId);
   }
