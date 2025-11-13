@@ -85,32 +85,25 @@ async function attachContentGrid(renderOptions, typeFilter, genreFilter, filterB
     filter.genres = { $in: [normalizedGenre] };
   }
 
+  let filteredItems;
+  let filteredTitle;
+
   if (normalizedFilter === 'popular') {
-    const popularItems = await getPopularContents({ limit, typeFilter, genreFilter: normalizedGenre });
-    const popularCount = popularItems.length;
-    renderOptions.gridItems = popularItems;
-    renderOptions.gridTitle = typeFilter === 'movie' ? 'Popular Movies' : 'Popular Shows';
-    renderOptions.gridPagination = {
-      page: 1,
-      limit: popularCount,
-      total: popularCount,
-      type: typeFilter || '',
-      randomSeed: '',
-      genre: normalizedGenre,
-      filterBy: normalizedFilter
-    };
-    return;
+    filteredItems = await getPopularContents({ limit, typeFilter, genreFilter: normalizedGenre });
+    filteredTitle = typeFilter === 'movie' ? 'Popular Movies' : 'Popular Shows';
+  } else if (normalizedFilter === 'unwatched' && profileId) {
+    filteredItems = await getUnwatchedContents(profileId, { limit, typeFilter, genreFilter: normalizedGenre });
+    filteredTitle = typeFilter === 'movie' ? 'Unwatched Movies' : 'Unwatched Shows';
   }
 
-  if (normalizedFilter === 'unwatched' && profileId) {
-    const unwatchedItems = await getUnwatchedContents(profileId, { limit, typeFilter, genreFilter: normalizedGenre });
-    const unwatchedCount = unwatchedItems.length;
-    renderOptions.gridItems = unwatchedItems;
-    renderOptions.gridTitle = typeFilter === 'movie' ? 'Unwatched Movies' : 'Unwatched Shows';
+  if (filteredItems) {
+    const filteredCount = filteredItems.length;
+    renderOptions.gridItems = filteredItems;
+    renderOptions.gridTitle = filteredTitle;
     renderOptions.gridPagination = {
       page: 1,
-      limit: unwatchedCount,
-      total: unwatchedCount,
+      limit: filteredCount,
+      total: filteredCount,
       type: typeFilter || '',
       randomSeed: '',
       genre: normalizedGenre,

@@ -266,7 +266,7 @@ function initEndlessScroll() {
   const limit = Number(container.dataset.limit || 0);
   const type = container.dataset.type || '';
   const genre = container.dataset.genre || '';
-  const filterBy = container.dataset.filter || '';
+  const filterBy = container.dataset.filterBy || '';
   let total = Number(container.dataset.total || 0);
   let lastServedPage = Number(container.dataset.page || 1);
   let currentSeed = container.dataset.randomSeed || Math.random().toString(36).slice(2);

@@ -709,4 +709,3 @@ exports.getContentGrid = async (typeFilter, limit = GRID_CONTENT_LIMIT) => {
 exports.fetchRandomizedContents = fetchRandomizedContents;
 exports.getPopularContents = getPopularContents;
 exports.getUnwatchedContents = getUnwatchedContents;
-exports.getPopularContents = getPopularContents;
