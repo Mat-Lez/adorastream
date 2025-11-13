@@ -1,4 +1,4 @@
-const WatchHistory = require('../models/watchHistory');
+const { WatchHistory, DailyWatch } = require('../models/watchHistory');
 const Content = require('../models/content');
 const User = require('../models/user');
 const ContentController = require('../controllers/content.controller');
