@@ -1,5 +1,7 @@
 const crypto = require('crypto');
 const Content = require('../models/content');
+const StatsController = require('../controllers/stats.controller');
+
 const { _getSortedEpisodes, getGenreSections, getContentGrid, fetchRandomizedContents } = require('./content.controller');
 
 
@@ -91,6 +93,15 @@ async function attachContentGrid(renderOptions, typeFilter) {
   };
 }
 
+async function attachRecommendations(renderOptions, userId, profileId) {
+  try {
+    renderOptions.recommendations = await StatsController.getRecommendedContent(userId, profileId);
+  } catch (err) {
+    console.error("Failed to attach recommendations:", err.message);
+    renderOptions.recommendations = [];
+  }
+}
+
 exports.showContentMainPage = async (req, res) => {   
   const { user, profiles, activeProfileId } = res.locals;
 
@@ -111,6 +122,7 @@ exports.showContentMainPage = async (req, res) => {
   };
 
   await attachGenreSections(renderOptions);
+  await attachRecommendations(renderOptions, user._id, activeProfileId);
 
   res.render('pages/content-main', renderOptions);
 }
@@ -145,6 +157,7 @@ async function showPage(req, res, page, renderPath) {
 
   if ((page === 'home' || renderOptions.topbarLayout?.includes("FILTERS")) && !renderOptions.genreSections) {
     await attachGenreSections(renderOptions);
+    await attachRecommendations(renderOptions, user._id, activeProfileId);
   }
 
   if (['movies', 'shows'].includes(page)) {
