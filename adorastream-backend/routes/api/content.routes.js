@@ -11,8 +11,6 @@ router.get('/currently-played', requireLogin, requireProfileSelection, (req, res
 router.get('/:id',   (req, res, next) => Content.get(req, res).catch(next));
 router.get('/:id/:episodeId/season-episode',    (req, res, next) => Content.getSeasonEpisodeById(req, res).catch(next));
 router.get('/:id/episodes',    (req, res, next) => Content._getSortedEpisodes(req, res).catch(next));
-router.get('/:id/actors',    (req, res, next) => Content.getMpvieActorsList(req, res).catch(next));
-router.get('/:id/seriesId/actors',    (req, res, next) => Content.getEpisodeActorsList(req, res).catch(next));
 
 router.post('/',     requireLogin, requireAdmin,   upload.fields([{ name: 'poster', maxCount: 1 },{ name: 'video', maxCount: 1 }]),(req, res, next) => Content.create(req, res).catch(next));
 router.patch('/:id', requireLogin, requireAdmin, (req, res, next) => Content.update(req, res).catch(next));
