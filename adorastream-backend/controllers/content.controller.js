@@ -1,5 +1,5 @@
 const Content = require('../models/content');
-const WatchHistory = require('../models/watchHistory');
+const { WatchHistory } = require('../models/watchHistory');
 const { enrichMovieRatings, enrichSeriesRatings, enrichSeriesEpisodesRatings } = require('../services/rating.service');
 const upload = require('../services/videoUpload.service');
 
