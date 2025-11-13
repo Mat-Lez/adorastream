@@ -630,8 +630,17 @@ exports.getSimilarContent = async (req, res) => {
     genres: { $in: genres },
     type: current.type, // same media type
   })
-    .limit(10)
+    .limit(20)
     .lean();
 
-  res.json({ similar });
+  // Shuffle array in place
+  for (let i = similar.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [similar[i], similar[j]] = [similar[j], similar[i]];
+  }
+
+  // Pick first 10 contents
+  const randomSimilar = similar.slice(0, 10);
+
+  res.json({ randomSimilar });
 };

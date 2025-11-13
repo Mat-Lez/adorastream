@@ -26,6 +26,7 @@
   max-height: 95vh; 
   overflow-y: auto; 
   box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+  scroll-behavior: smooth;
 }
 
 .hidden {
@@ -323,4 +324,103 @@
 .actors span {
   color: #aaa; /* fallback text for "No actors listed" */
   font-style: italic;
+}
+
+.similar-carousel {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 10px 0;
+  scroll-behavior: smooth;
+}
+
+.similar-carousel::-webkit-scrollbar {
+  height: 8px; /* visible scrollbar */
+}
+
+.similar-carousel::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 6px;
+}
+
+.similar-card {
+  flex: 0 0 auto; /* don't shrink, keep width fixed */
+  width: 120px;   /* fixed width for all posters */
+  text-align: center;
+  cursor: pointer;
+}
+
+
+.similar-card img {
+  width: 100%;
+  height: 180px; /* fixed height for all posters */
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.similar-card p {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-card.loading::after {
+  content: '';
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.preview-overlay {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.preview-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
+.main.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: 100;
+}
+
+.main.loading {
+  position: relative;
+  opacity: 0.6;
+  transition: opacity 0.3s ease-in-out;
+  pointer-events: none;
+}
+
+.preview-card.loading {
+  opacity: 0.5;          /* dim the card */
+  pointer-events: none;  /* prevent clicks while loading */
+  position: relative;
 }

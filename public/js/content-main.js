@@ -156,9 +156,12 @@ function addCardClickListeners() {
     if (!cardEl) return;
     const contentId = cardEl.dataset.id;
     if (!contentId) return;
+    const main = document.querySelector('.main');
     try {
+        // main.classList.add('loading');
         openPreview(contentId);
     } catch (err) {
+      // main.classList.remove('loading');
       console.error(`Failed to select content: ${err.message}`);
     }
   });

@@ -14,6 +14,8 @@ const descriptionEl = document.getElementById('preview-description');
 const genreEl = document.getElementById('preview-genre');
 const heartBtnTemplate = document.getElementById('like-btn');
 const seasonEpisodeEl = document.getElementById('preview-season-episode');
+const actorsContainer = document.getElementById('preview-actors');
+const similarContentContainer = document.getElementById('similar-content');
 
 
 // Handles playing content from preview
@@ -196,6 +198,9 @@ async function controlButtonsContainer(contentId, heartBtnTemplate, contentType)
 
 async function openPreview(contentId) {
   try {
+    overlay.classList.add('visible');
+    main.classList.add('loading');
+
     // Fetch content info
     const content = await api(`/api/content/${contentId}`);
     if (!content) { const e = new Error('Content not found'); e.status = 404; throw e; }
@@ -271,7 +276,6 @@ async function openPreview(contentId) {
     }
 
   // Actors with clickable Wikipedia links
-    const actorsContainer = document.getElementById('preview-actors');
     // Fetch rendered actors list
     let actorsUrl = `/content-main/preview/${contentId}/actors`;
     if (currentEpisodeId) actorsUrl += `?episodeId=${currentEpisodeId}`;
@@ -312,21 +316,48 @@ async function openPreview(contentId) {
         });
       });
     }
+
+    if (similarContentContainer) {
+      // Fetch similar content from backend
+      const { randomSimilar: similarItems } = await api(`/api/content/${contentId}/similar-content`);
+
+      similarContentContainer.innerHTML = similarItems.map(item => `
+        <div class="similar-card" data-content-id="${item._id}">
+          <img src="${item.posterUrl}" alt="${item.title}">
+          <p>${item.title}</p>
+        </div>
+      `).join('');
+
+      // Add click listeners
+      const cards = similarContentContainer.querySelectorAll('.similar-card');
+      cards.forEach(card => {
+        card.addEventListener('click', async () => {
+          const newId = card.dataset.contentId;
+          if (!newId) return;
+
+          // clear current preview
+          const previewCard = overlay.querySelector('.preview-card');
+          previewCard.classList.add('loading');
+
+          try {
+            await openPreview(newId); // reuse existing function
+          } finally {
+            previewCard.classList.remove('loading');
+            previewCard.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        });
+      });
+    }
       
     overlay.classList.remove('hidden');
-    main.classList.add('blurred');
+
 
   } catch (err) {
     console.error('Preview error:', err);
   }
 }
 
-  function closePreview() {
-    if (!overlay) return;
-    overlay.classList.add('hidden');
-    main.classList.remove('blurred');
-
-    // Clear basic fields
+  function clearPreviewContent() {
     if (posterEl) posterEl.src = '';
     if (titleEl) titleEl.textContent = '';
     if (yearEl) yearEl.textContent = '';
@@ -336,16 +367,26 @@ async function openPreview(contentId) {
     if (durationEl) durationEl.textContent = '';
     if (seasonEpisodeEl) seasonEpisodeEl.textContent = '';
 
-    // Clear episodes section
+    // Episodes
     const episodesContainer = overlay.querySelector('#episodes-container');
     if (episodesContainer) {
-      episodesContainer.innerHTML = ''; // remove any rendered episodes
-      episodesContainer.classList.add('hidden'); // hide it again
+      episodesContainer.innerHTML = '';
+      episodesContainer.classList.add('hidden');
     }
 
-    // Scroll back to top
-    overlay.scrollTop = 0;
-}
+    // Similar content
+    if (similarContentContainer) similarContentContainer.innerHTML = '';
+
+    // Actors
+    if (actorsContainer) actorsContainer.innerHTML = '';
+
+  }
+
+  function closePreview() {
+    overlay.classList.add('hidden');
+    main.classList.remove('loading');
+    clearPreviewContent();
+  }
 
   // Event listeners for closing overlay
   overlay.addEventListener('click', e => {
@@ -357,5 +398,3 @@ async function openPreview(contentId) {
   });
 
 export { openPreview };
-
-// Need to add similar content
