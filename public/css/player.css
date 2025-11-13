@@ -129,7 +129,7 @@ html, body {
 }
 
 /* Hide controls on inactivity */
-.video-wrapper.hide-controls .custom-controls {
+.custom-controls.hide-controls  {
   opacity: 0;
   pointer-events: none;
 }

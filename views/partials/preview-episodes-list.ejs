@@ -1,0 +1,23 @@
+<% if (episodes && episodes.length > 0) { %>
+  <div id="episodes-container">
+    <button id="toggle-episodes-btn" class="toggle-episodes-btn control-btn">All Episodes</button>
+    <div id="episodes-list" class="hidden">
+      <% episodes.forEach(ep => { %>
+        <div class="episode-card" data-episode-id="<%= ep._id %>">
+          <img src="<%= ep.posterUrl %>" alt="<%= ep.title %>" class="episode-card-poster">
+          <div class="episode-card-details">
+            <span class="episode-card-title"><%= ep.title %></span>
+            <span class="episode-card-season-ep">
+              <% if (ep.seasonNumber && ep.episodeNumber) { %>
+                Season <%= ep.seasonNumber %> Episode <%= ep.episodeNumber %>
+              <% } %>
+            </span>
+            <span class="episode-card-desc"><%= ep.description %></span>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+<% } else { %>
+  <p>No episodes available</p>
+<% } %>

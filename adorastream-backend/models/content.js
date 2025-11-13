@@ -62,6 +62,7 @@ const ContentSchema = new Schema(
     seasons: { type: [SeasonSchema], default: [] }
   },
   { timestamps: true }
+   
 );
 
 // search index
