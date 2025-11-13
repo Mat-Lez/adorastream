@@ -21,14 +21,17 @@
 <%- include('search-results', { searchScope }) %>
 
 <div class="home-body">
-	<section class="category">
-		<h2>Continue Watching</h2>
-    <% if (continueWatching && continueWatching.length) { %>
-      <% renderCardRow(continueWatching); %>
-    <% } else { %>
-      <p class="empty">No items to resume yet.</p>
-    <% } %>
-	</section>
+  <% if (continueWatching && continueWatching.length) { %>
+  <section class="category">
+    <h2>Continue Watching</h2>
+    <% renderCardRow(continueWatching); %>
+  </section>
+  <% } else { %>
+  <section class="category">
+    <h2>Continue Watching</h2>
+    <p class="empty">No items to resume yet.</p>
+  </section>
+  <% } %>
 
 	<section class="category">
 		<h2>Popular</h2>

@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const Content = require('../models/content');
-const WatchHistory = require('../models/watchHistory');
+const WatchHistoryController = require('../controllers/watchHistory.controller');
 const StatsController = require('../controllers/stats.controller');
 
 const { _getSortedEpisodes, getGenreSections, fetchRandomizedContents } = require('./content.controller');
@@ -115,41 +115,11 @@ async function attachContinueWatching(renderOptions, userId, profileId) {
     return;
   }
 
-  const histories = await WatchHistory.find({
+  renderOptions.continueWatching = await WatchHistoryController.getContinueWatchingItems(
     userId,
     profileId,
-    completed: false,
-    type: 'progress'
-  })
-    .sort({ updatedAt: -1, lastWatchedAt: -1 })
-    .limit(CONTINUE_WATCHING_LIMIT * 3)
-    .populate({
-      path: 'contentId',
-      select: 'title posterUrl durationSec type'
-    })
-    .lean();
-
-  const seen = new Set();
-  const items = [];
-  for (const history of histories) {
-    const content = history.contentId;
-    if (!content) continue;
-    const id = String(content._id);
-    if (seen.has(id)) continue;
-    seen.add(id);
-    items.push({
-      id,
-      title: content.title || 'Untitled',
-      posterUrl: content.posterUrl || '/assets/no_poster.svg',
-      progress: history.lastPositionSec || 0,
-      duration: content.durationSec || 0,
-      updatedAt: history.updatedAt || history.lastWatchedAt || history.createdAt || new Date(0)
-    });
-    if (items.length >= CONTINUE_WATCHING_LIMIT) break;
-  }
-
-  items.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-  renderOptions.continueWatching = items;
+    CONTINUE_WATCHING_LIMIT
+  );
 }
 
 exports.showContentMainPage = async (req, res) => {   
@@ -170,7 +140,6 @@ exports.showContentMainPage = async (req, res) => {
     topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout,
     searchScope: pageSearchScopes.home
   };
-  renderOptions.continueWatching = [];
 
   await attachGenreSections(renderOptions);
   await attachRecommendations(renderOptions, user._id, activeProfileId);
@@ -203,8 +172,7 @@ async function showPage(req, res, page, renderPath) {
     activeProfileId,
     topbarLayout: pageToLayoutMap[page].topbarLayout,
     topbarActionsLayout: pageToLayoutMap[page].topbarActionsLayout,
-    initialSettingsPage: page === 'settings' ? (req.query.tab === 'statistics' ? 'statistics' : 'manage-profiles') : undefined,
-    continueWatching: []
+    initialSettingsPage: page === 'settings' ? (req.query.tab === 'statistics' ? 'statistics' : 'manage-profiles') : undefined
   };
   renderOptions.searchScope = pageSearchScopes[page] || 'all';
 
