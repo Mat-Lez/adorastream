@@ -3,6 +3,48 @@ const Content = require('../models/content');
 const User = require('../models/user');
 const ContentController = require('../controllers/content.controller');
 
+exports.getContinueWatchingItems = async (userId, profileId, limit = 12) => {
+  if (!userId || !profileId) {
+    return [];
+  }
+
+  const histories = await WatchHistory.find({
+    userId,
+    profileId,
+    completed: false,
+    type: 'progress'
+  })
+    .sort({ updatedAt: -1, lastWatchedAt: -1 })
+    .limit(limit * 3)
+    .populate({
+      path: 'contentId',
+      select: 'title posterUrl durationSec type'
+    })
+    .lean();
+
+  const seen = new Set();
+  const items = [];
+  for (const history of histories) {
+    const content = history.contentId;
+    if (!content) continue;
+    const id = String(content._id);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    items.push({
+      id,
+      title: content.title || 'Untitled',
+      posterUrl: content.posterUrl || '/assets/no_poster.svg',
+      progress: history.lastPositionSec || 0,
+      duration: content.durationSec || 0,
+      updatedAt: history.updatedAt || history.lastWatchedAt || history.createdAt || new Date(0)
+    });
+    if (items.length >= limit) break;
+  }
+
+  items.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  return items;
+};
+
 
 
 // Updates progress for a specific profileID + contentID combo
@@ -39,6 +81,8 @@ exports.upsertProgress = async (req, res) => {
     { upsert: true, new: true }
   );
 
+  logDailyWatch(userId, profileId, contentId);
+  
   res.json(history);
 };
 
@@ -110,6 +154,33 @@ exports.listMine = async (req, res) => {
   res.json({ histories: rows, total: rows.length });
 };
 
+/**
+ * @description Logs a distinct watch event for the day.
+ * Runs an upsert on the DailyWatch collection.
+ * This is designed to be "fire-and-forget" and not block the main request.
+ */
+async function logDailyWatch(userId, profileId, contentId) {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // YYYY-MM-DD 00:00:00
+
+    const filter = {
+        userId: userId,
+        profileId: profileId,
+        contentId: contentId,
+        date: today
+    };
+    await DailyWatch.findOneAndUpdate(
+      filter,
+      { $setOnInsert: filter },
+      { upsert: true, new: true }
+    );
+  } catch (err) {
+    if (err.code !== 11000) { // 11000 is "duplicate key", which is fine
+      console.error("Failed to log daily watch:", err.message);
+    }
+  }
+}
 
 exports.getProgress = async (req, res) => {
   try {

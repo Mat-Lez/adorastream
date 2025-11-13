@@ -16,7 +16,7 @@ const WatchHistorySchema = new Schema(
 
     // Adding a psuedo record 'series_like' to store series likes
     // progress type will be for movies and episodes normal progress
-    type: { type: String, enum: ['progress', 'series_like'], default: 'progress' },
+    type: { type: String, enum: ['progress', 'series-like'], default: 'progress' },
 
     lastWatchedAt: { type: Date, default: null }
   },
@@ -28,4 +28,35 @@ WatchHistorySchema.index(
   { unique: true, name: 'uniq_user_profile_content' }
 );
 WatchHistorySchema.plugin(cleanMongoResponse);
-module.exports = model('WatchHistory', WatchHistorySchema);
+const WatchHistory = model('WatchHistory', WatchHistorySchema);
+
+/**
+ * @description Stores a single record of a user/profile watching a
+ * specific piece of content on a specific day.
+ * This is used for "activity feed" and "daily count" stats, where the
+ * main watchHistory is only for "last progress".
+ */
+const DailyWatchSchema = new Schema(
+  {
+    userId: { type: Types.ObjectId, ref: 'User', index: true, required: true },
+    profileId: { type: Types.ObjectId, index: true, required: true },
+    contentId: { type: Types.ObjectId, ref: 'Content', index: true, required: true },
+    
+    // This field is supposed to store the very start of the day (00:00:00)
+    date: { type: Date, index: true, required: true },
+  },
+  { timestamps: true }
+);
+
+DailyWatchSchema.index(
+  { userId: 1, profileId: 1, contentId: 1, date: 1 },
+  { unique: true, name: 'uniq_user_profile_content_day' }
+);
+
+DailyWatchSchema.plugin(cleanMongoResponse);
+const DailyWatch = model('DailyWatch', DailyWatchSchema);
+
+module.exports = {
+    WatchHistory,
+    DailyWatch
+};

@@ -1,4 +1,5 @@
 const Content = require('../models/content');
+const { WatchHistory } = require('../models/watchHistory');
 const { enrichMovieRatings, enrichSeriesRatings, enrichSeriesEpisodesRatings } = require('../services/rating.service');
 const upload = require('../services/videoUpload.service');
 
@@ -61,6 +62,73 @@ function createSeededRandom(seed) {
     t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+async function getPopularContents({ limit = 10, typeFilter, genreFilter, titleRegex } = {}) {
+  const sanitizedLimit = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
+  const pipeline = [
+    { $match: { liked: true } },
+    { $group: { _id: '$contentId', likes: { $sum: 1 } } },
+    { $sort: { likes: -1 } },
+    {
+      $lookup: {
+        from: 'contents',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'content'
+      }
+    },
+    { $unwind: '$content' }
+  ];
+
+  const contentMatch = {};
+  if (typeFilter) {
+    contentMatch['content.type'] = typeFilter;
+  }
+
+  if (genreFilter) {
+    contentMatch['content.genres'] = genreFilter;
+  }
+
+  if (titleRegex) {
+    contentMatch['content.title'] = { $regex: titleRegex };
+  }
+
+  if (Object.keys(contentMatch).length > 0) {
+    pipeline.push({ $match: contentMatch });
+  }
+
+  pipeline.push({ $limit: sanitizedLimit });
+
+  const results = await WatchHistory.aggregate(pipeline).exec();
+  return results.map(item => ({
+    ...item.content,
+    likes: item.likes
+  }));
+}
+
+async function getUnwatchedContents(profileId, { limit = 10, typeFilter, genreFilter, titleRegex } = {}) {
+  if (!profileId) {
+    return [];
+  }
+  const sanitizedLimit = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
+  const watchedIds = await WatchHistory.find({ profileId }).distinct('contentId');
+  const filter = {
+    _id: { $nin: watchedIds }
+  };
+  if (typeFilter) {
+    filter.type = typeFilter;
+  }
+  if (genreFilter) {
+    filter.genres = genreFilter;
+  }
+  if (titleRegex) {
+    filter.title = { $regex: titleRegex };
+  }
+  return Content.find(filter)
+    .sort({ createdAt: -1 })
+    .limit(sanitizedLimit)
+    .lean();
 }
 
 // POST create new content
@@ -139,7 +207,9 @@ exports.create = async (req, res) => {
 
 //
 exports.list = async (req, res) => {
-  const { q, genres = [], sortBy = 'createdAt', order = 'desc' } = req.query;
+  const { q = '', sortBy = 'createdAt', order = 'desc' } = req.query;
+  const rawGenres = req.query.genres;
+  const filterBy = typeof req.query.filterBy === 'string' ? req.query.filterBy.trim() : '';
   const page  = Math.max(1, parseInt(req.query.page || '1', 10));
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || '20', 10)));
   const skip  = (page - 1) * limit;
@@ -156,19 +226,48 @@ exports.list = async (req, res) => {
     }
   }
 
-  if (q) {
-    const searchTerm = String(q).trim();
-    if (searchTerm) {
-      filter.title = { $regex: escapeRegex(searchTerm), $options: 'i' };
-    }
+  const searchTerm = String(q || '').trim();
+  if (searchTerm) {
+    filter.title = { $regex: escapeRegex(searchTerm), $options: 'i' };
   }
 
-  // genres is expected to be an array: ?genres=Drama&genres=Sci-Fi
-  if (Array.isArray(genres) && genres.length > 0) {
-    filter.genres = { $in: genres };
+  const resolvedGenres = Array.isArray(rawGenres)
+    ? rawGenres
+    : (typeof rawGenres === 'string' && rawGenres.trim() ? [rawGenres.trim()] : []);
+  if (resolvedGenres.length > 0) {
+    filter.genres = { $in: resolvedGenres };
   }
+  const filterGenre = resolvedGenres.length ? resolvedGenres[0] : '';
 
   const sort = { [sortBy]: order === 'asc' ? 1 : -1 };
+
+  const titleRegex = searchTerm ? new RegExp(escapeRegex(searchTerm), 'i') : null;
+  const profileId = req.session?.user?.profileId || null;
+
+  if (filterBy === 'popular') {
+    const popularItems = await getPopularContents({ limit, typeFilter: filter.type, genreFilter: filterGenre, titleRegex });
+    const popularCount = popularItems.length;
+    return res.json({
+      contents: popularItems,
+      total: popularCount,
+      page: 1,
+      pages: popularCount > 0 ? 1 : 0
+    });
+  }
+
+  if (filterBy === 'unwatched') {
+    if (!profileId) {
+      return res.json({ contents: [], total: 0, page: 1, pages: 0 });
+    }
+    const unwatched = await getUnwatchedContents(profileId, { limit, typeFilter: filter.type, genreFilter: filterGenre, titleRegex });
+    const unwatchedCount = unwatched.length;
+    return res.json({
+      contents: unwatched,
+      total: unwatchedCount,
+      page: 1,
+      pages: unwatchedCount > 0 ? 1 : 0
+    });
+  }
 
   let contents;
   let total;
@@ -607,7 +706,6 @@ exports.getContentGrid = async (typeFilter, limit = GRID_CONTENT_LIMIT) => {
     .lean();
 };
 
-exports.fetchRandomizedContents = fetchRandomizedContents;
 
 exports.getSimilarContent = async (req, res) => {
   const contentId = req.params.id;
@@ -644,3 +742,7 @@ exports.getSimilarContent = async (req, res) => {
 
   res.json({ randomSimilar });
 };
+
+exports.fetchRandomizedContents = fetchRandomizedContents;
+exports.getPopularContents = getPopularContents;
+exports.getUnwatchedContents = getUnwatchedContents;

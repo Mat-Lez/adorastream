@@ -3,8 +3,9 @@ import { logoutEventListener } from '../utils/reuseableEventListeners.js';
 import { switchProfile } from '/utils/profilesManagement.js';
 import { fetchPage } from '../utils/pageManagement.js';
 import { animateOut } from "../utils/reuseableAnimations.js";
-import { openPreview } from "./media-preview.js"
+import { openPreview } from "./media-preview.js";
 
+const NO_POSTER_IMAGE = '/assets/no_poster.svg';
 const SEARCH_RESULTS_LIMIT = 50;
 
 // init functions
@@ -134,6 +135,7 @@ async function sideNavbarPageSwapListener() {
       if (page === 'movies' || page === 'shows') {
         initEndlessScroll();
       }
+      initTopbarFilters();
       if (btn.dataset.settingsTarget === 'statistics') {
           try {
               // Dynamically import the script
@@ -179,17 +181,80 @@ function escapeHtml(value = '') {
 function buildCardMarkup(item = {}) {
   const id = item.id || item._id || '';
   const title = escapeHtml(item.title || 'Untitled');
-  const posterUrl = item.posterUrl || '/assets/no_poster.svg';
+  const posterUrl = item.posterUrl || NO_POSTER_IMAGE;
   return `
     <div class="card" data-id="${id}">
       <div class="card-media">
-        <img src="${posterUrl}" alt="${title}" onerror="this.src='/assets/no_poster.svg';">
+        <img src="${posterUrl}" alt="${title}" onerror="this.onerror=null;this.src='${NO_POSTER_IMAGE}';">
         <div class="play-overlay">▶</div>
       </div>
       <div class="card-title">${title}</div>
 
     </div>
   `;
+}
+
+function getActivePageName() {
+  const activeBtn = document.querySelector('.nav-item.active');
+  return activeBtn ? activeBtn.dataset.page : '';
+}
+
+function getSelectedGenreFilterValue() {
+  const genreSelect = document.getElementById('genre-filter');
+  return genreSelect?.value?.trim() || '';
+}
+
+function getSelectedFilterValue() {
+  const filterSelect = document.getElementById('filter-select');
+  return filterSelect?.value?.trim() || '';
+}
+
+async function applyActiveFilters() {
+  const activePage = getActivePageName();
+  if (!['movies', 'shows'].includes(activePage)) {
+    return;
+  }
+
+  const mainElem = document.querySelector('.main');
+  if (!mainElem) {
+    return;
+  }
+
+  const params = new URLSearchParams();
+  const genreValue = getSelectedGenreFilterValue();
+  if (genreValue) {
+    params.set('genre', genreValue);
+  }
+  const filterValue = getSelectedFilterValue();
+  if (filterValue) {
+    params.set('filterBy', filterValue);
+  }
+  const basePath = `/content-main/${activePage}`;
+  const targetUrl = params.toString() ? `${basePath}?${params.toString()}` : basePath;
+
+  await fetchPage(targetUrl, mainElem, 'loading');
+  if (document.getElementById('search')) {
+    initSearchFeature();
+  }
+  initEndlessScroll();
+  initTopbarFilters();
+}
+
+function initTopbarFilters() {
+  const filterSelectors = ['genre-filter', 'filter-select'];
+  filterSelectors.forEach((selectorId) => {
+    const filterElement = document.getElementById(selectorId);
+    if (!filterElement) {
+      return;
+    }
+    if (filterElement.dataset.filterInit === 'true') {
+      return;
+    }
+    filterElement.dataset.filterInit = 'true';
+    filterElement.addEventListener('change', () => {
+      applyActiveFilters();
+    });
+  });
 }
 
 function initEndlessScroll() {
@@ -202,6 +267,8 @@ function initEndlessScroll() {
   const sentinel = container.querySelector('.endless-scroll-sentinel');
   const limit = Number(container.dataset.limit || 0);
   const type = container.dataset.type || '';
+  const genre = container.dataset.genre || '';
+  const filterBy = container.dataset.filterBy || '';
   let total = Number(container.dataset.total || 0);
   let lastServedPage = Number(container.dataset.page || 1);
   let currentSeed = container.dataset.randomSeed || Math.random().toString(36).slice(2);
@@ -255,6 +322,13 @@ function initEndlessScroll() {
       });
       if (type) {
         params.set('type', type);
+      }
+      if (genre) {
+        params.set('genres', genre);
+      }
+      // currently unused but kept for future extensibility
+      if (filterBy) {
+        params.set('filterBy', filterBy);
       }
 
       const response = await api(`/api/content?${params.toString()}`);
@@ -345,10 +419,22 @@ function initSearchFeature() {
     searchGrid.innerHTML = '';
 
     try {
-      const typeFilterParam = normalizedSearchScope !== 'all'
-        ? `&type=${encodeURIComponent(normalizedSearchScope)}`
-        : '';
-      const response = await api(`/api/content?q=${encodeURIComponent(term)}&limit=${SEARCH_RESULTS_LIMIT}${typeFilterParam}`);
+      const params = new URLSearchParams({
+        q: term,
+        limit: String(SEARCH_RESULTS_LIMIT)
+      });
+      if (normalizedSearchScope !== 'all') {
+        params.set('type', normalizedSearchScope);
+      }
+      const selectedGenre = getSelectedGenreFilterValue();
+      if (selectedGenre) {
+        params.set('genres', selectedGenre);
+      }
+      const selectedFilter = getSelectedFilterValue();
+      if (selectedFilter) {
+        params.set('filterBy', selectedFilter);
+      }
+      const response = await api(`/api/content?${params.toString()}`);
       const contents = response.contents || [];
       if (contents.length === 0) {
         showMessage(`No results found for "${term}".`);
@@ -397,4 +483,5 @@ document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('search')) {
     initSearchFeature();
   }
+  initTopbarFilters();
 });
