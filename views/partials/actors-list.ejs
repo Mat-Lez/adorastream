@@ -1,0 +1,13 @@
+<p class="actors-container">
+  <strong>Actors:</strong>
+  <span class="actors">
+    <% if (actors && actors.length) { %>
+      <% actors.forEach((actor, index) => { %>
+        <% const wiki = actor.wikipedia || `https://en.wikipedia.org/wiki/${encodeURIComponent(actor.name)}`; %>
+        <a href="<%= wiki %>" target="_blank"><%= actor.name %></a>
+      <% }) %>
+    <% } else { %>
+      <span>No actors listed.</span>
+    <% } %>
+  </span>
+</p>
