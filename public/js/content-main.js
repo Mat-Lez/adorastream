@@ -196,6 +196,12 @@ function getActivePageName() {
   return activeBtn ? activeBtn.dataset.page : '';
 }
 
+function getSelectedGenreFilterValue() {
+  const genreSelect = document.getElementById('genre-filter');
+  const value = genreSelect?.value?.trim() || '';
+  return value;
+}
+
 function initGenreFilter() {
   const genreSelect = document.getElementById('genre-filter');
   if (!genreSelect) {
@@ -391,10 +397,18 @@ function initSearchFeature() {
     searchGrid.innerHTML = '';
 
     try {
-      const typeFilterParam = normalizedSearchScope !== 'all'
-        ? `&type=${encodeURIComponent(normalizedSearchScope)}`
-        : '';
-      const response = await api(`/api/content?q=${encodeURIComponent(term)}&limit=${SEARCH_RESULTS_LIMIT}${typeFilterParam}`);
+      const params = new URLSearchParams({
+        q: term,
+        limit: String(SEARCH_RESULTS_LIMIT)
+      });
+      if (normalizedSearchScope !== 'all') {
+        params.set('type', normalizedSearchScope);
+      }
+      const selectedGenre = getSelectedGenreFilterValue();
+      if (selectedGenre) {
+        params.set('genres', selectedGenre);
+      }
+      const response = await api(`/api/content?${params.toString()}`);
       const contents = response.contents || [];
       if (contents.length === 0) {
         showMessage(`No results found for "${term}".`);
