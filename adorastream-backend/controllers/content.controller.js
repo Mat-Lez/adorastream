@@ -123,7 +123,7 @@ async function getUnwatchedContents(profileId, { limit = 10, typeFilter, genreFi
     filter.genres = genreFilter;
   }
   if (titleRegex) {
-     filter.title = { $regex: titleRegex };
+    filter.title = { $regex: titleRegex };
   }
   return Content.find(filter)
     .sort({ createdAt: -1 })

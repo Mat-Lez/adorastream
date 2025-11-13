@@ -324,6 +324,7 @@ function initEndlessScroll() {
       if (genre) {
         params.set('genres', genre);
       }
+      // currently unused but kept for future extensibility
       if (filterBy) {
         params.set('filterBy', filterBy);
       }
