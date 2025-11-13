@@ -5,7 +5,6 @@ const upload = require('../../services/videoUpload.service');
 
 router.get('/',      (req, res, next) => Content.list(req, res).catch(next));
 router.get('/next-episode', requireLogin, requireProfileSelection, (req, res, next) => Content.getNextEpisodeId(req, res).catch(next));
-router.post('/select-content', requireLogin, requireProfileSelection, (req, res, next) => Content.selectContent(req, res).catch(next));
 router.get('/:id/episodes', requireLogin, requireProfileSelection, (req, res, next) => Content.getEpisodesForSeries(req, res).catch(next));
 router.get('/currently-played', requireLogin, requireProfileSelection, (req, res, next) => Content.currentlyPlayed(req, res).catch(next));
 

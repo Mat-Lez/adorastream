@@ -14,9 +14,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const timeDisplay = document.getElementById('time-display');
   const wrapper = document.querySelector('.video-wrapper');
   const timeline = document.getElementById('timeline');
+
   if (!video) return console.error('video element not found'); 
   const lastPosition = parseFloat(video.dataset.lastPosition || 0);
-
 
   // --- global variables ---
   let hideControlsTimeout;
@@ -39,22 +39,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   let lastSavedTime = 0;
   const SAVE_INTERVAL = 10; // seconds
-
-  // --- get currently played ---
-  let contentId, currentEpisodeId, type;
-  try {
-    const result = await api('/api/content/currently-played');
-    contentId = result.contentId;
-    currentEpisodeId = result.currentEpisodeId;
-    type = result.type;
-  } catch (err) {
-    console.error('Failed to fetch content info:', err);
-  }
-
-
-  if (type === 'series') {
-    initSeries();
-  }
 
   // --- Utility functions ---
   function showSkipOverlay(text) {
@@ -206,8 +190,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         const { contentId, nextEpisodeId } = await api('/api/content/next-episode');
         if (!contentId) return;
-        if (!nextEpisodeId) return;
+        if (!nextEpisodeId) { 
+          location.href = '/content-main';
+        }
+        else {
           location.href = `/player?contentId=${contentId}&currentEpisodeId=${nextEpisodeId}`;
+        }
       } catch (e) {
           console.error(`Failed to select content: ${e.message}`);
       }
@@ -252,8 +240,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     });
   }
-
-  
 async function saveProgress() {
   const { contentId, currentEpisodeId } = await api('/api/content/currently-played');
 
@@ -278,19 +264,17 @@ window.addEventListener('beforeunload', saveProgress);
 
 // When metadata is loaded - duration and etc are known
 
-  video.addEventListener('loadedmetadata', () => {
-    if (lastPosition > 0 && lastPosition < video.duration) {
-      video.currentTime = lastPosition; // resume from saved time
-    }
-    video.play().catch(err => {
-      console.warn('Autoplay failed (maybe browser restriction):', err);
-    });
+video.addEventListener('loadedmetadata', () => {
+  if (lastPosition > 0 && lastPosition < video.duration) {
+    video.currentTime = lastPosition; // resume from saved time
+  }
   video.play().catch(err => {
     console.warn('Autoplay failed (maybe browser restriction):', err);
   });
+});
 
-  if (video.readyState >= 1) {
-    video.dispatchEvent(new Event('loadedmetadata'));
-  }
+if (video.readyState >= 1) {
+  video.dispatchEvent(new Event('loadedmetadata'));
+}
 
 });

@@ -123,7 +123,7 @@ exports.get = async (req, res) => {
   const content = await Content.findById(req.params.id);
   if (!content) { const e = new Error('Content not found'); e.status = 404; throw e; }
   res.json(content);
-}
+};
 
 // PATCH update content by ID
 exports.update = async (req, res) => {
@@ -457,7 +457,7 @@ exports.getSeasonEpisodeById = async (req, res) => {
   for (const season of content.seasons) {
     const ep = season.episodes.find(e => e._id.toString() === episodeId.toString());
     if (ep) {
-      return res.json({ seasonNumber: season.seasonNumber, episodeNumber: ep.episodeNumber });
+      return res.json({ episode: ep, seasonNumber: season.seasonNumber, episodeNumber: ep.episodeNumber });
     }
   }
 }

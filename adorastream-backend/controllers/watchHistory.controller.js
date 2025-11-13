@@ -20,10 +20,10 @@ exports.upsertProgress = async (req, res) => {
   }
 
   const update = {
-  lastPositionSec: Math.max(0, positionSec || 0),
-  completed: !!completed,
-  lastWatchedAt: new Date(),
-};
+    lastPositionSec: Math.max(0, positionSec || 0),
+    completed: !!completed,
+    lastWatchedAt: new Date(),
+  };
 
 // Define filter for unique record: profile + content + episode
   const filter = {

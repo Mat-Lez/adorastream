@@ -201,7 +201,6 @@ async function openPreview(contentId) {
     if (!content) { const e = new Error('Content not found'); e.status = 404; throw e; }
 
     let currentEpisodeId = null;
-    
     const progressData = await getProgress(contentId);
     currentEpisodeId = progressData?.episodeId;
     let currentEpisode = null;
@@ -249,7 +248,7 @@ async function openPreview(contentId) {
       if (content.type === 'movie') {
         yearEl.textContent = content.year ? `(${content.year})` : '';
         yearEl.classList.remove('hidden');
-      }
+    }
     
       else {
         yearEl.textContent = ''; 
@@ -257,19 +256,19 @@ async function openPreview(contentId) {
       }
     }
 
-  if (durationEl) {
+    if (durationEl) {
       durationEl.textContent = showDuration(content, currentEpisode);
-      durationEl.classList.remove('hidden');
-    }
+        durationEl.classList.remove('hidden');
+      }
 
-  // Show rating only if available
-  if (ratingEl) {
-    if (content.ratings?.imdb) {
-      ratingEl.textContent = `⭐ IMDB: ${content.ratings.imdb}/10`;
-    } else {
-      ratingEl.textContent = "No rating available";
+    // Show rating only if available
+    if (ratingEl) {
+      if (content.ratings?.imdb) {
+        ratingEl.textContent = `⭐ IMDB: ${content.ratings.imdb}/10`;
+      } else {
+        ratingEl.textContent = "No rating available";
+      }
     }
-  }
 
   // Actors with clickable Wikipedia links
     const actorsContainer = document.getElementById('preview-actors');
