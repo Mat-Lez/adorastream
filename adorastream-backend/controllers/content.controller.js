@@ -64,7 +64,7 @@ function createSeededRandom(seed) {
   };
 }
 
-async function getPopularContents({ limit = 10, typeFilter, genreFilter } = {}) {
+async function getPopularContents({ limit = 10, typeFilter, genreFilter, titleRegex } = {}) {
   const sanitizedLimit = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
   const pipeline = [
     { $match: { liked: true } },
@@ -81,12 +81,21 @@ async function getPopularContents({ limit = 10, typeFilter, genreFilter } = {}) 
     { $unwind: '$content' }
   ];
 
+  const contentMatch = {};
   if (typeFilter) {
-    pipeline.push({ $match: { 'content.type': typeFilter } });
+    contentMatch['content.type'] = typeFilter;
   }
 
   if (genreFilter) {
-    pipeline.push({ $match: { 'content.genres': genreFilter } });
+    contentMatch['content.genres'] = genreFilter;
+  }
+
+  if (titleRegex) {
+    contentMatch['content.title'] = { $regex: titleRegex };
+  }
+
+  if (Object.keys(contentMatch).length > 0) {
+    pipeline.push({ $match: contentMatch });
   }
 
   pipeline.push({ $limit: sanitizedLimit });
@@ -98,7 +107,7 @@ async function getPopularContents({ limit = 10, typeFilter, genreFilter } = {}) 
   }));
 }
 
-async function getUnwatchedContents(profileId, { limit = 10, typeFilter, genreFilter } = {}) {
+async function getUnwatchedContents(profileId, { limit = 10, typeFilter, genreFilter, titleRegex } = {}) {
   if (!profileId) {
     return [];
   }
@@ -112,6 +121,9 @@ async function getUnwatchedContents(profileId, { limit = 10, typeFilter, genreFi
   }
   if (genreFilter) {
     filter.genres = genreFilter;
+  }
+  if (titleRegex) {
+     filter.title = { $regex: titleRegex };
   }
   return Content.find(filter)
     .sort({ createdAt: -1 })
@@ -197,6 +209,7 @@ exports.create = async (req, res) => {
 exports.list = async (req, res) => {
   const { q = '', sortBy = 'createdAt', order = 'desc' } = req.query;
   const rawGenres = req.query.genres;
+  const filterBy = typeof req.query.filterBy === 'string' ? req.query.filterBy.trim() : '';
   const page  = Math.max(1, parseInt(req.query.page || '1', 10));
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || '20', 10)));
   const skip  = (page - 1) * limit;
@@ -213,11 +226,9 @@ exports.list = async (req, res) => {
     }
   }
 
-  if (q) {
-    const searchTerm = String(q).trim();
-    if (searchTerm) {
-      filter.title = { $regex: escapeRegex(searchTerm), $options: 'i' };
-    }
+  const searchTerm = String(q || '').trim();
+  if (searchTerm) {
+    filter.title = { $regex: escapeRegex(searchTerm), $options: 'i' };
   }
 
   const resolvedGenres = Array.isArray(rawGenres)
@@ -226,8 +237,37 @@ exports.list = async (req, res) => {
   if (resolvedGenres.length > 0) {
     filter.genres = { $in: resolvedGenres };
   }
+  const filterGenre = resolvedGenres.length ? resolvedGenres[0] : '';
 
   const sort = { [sortBy]: order === 'asc' ? 1 : -1 };
+
+  const titleRegex = searchTerm ? new RegExp(escapeRegex(searchTerm), 'i') : null;
+  const profileId = req.session?.user?.profileId || null;
+
+  if (filterBy === 'popular') {
+    const popularItems = await getPopularContents({ limit, typeFilter: filter.type, genreFilter: filterGenre, titleRegex });
+    const popularCount = popularItems.length;
+    return res.json({
+      contents: popularItems,
+      total: popularCount,
+      page: 1,
+      pages: popularCount > 0 ? 1 : 0
+    });
+  }
+
+  if (filterBy === 'unwatched') {
+    if (!profileId) {
+      return res.json({ contents: [], total: 0, page: 1, pages: 0 });
+    }
+    const unwatched = await getUnwatchedContents(profileId, { limit, typeFilter: filter.type, genreFilter: filterGenre, titleRegex });
+    const unwatchedCount = unwatched.length;
+    return res.json({
+      contents: unwatched,
+      total: unwatchedCount,
+      page: 1,
+      pages: unwatchedCount > 0 ? 1 : 0
+    });
+  }
 
   let contents;
   let total;

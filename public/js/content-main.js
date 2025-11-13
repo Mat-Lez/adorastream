@@ -427,6 +427,10 @@ function initSearchFeature() {
       if (selectedGenre) {
         params.set('genres', selectedGenre);
       }
+      const selectedFilter = getSelectedFilterValue();
+      if (selectedFilter) {
+        params.set('filterBy', selectedFilter);
+      }
       const response = await api(`/api/content?${params.toString()}`);
       const contents = response.contents || [];
       if (contents.length === 0) {
