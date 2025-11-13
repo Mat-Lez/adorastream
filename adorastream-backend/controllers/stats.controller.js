@@ -129,25 +129,17 @@ async function getRecommendedContent(userId, profileId) {
 
         let recommendations;
 
-        // If we found genres (even just 1 or 2), recommend based on them.
+        const query = {
+            _id: { $nin: watchedContentIds } // Excludes watched content
+        };
         if (topGenres.length > 0) {
-            recommendations = await Content.find({
-                genres: { $in: topGenres },
-                _id: { $nin: watchedContentIds } // Excludes watched content
-            })
+            query.genres = { $in: topGenres };
+        }
+
+        recommendations = await Content.find(query)
             .select('title posterUrl')
             .limit(DEFAULT_RECOMMENDATIONS_LIMIT) // Limit to a reasonable number
             .sort({ createdAt: -1 }); // Sort by newest
-        
-        } else {
-            // If still no genres, return latest content.            
-            recommendations = await Content.find({
-                _id: { $nin: watchedContentIds }
-            })
-            .select('title posterUrl')
-            .limit(DEFAULT_RECOMMENDATIONS_LIMIT)
-            .sort({ createdAt: -1 });
-        }
 
         return recommendations;
 
