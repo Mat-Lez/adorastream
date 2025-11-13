@@ -4,6 +4,65 @@ const upload = require('../services/videoUpload.service');
 
 const escapeRegex = value => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+async function fetchRandomizedContents(matchFilter, { limit, skip = 0, seed }) {
+  if (!limit || limit <= 0) {
+    return { contents: [], total: 0 };
+  }
+
+  const normalizedSeed = (typeof seed === 'string' && seed.trim()) || 'default';
+
+  // 1. Fetch only IDs to save memory
+  const allIds = await Content.find(matchFilter).select('_id').lean();
+  const total = allIds.length;
+
+  if (!total) {
+    return { contents: [], total: 0 };
+  }
+
+  // 2. Shuffle indices to get a random-but-stable order based on the seed
+  const indices = Array.from({ length: total }, (_value, index) => index);
+  const rng = createSeededRandom(normalizedSeed);
+
+  for (let i = indices.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(rng() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+
+  // 3. Get IDs for the current page
+  const selectedIndices = indices.slice(skip, skip + limit);
+  const pageIds = selectedIndices.map(idx => allIds[idx]._id);
+
+  if (!pageIds.length) {
+    return { contents: [], total };
+  }
+
+  // 4. Fetch full documents for only the current page
+  const pageContents = await Content.find({ _id: { $in: pageIds } }).lean();
+
+  // 5. Preserve the shuffled order, as $in doesn't guarantee it
+  const contentMap = new Map(pageContents.map(doc => [String(doc._id), doc]));
+  const orderedContents = pageIds.map(id => contentMap.get(String(id)));
+
+  return { contents: orderedContents, total };
+}
+
+function createSeededRandom(seed) {
+  let hash = 2166136261;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash ^= seed.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  let state = hash >>> 0;
+  return function mulberry32() {
+    state += 0x6D2B79F5;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), 1 | t);
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 // POST create new content
 exports.create = async (req, res) => {
    // Extract and parse fields
@@ -87,6 +146,8 @@ exports.list = async (req, res) => {
 
   const filter = {};
   const rawType = req.query.type;
+  const rawSeed = typeof req.query.randomSeed === 'string' ? req.query.randomSeed.trim() : '';
+  const useRandomOrdering = rawSeed.length > 0;
   
   if (rawType) {
     const normalizedType = String(rawType).trim().toLowerCase();
@@ -109,10 +170,18 @@ exports.list = async (req, res) => {
 
   const sort = { [sortBy]: order === 'asc' ? 1 : -1 };
 
-  const [contents, total] = await Promise.all([
-    Content.find(filter).sort(sort).skip(skip).limit(limit),
-    Content.countDocuments(filter)
-  ]);
+  let contents;
+  let total;
+  if (useRandomOrdering) {
+    const result = await fetchRandomizedContents(filter, { limit, skip, seed: rawSeed });
+    contents = result.contents;
+    total = result.total;
+  } else {
+    [contents, total] = await Promise.all([
+      Content.find(filter).sort(sort).skip(skip).limit(limit),
+      Content.countDocuments(filter),
+    ]);
+  }
 
   res.json({ contents, total, page, pages: Math.ceil(total / limit) });
 };
@@ -537,3 +606,5 @@ exports.getContentGrid = async (typeFilter, limit = GRID_CONTENT_LIMIT) => {
     .limit(limit)
     .lean();
 };
+
+exports.fetchRandomizedContents = fetchRandomizedContents;
