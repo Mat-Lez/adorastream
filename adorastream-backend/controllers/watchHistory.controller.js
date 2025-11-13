@@ -100,13 +100,20 @@ exports.toggleLike = async (req, res) => {
     const content = await Content.findById(contentId).lean();
     if (!content) return res.status(404).json({ success: false, error: 'Content not found' });
 
-    let filter = { userId, profileId, contentId, episodeId: null };
-    if (content.type === 'series')
-      filter.type = 'series-like';
+    const filter = { userId, profileId, contentId, episodeId: null };
+    const targetType = content.type === 'series' ? 'series-like' : 'progress';
 
     const entry = await WatchHistory.findOneAndUpdate(
       filter,
-      [{ $set: { liked: { $not: '$liked' } } }],
+      [
+        {
+          $set: {
+            type: { $ifNull: ['$type', targetType] },
+            liked: { $ifNull: ['$liked', false] },
+          },
+        },
+        { $set: { liked: { $not: '$liked' } } },
+      ],
       { new: true, upsert: true }
     );
 
