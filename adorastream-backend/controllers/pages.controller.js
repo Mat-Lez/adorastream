@@ -79,7 +79,7 @@ async function attachContentGrid(renderOptions, typeFilter, genreFilter) {
   const limit = ENDLESS_SCROLLING_CONTENT_AMOUNT;
   const filter = typeFilter ? { type: typeFilter } : {};
   const randomSeed = crypto.randomBytes(8).toString('hex');
-  const normalizedGenre = typeof genreFilter === 'string' && genreFilter.trim() ? genreFilter.trim() : '';
+  const normalizedGenre = typeof genreFilter === 'string' ? genreFilter.trim() : '';
   if (normalizedGenre) {
     filter.genres = { $in: [normalizedGenre] };
   }

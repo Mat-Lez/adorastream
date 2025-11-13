@@ -371,7 +371,7 @@ function initSearchFeature() {
 
   const clearResults = () => {
     searchGrid.innerHTML = '';
-  searchEmpty.classList.add('is-hidden');
+    searchEmpty.classList.add('is-hidden');
   };
 
   const showMessage = (message) => {
