@@ -16,7 +16,7 @@ const WatchHistorySchema = new Schema(
 
     // Adding a psuedo record 'series_like' to store series likes
     // progress type will be for movies and episodes normal progress
-    type: { type: String, enum: ['progress', 'series_like'], default: 'progress' },
+    type: { type: String, enum: ['progress', 'series-like'], default: 'progress' },
 
     lastWatchedAt: { type: Date, default: null }
   },
