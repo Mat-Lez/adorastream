@@ -199,6 +199,7 @@ async function controlButtonsContainer(contentId, heartBtnTemplate, contentType)
 async function openPreview(contentId) {
   try {
     overlay.classList.add('visible');
+    overlay.querySelector('.preview-card').scrollTo({ top: 0 });
     main.classList.add('loading');
 
     // Fetch content info
@@ -354,6 +355,8 @@ async function openPreview(contentId) {
 
   } catch (err) {
     console.error('Preview error:', err);
+    main.classList.remove('loading');
+    overlay.classList.remove('visible');
   }
 }
 

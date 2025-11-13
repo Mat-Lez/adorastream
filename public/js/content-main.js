@@ -158,10 +158,9 @@ function addCardClickListeners() {
     if (!contentId) return;
     const main = document.querySelector('.main');
     try {
-        // main.classList.add('loading');
         openPreview(contentId);
     } catch (err) {
-      // main.classList.remove('loading');
+      main.classList.remove('loading');
       console.error(`Failed to select content: ${err.message}`);
     }
   });

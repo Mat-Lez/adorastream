@@ -621,7 +621,7 @@ exports.getSimilarContent = async (req, res) => {
   const genres = Array.isArray(current.genres) ? current.genres : [];
 
   if (genres.length === 0) {
-    return res.json({ similar: [] });
+    return res.json({ randomSimilar: [] });
   }
 
   // Find other content that shares at least one genre
