@@ -1,5 +1,6 @@
 const Content = require('../models/content');
 const ContentController = require('../controllers/content.controller');
+const StatsController = require('../controllers/stats.controller');
 
 const { getGenreSections, getContentGrid } = require('./content.controller');
 
@@ -76,6 +77,15 @@ async function attachContentGrid(renderOptions, typeFilter) {
   renderOptions.gridTitle = typeFilter === 'movie' ? 'Movies' : 'Shows';
 }
 
+async function attachRecommendations(renderOptions, userId, profileId) {
+  try {
+    renderOptions.recommendations = await StatsController.getRecommendedContent(userId, profileId);
+  } catch (err) {
+    console.error("Failed to attach recommendations:", err.message);
+    renderOptions.recommendations = [];
+  }
+}
+
 exports.showContentMainPage = async (req, res) => {   
   const { user, profiles, activeProfileId } = res.locals;
 
@@ -96,6 +106,7 @@ exports.showContentMainPage = async (req, res) => {
   };
 
   await attachGenreSections(renderOptions);
+  await attachRecommendations(renderOptions, user._id, activeProfileId);
 
   res.render('pages/content-main', renderOptions);
 }
@@ -130,6 +141,7 @@ async function showPage(req, res, page, renderPath) {
 
   if (page === 'home') {
     await attachGenreSections(renderOptions);
+    await attachRecommendations(renderOptions, user._id, activeProfileId);
   }
 
   if (['movies', 'shows'].includes(page)) {

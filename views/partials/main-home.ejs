@@ -1,3 +1,19 @@
+<%
+  function renderCardRow(items) {
+%>
+  <div class="cards-row">
+    <% items.forEach(item => { %>
+      <div class="card" data-id="<%= item.id %>">
+        <div class="card-media">
+          <img src="<%= item.posterUrl %>" alt="<%= item.title %>" onerror="this.src='https://placehold.co/200x280/0d1117/8b949e?text=No+Poster';">
+          <div class="play-overlay">▶</div>
+        </div>
+        <div class="card-title"><%= item.title %></div>
+      </div>
+    <% }); %>
+  </div>
+<% } %>
+
 <header class="topbar">
 <%- include('main-topbar') %>
 </header>
@@ -15,21 +31,18 @@
 		<div class="grid" id="popular"></div>
 	</section>
 
+    <% if (typeof recommendations !== 'undefined' && recommendations.length > 0) { %>
+	<section class="category">
+		<h2>Recommended For You</h2>
+		<% renderCardRow(recommendations); %>
+	</section>
+  	<% } %>
+
 	<div id="genre-sections-root">
 	<% (genreSections || []).forEach(section => { %>
 		<section class="category">
 			<h2><%= section.genre %></h2>
-			<div class="cards-row">
-				<% section.items.forEach(item => { %>
-					<div class="card" data-id="<%= item.id %>">
-						<div class="card-media">
-							<img src="<%= item.posterUrl %>" alt="<%= item.title %>">
-							<div class="play-overlay">▶</div>
-						</div>
-						<div class="card-title"><%= item.title %></div>
-					</div>
-				<% }); %>
-			</div>
+			<% renderCardRow(section.items); %>
 		</section>
 	<% }); %>
 </div>
