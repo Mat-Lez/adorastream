@@ -21,8 +21,11 @@
     <main class="main">
       <!-- By default display home page -->
       <%- include('../partials/main-home', {
-        profiles: profiles,
-        activeProfileId: activeProfileId
+        profiles,
+        activeProfileId,
+        genreSections: typeof genreSections !== 'undefined' ? genreSections : [],
+        recommendations: typeof recommendations !== 'undefined' ? recommendations : [],
+        continueWatching: typeof continueWatching !== 'undefined' ? continueWatching : []
       }) %>
     </main>
     

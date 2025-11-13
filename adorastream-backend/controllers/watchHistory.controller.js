@@ -1,7 +1,49 @@
-const { WatchHistory, DailyWatch } = require('../models/watchHistory');
+const WatchHistory = require('../models/watchHistory');
 const Content = require('../models/content');
 const User = require('../models/user');
 const ContentController = require('../controllers/content.controller');
+
+exports.getContinueWatchingItems = async (userId, profileId, limit = 12) => {
+  if (!userId || !profileId) {
+    return [];
+  }
+
+  const histories = await WatchHistory.find({
+    userId,
+    profileId,
+    completed: false,
+    type: 'progress'
+  })
+    .sort({ updatedAt: -1, lastWatchedAt: -1 })
+    .limit(limit * 3)
+    .populate({
+      path: 'contentId',
+      select: 'title posterUrl durationSec type'
+    })
+    .lean();
+
+  const seen = new Set();
+  const items = [];
+  for (const history of histories) {
+    const content = history.contentId;
+    if (!content) continue;
+    const id = String(content._id);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    items.push({
+      id,
+      title: content.title || 'Untitled',
+      posterUrl: content.posterUrl || '/assets/no_poster.svg',
+      progress: history.lastPositionSec || 0,
+      duration: content.durationSec || 0,
+      updatedAt: history.updatedAt || history.lastWatchedAt || history.createdAt || new Date(0)
+    });
+    if (items.length >= limit) break;
+  }
+
+  items.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  return items;
+};
 
 
 

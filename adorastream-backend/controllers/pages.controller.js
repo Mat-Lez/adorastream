@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const Content = require('../models/content');
+const WatchHistoryController = require('../controllers/watchHistory.controller');
 const StatsController = require('../controllers/stats.controller');
 
 const { _getSortedEpisodes, getGenreSections, getContentGrid, fetchRandomizedContents, getPopularContents, getUnwatchedContents } = require('./content.controller');
@@ -74,6 +75,7 @@ async function attachGenreSections(renderOptions) {
 }
 
 const ENDLESS_SCROLLING_CONTENT_AMOUNT = Number(process.env.ENDLESS_SCROLLING_CONTENT_AMOUNT) || 20;
+const CONTINUE_WATCHING_LIMIT = Number(process.env.CONTINUE_WATCHING_LIMIT) || 12;
 
 async function attachContentGrid(renderOptions, typeFilter, genreFilter, filterBy, profileId) {
   const limit = ENDLESS_SCROLLING_CONTENT_AMOUNT;
@@ -136,6 +138,19 @@ async function attachRecommendations(renderOptions, userId, profileId) {
   }
 }
 
+async function attachContinueWatching(renderOptions, userId, profileId) {
+  renderOptions.continueWatching = [];
+  if (!userId || !profileId) {
+    return;
+  }
+
+  renderOptions.continueWatching = await WatchHistoryController.getContinueWatchingItems(
+    userId,
+    profileId,
+    CONTINUE_WATCHING_LIMIT
+  );
+}
+
 exports.showContentMainPage = async (req, res) => {   
   const { user, profiles, activeProfileId } = res.locals;
 
@@ -158,6 +173,7 @@ exports.showContentMainPage = async (req, res) => {
 
   await attachGenreSections(renderOptions);
   await attachRecommendations(renderOptions, user._id, activeProfileId);
+  await attachContinueWatching(renderOptions, user._id, activeProfileId);
 
   res.render('pages/content-main', renderOptions);
 }
@@ -190,7 +206,11 @@ async function showPage(req, res, page, renderPath) {
   };
   renderOptions.searchScope = pageSearchScopes[page] || 'all';
 
-  if ((page === 'home' || renderOptions.topbarLayout?.includes("FILTERS")) && !renderOptions.genreSections) {
+  if (page === 'home') {
+    await attachGenreSections(renderOptions);
+    await attachRecommendations(renderOptions, user._id, activeProfileId);
+    await attachContinueWatching(renderOptions, user._id, activeProfileId);
+  } else if (renderOptions.topbarLayout?.includes("FILTERS")) {
     await attachGenreSections(renderOptions);
     await attachRecommendations(renderOptions, user._id, activeProfileId);
   }
