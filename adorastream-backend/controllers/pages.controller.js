@@ -1,4 +1,9 @@
+const crypto = require('crypto');
 const Content = require('../models/content');
+const StatsController = require('../controllers/stats.controller');
+
+const { _getSortedEpisodes, getGenreSections, getContentGrid, fetchRandomizedContents } = require('./content.controller');
+
 
 const availablePages = ['home', 'movies', 'shows', 'settings'];
 const pageToLayoutMap = {
@@ -7,17 +12,22 @@ const pageToLayoutMap = {
       topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
     shows: {
-      topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+      topbarLayout: ["SEARCH", "FILTERS", "TOPBAR_ACTIONS"],
       topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
     movies: {
-      topbarLayout: ["SEARCH", "TOPBAR_ACTIONS"],
+      topbarLayout: ["SEARCH", "FILTERS", "TOPBAR_ACTIONS"],
       topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
     settings: {
       topbarLayout: ["TOPBAR_ACTIONS"],
       topbarActionsLayout: ["LOGOUT_BUTTON", "PROFILE_DROPDOWN", "ADD_CONTENT_BUTTON"]
     },
+};
+const pageSearchScopes = {
+  home: 'all',
+  movies: 'movie',
+  shows: 'series'
 };
 
 exports.showLoginPage = (req, res) => {
@@ -59,6 +69,44 @@ exports.showAddContentPage = (req, res) => {
     additional_css: ['addContent']  });
 }
 
+async function attachGenreSections(renderOptions) {
+  renderOptions.genreSections = await getGenreSections();
+}
+
+const ENDLESS_SCROLLING_CONTENT_AMOUNT = Number(process.env.ENDLESS_SCROLLING_CONTENT_AMOUNT) || 20;
+
+async function attachContentGrid(renderOptions, typeFilter, genreFilter) {
+  const limit = ENDLESS_SCROLLING_CONTENT_AMOUNT;
+  const filter = typeFilter ? { type: typeFilter } : {};
+  const randomSeed = crypto.randomBytes(8).toString('hex');
+  const normalizedGenre = typeof genreFilter === 'string' ? genreFilter.trim() : '';
+  if (normalizedGenre) {
+    filter.genres = { $in: [normalizedGenre] };
+  }
+
+  const { contents: gridItems, total } = await fetchRandomizedContents(filter, { limit, seed: randomSeed });
+
+  renderOptions.gridItems = gridItems;
+  renderOptions.gridTitle = typeFilter === 'movie' ? 'Movies' : 'Shows';
+  renderOptions.gridPagination = {
+    page: 1,
+    limit,
+    total,
+    type: typeFilter || '',
+    randomSeed,
+    genre: normalizedGenre
+  };
+}
+
+async function attachRecommendations(renderOptions, userId, profileId) {
+  try {
+    renderOptions.recommendations = await StatsController.getRecommendedContent(userId, profileId);
+  } catch (err) {
+    console.error("Failed to attach recommendations:", err.message);
+    renderOptions.recommendations = [];
+  }
+}
+
 exports.showContentMainPage = async (req, res) => {   
   const { user, profiles, activeProfileId } = res.locals;
 
@@ -66,16 +114,22 @@ exports.showContentMainPage = async (req, res) => {
     return res.redirect('/login');
   }
 
-  res.render('pages/content-main', {
+  const renderOptions = {
     title: 'Main - AdoraStream',
-    scripts: ['contentMain'],
-    additional_css: ['contentMain', 'buttons'],
+    scripts: ['contentMain', 'mediaPreview'],
+    additional_css: ['contentMain', 'buttons', 'mediaPreview'],
     user,
     profiles,
     activeProfileId,
     topbarLayout: pageToLayoutMap['home'].topbarLayout,
-    topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout
-   });
+    topbarActionsLayout: pageToLayoutMap['home'].topbarActionsLayout,
+    searchScope: pageSearchScopes.home
+  };
+
+  await attachGenreSections(renderOptions);
+  await attachRecommendations(renderOptions, user._id, activeProfileId);
+
+  res.render('pages/content-main', renderOptions);
 }
 
 exports.showMainSpecificPage = async (req, res) => {
@@ -95,7 +149,7 @@ async function showPage(req, res, page, renderPath) {
     return res.status(403).send('User not found');
   }
 
-  res.render(renderPath, {
+  const renderOptions = {
     layout: false,
     user,
     profiles,
@@ -103,7 +157,23 @@ async function showPage(req, res, page, renderPath) {
     topbarLayout: pageToLayoutMap[page].topbarLayout,
     topbarActionsLayout: pageToLayoutMap[page].topbarActionsLayout,
     initialSettingsPage: page === 'settings' ? (req.query.tab === 'statistics' ? 'statistics' : 'manage-profiles') : undefined
-  });  
+  };
+  renderOptions.searchScope = pageSearchScopes[page] || 'all';
+
+  if ((page === 'home' || renderOptions.topbarLayout?.includes("FILTERS")) && !renderOptions.genreSections) {
+    await attachGenreSections(renderOptions);
+    await attachRecommendations(renderOptions, user._id, activeProfileId);
+  }
+
+  const requestedGenre = typeof req.query.genre === 'string' ? req.query.genre.trim() : '';
+  renderOptions.selectedGenre = requestedGenre || '';
+
+  if (['movies', 'shows'].includes(page)) {
+    const typeFilter = page === 'movies' ? 'movie' : 'series';
+    await attachContentGrid(renderOptions, typeFilter, requestedGenre);
+  }
+
+  res.render(renderPath, renderOptions);
 }
 
 function getRequestedPage(req, availablePages, defaultPage) {
@@ -162,15 +232,127 @@ exports.showSettingsProfileActionPage = async (req, res) => {
 }
 
 exports.showMediaPlayerPage = async (req, res) => {    
-  const contentId = req.session.user.contentId;
+
+  const { contentId, currentEpisodeId } = req.query;
+  const lastPositionSec = Number(req.query.lastPositionSec) || 0; 
+
   if (!contentId) {
     return res.redirect('/content-main');
   }
-  const media = await Content.findOne({ _id: contentId }).lean();
+  
+  // Fetch the content
+  const media = await Content.findById(contentId).lean();
+  if (!media) {
+    return res.status(404).send('Content not found');
+  }
+
+  let currentEpisode = null;
+
+  if (media.type === 'series') {
+    const allEpisodes = _getSortedEpisodes(media);
+
+    currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
+  }
+
+  // Save it in the session and persist
+  req.session.user.contentId = contentId;
+  req.session.user.currentEpisodeId = currentEpisode ? currentEpisode._id : null;
+
+  await new Promise((resolve, reject) => {
+    req.session.save(err => (err ? reject(err) : resolve()));
+  });
+
   res.render('pages/player', {
     title: 'Play - AdoraStream',
     content: media,
+    lastPositionSec: lastPositionSec,
+    currentEpisode,
     scripts: ['player'],
     additional_css: ['player'] 
   });
 }
+
+exports.showPreviewPage = async (req, res) => {
+  const { contentId, currentEpisodeId } = req.query;
+
+  if (!contentId) {
+    return res.redirect('/content-main');
+  }
+  // Fetch the content
+  const media = await Content.findById(contentId).lean();
+  if (!media) {
+    return res.status(404).send('Content not found');
+  }
+
+  let currentEpisode = null;
+
+  if (media.type === 'series') {
+    const allEpisodes = _getSortedEpisodes(media);
+
+    currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
+  }
+   res.render('pages/player', {
+    title: 'Play - AdoraStream',
+    content: media,
+    currentEpisode,
+    scripts: ['player'],
+    additional_css: ['player'] 
+  });
+};
+
+
+exports.showEpisodesDetailedList = async (req, res) => {
+  const { contentId } = req.params;
+  if (!contentId) {
+    return res.redirect('/content-main');
+  }
+
+  const content = await Content.findById(contentId).lean();
+    if (!content || content.type !== 'series') {
+      return res.status(404).send('No episodes found');
+    }
+
+  const episodes = _getSortedEpisodes(content);
+  res.render('partials/preview-episodes-list', {
+    episodes
+  });
+};
+
+
+exports.showActorsList = async (req, res) => {
+  try {
+    const  { contentId } = req.params;
+    const { episodeId } = req.query;
+
+    const content = await Content.findById(contentId).lean();
+    if (!content) {
+      return res.status(404).send('Content not found');
+    }
+
+    if (content.type === 'movie' || !episodeId) {
+      return res.render('partials/actors-list', {
+        layout: false,
+        actors: content.actors || []
+      });
+    }
+
+    let episode = null;
+    for (const season of content.seasons || []) {
+      episode = season.episodes.find(ep => String(ep._id) === episodeId);
+      if (episode) break;
+    }
+
+    if (!episode) {
+      return res.status(404).send('Episode not found');
+    }
+
+    return res.render('partials/actors-list', {
+      layout: false,
+      actors: episode.actors || []
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send('Internal server error');
+  }
+};

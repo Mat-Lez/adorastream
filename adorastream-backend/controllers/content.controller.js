@@ -2,6 +2,67 @@ const Content = require('../models/content');
 const { enrichMovieRatings, enrichSeriesRatings, enrichSeriesEpisodesRatings } = require('../services/rating.service');
 const upload = require('../services/videoUpload.service');
 
+const escapeRegex = value => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+async function fetchRandomizedContents(matchFilter, { limit, skip = 0, seed }) {
+  if (!limit || limit <= 0) {
+    return { contents: [], total: 0 };
+  }
+
+  const normalizedSeed = (typeof seed === 'string' && seed.trim()) || 'default';
+
+  // 1. Fetch only IDs to save memory
+  const allIds = await Content.find(matchFilter).select('_id').lean();
+  const total = allIds.length;
+
+  if (!total) {
+    return { contents: [], total: 0 };
+  }
+
+  // 2. Shuffle indices to get a random-but-stable order based on the seed
+  const indices = Array.from({ length: total }, (_value, index) => index);
+  const rng = createSeededRandom(normalizedSeed);
+
+  for (let i = indices.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(rng() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+
+  // 3. Get IDs for the current page
+  const selectedIndices = indices.slice(skip, skip + limit);
+  const pageIds = selectedIndices.map(idx => allIds[idx]._id);
+
+  if (!pageIds.length) {
+    return { contents: [], total };
+  }
+
+  // 4. Fetch full documents for only the current page
+  const pageContents = await Content.find({ _id: { $in: pageIds } }).lean();
+
+  // 5. Preserve the shuffled order, as $in doesn't guarantee it
+  const contentMap = new Map(pageContents.map(doc => [String(doc._id), doc]));
+  const orderedContents = pageIds.map(id => contentMap.get(String(id)));
+
+  return { contents: orderedContents, total };
+}
+
+function createSeededRandom(seed) {
+  let hash = 2166136261;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash ^= seed.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  let state = hash >>> 0;
+  return function mulberry32() {
+    state += 0x6D2B79F5;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), 1 | t);
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 // POST create new content
 exports.create = async (req, res) => {
    // Extract and parse fields
@@ -15,6 +76,20 @@ exports.create = async (req, res) => {
     description,
     durationSec
   } = req.body;
+
+  const normalizedTitle = String(title || '').trim();
+  if (!normalizedTitle) {
+    const err = new Error('Title is required');
+    err.status = 400;
+    throw err;
+  }
+
+  const existingContent = await Content.findOne({ title: { $regex: new RegExp(`^${normalizedTitle}$`, 'i') } }).lean()
+  if (existingContent) {
+    const err = new Error('Content with this title already exists');
+    err.status = 409;
+    throw err;
+  }
 
   // Parse genres
   const genresArr = typeof genres === 'string'
@@ -44,7 +119,7 @@ exports.create = async (req, res) => {
 
   // Create content
   const content = await Content.create({
-    title,
+    title: normalizedTitle,
     type,
     year,
     genres: genresArr,
@@ -64,25 +139,52 @@ exports.create = async (req, res) => {
 
 //
 exports.list = async (req, res) => {
-  const { q, genres = [], sortBy = 'createdAt', order = 'desc' } = req.query;
+  const { q = '', sortBy = 'createdAt', order = 'desc' } = req.query;
+  const rawGenres = req.query.genres;
   const page  = Math.max(1, parseInt(req.query.page || '1', 10));
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || '20', 10)));
   const skip  = (page - 1) * limit;
 
   const filter = {};
-  if (q) filter.$text = { $search: q };
+  const rawType = req.query.type;
+  const rawSeed = typeof req.query.randomSeed === 'string' ? req.query.randomSeed.trim() : '';
+  const useRandomOrdering = rawSeed.length > 0;
+  
+  if (rawType) {
+    const normalizedType = String(rawType).trim().toLowerCase();
+    if (['movie', 'series'].includes(normalizedType)) {
+      filter.type = normalizedType;
+    }
+  }
 
-  // genres is expected to be an array: ?genres=Drama&genres=Sci-Fi
-  if (Array.isArray(genres) && genres.length > 0) {
-    filter.genres = { $in: genres };
+  if (q) {
+    const searchTerm = String(q).trim();
+    if (searchTerm) {
+      filter.title = { $regex: escapeRegex(searchTerm), $options: 'i' };
+    }
+  }
+
+  const resolvedGenres = Array.isArray(rawGenres)
+    ? rawGenres
+    : (typeof rawGenres === 'string' && rawGenres.trim() ? [rawGenres.trim()] : []);
+  if (resolvedGenres.length > 0) {
+    filter.genres = { $in: resolvedGenres };
   }
 
   const sort = { [sortBy]: order === 'asc' ? 1 : -1 };
 
-  const [contents, total] = await Promise.all([
-    Content.find(filter).sort(sort).skip(skip).limit(limit),
-    Content.countDocuments(filter)
-  ]);
+  let contents;
+  let total;
+  if (useRandomOrdering) {
+    const result = await fetchRandomizedContents(filter, { limit, skip, seed: rawSeed });
+    contents = result.contents;
+    total = result.total;
+  } else {
+    [contents, total] = await Promise.all([
+      Content.find(filter).sort(sort).skip(skip).limit(limit),
+      Content.countDocuments(filter),
+    ]);
+  }
 
   res.json({ contents, total, page, pages: Math.ceil(total / limit) });
 };
@@ -94,7 +196,6 @@ exports.get = async (req, res) => {
   if (!content) { const e = new Error('Content not found'); e.status = 404; throw e; }
   res.json(content);
 };
-
 
 // PATCH update content by ID
 exports.update = async (req, res) => {
@@ -116,6 +217,20 @@ exports.remove = async (req, res) => {
 // POST /api/series - create a new series
 exports.createSeries = async (req, res) => {
   const { title, creators, numberOfSeasons, genres, description } = req.body;
+  const normalizedTitle = String(title || '').trim();
+
+  if (!normalizedTitle) {
+    const err = new Error('Title is required');
+    err.status = 400;
+    throw err;
+  }
+
+  const existingTitle = await Content.findOne({ title: { $regex: new RegExp(`^${normalizedTitle}$`, 'i') } }).lean();
+  if (existingTitle) {
+    const err = new Error('Content with this title already exists');
+    err.status = 409;
+    throw err;
+  }
 
   let creatorsArr = [];
   if (creators) {
@@ -135,7 +250,7 @@ exports.createSeries = async (req, res) => {
 
   const seriesContent = await Content.create({
     type: 'series',
-    title,
+    title: normalizedTitle,
     synopsis: description || '',
     creators: creatorsArr,
     numberOfSeasons: Number(numberOfSeasons) || 0,
@@ -197,8 +312,10 @@ exports.addEpisode = async (req, res) => {
     season = { seasonNumber: seasonNum, episodes: [] };
     series.seasons.push(season);
   }
-  const exists = (season.episodes || []).some(e => e.episodeNumber === epNum);
-  if (exists) { const e = new Error('Episode already exists in this season'); e.status = 409; throw e; }
+    const exists = (season.episodes || []).some(e => e.episodeNumber === epNum);
+    if (exists) { const e = new Error('Episode already exists in this season'); e.status = 409; throw e; }
+    const titleExists = (season.episodes || []).some(e => e.title?.trim().toLowerCase() === String(title || '').trim().toLowerCase());
+    if (titleExists) { const e = new Error('Episode with this title already exists in this season'); e.status = 409; throw e; }
 
   const episodeDoc = {
     seasonNumber: seasonNum,
@@ -238,6 +355,48 @@ exports.addEpisodesBatch = async (req, res) => {
   const posters = (req.files && req.files.posters) || [];
   const videos  = (req.files && req.files.videos)  || [];
 
+  const seasons = Array.isArray(series.seasons) ? series.seasons : (series.seasons = []);
+  const batchSeen = new Set();
+  const batchTitlesBySeason = new Map();
+  for (const ep of episodes) {
+    const seasonNum = Number(ep.seasonNumber || 1);
+    const epNum = Number(ep.episodeNumber || 1);
+    const title = String(ep.title || '').trim().toLowerCase();
+    const key = `${seasonNum}:${epNum}`;
+
+    if (batchSeen.has(key)) {
+      const err = new Error(`Duplicate episode ${seasonNum}x${epNum} in request`);
+      err.status = 409;
+      throw err;
+    }
+    batchSeen.add(key);
+
+    if (title) {
+      if (!batchTitlesBySeason.has(seasonNum)) {
+        batchTitlesBySeason.set(seasonNum, new Set());
+      }
+      const seasonTitles = batchTitlesBySeason.get(seasonNum);
+      if (seasonTitles.has(title)) {
+        const err = new Error(`Duplicate episode title "${ep.title}" in request for season ${seasonNum}`);
+        err.status = 409;
+        throw err;
+      }
+      seasonTitles.add(title);
+    }
+
+    const season = seasons.find(s => s.seasonNumber === seasonNum);
+    if (season && (season.episodes || []).some(e => e.episodeNumber === epNum)) {
+      const err = new Error(`Episode ${seasonNum}x${epNum} already exists`);
+      err.status = 409;
+      throw err;
+    }
+    if (season && title && (season.episodes || []).some(e => String(e.title || '').trim().toLowerCase() === title)) {
+      const err = new Error(`Episode title "${ep.title}" already exists in season ${seasonNum}`);
+      err.status = 409;
+      throw err;
+    }
+  }
+
   if (!Array.isArray(series.seasons)) series.seasons = [];
   episodes.forEach((ep, idx) => {
     const seasonNum = Number(ep.seasonNumber || 1);
@@ -252,10 +411,11 @@ exports.addEpisodesBatch = async (req, res) => {
     const posterUrl = posters[idx] ? `/assets/posters/${posters[idx].filename}` : '';
     const videoUrl  = videos[idx]  ? `/assets/videos/${videos[idx].filename}`   : '';
     const actorsArr = Array.isArray(ep.actors) ? ep.actors : [];
+    const normalizedTitle = String(ep.title || '').trim();
     season.episodes.push({
       seasonNumber: seasonNum,
       episodeNumber: epNum,
-      title: ep.title || '',
+      title: normalizedTitle,
       synopsis: ep.description || '',
       director: ep.director || '',
       actors: actorsArr,
@@ -274,7 +434,25 @@ exports.addEpisodesBatch = async (req, res) => {
   res.status(201).json(series);
 };
 
-exports.selectContent = async (req, res) => {
+
+
+exports.currentlyPlayed = async (req, res) => {
+  if (!req.session?.user?.id || !req.session?.user?.profileId) {
+    return res.status(401).json({ error: 'Not authenticated or profile not selected' });
+  }
+
+  const contentId = req.session.user.contentId;
+  const currentEpisodeId = req.session.user.currentEpisodeId || null;
+  if (!contentId) return res.status(400).json({ error: 'No content selected' });
+  const content = await Content.findById(contentId);
+  if (!content) throw Object.assign(new Error('Content not found'), { status: 404 });
+
+  return res.json({ contentId: contentId, currentEpisodeId: currentEpisodeId, type: content.type });
+};
+
+
+// Get Id of the next episode based on the one currently playing
+  exports.getNextEpisodeId = async (req, res) => {
     // require an authenticated session user
     if (!req.session?.user?.id) {
       return res.status(401).json({ error: 'Not authenticated' });
@@ -283,11 +461,13 @@ exports.selectContent = async (req, res) => {
     if (!req.session?.user?.profileId) {
       return res.status(401).json({ error: 'No profile selected' });
     }
-    const { contentId } = req.body;
+
+    const contentId = req.session.user.contentId;
+    const currentEpisodeId = req.session.user.currentEpisodeId;
+
     if (!contentId) {
-      return res.status(400).json({ error: 'ContentId is required' });
+      return res.status(400).json({ error: 'No content selected' });
     }
-    const { season, episode } = req.query; // for series
 
     const content = await Content.findById(contentId);
     if (!content) { const e = new Error('Content not found'); e.status = 404; throw e; }
@@ -296,23 +476,138 @@ exports.selectContent = async (req, res) => {
     let nextEpisode = null;
 
     if (content.type === 'series') {
-      const episodes = content.episodes.sort((a, b) => {
-        if (a.season === b.season) return a.episode - b.episode;
-        return a.season - b.season;
-      });
+      const allEpisodes = _getSortedEpisodes(content);
 
-      currentEpisode = episodes.find(
-        (e) => e.season === season && e.episode === episode
-      ) || episodes[0]; // default to first episode
-
-      // Find next episode if available
-      const currentIndex = episodes.indexOf(currentEpisode);
-      nextEpisode = episodes[currentIndex + 1] || null;
+      currentEpisode = allEpisodes.find(ep => ep._id.toString() === currentEpisodeId) || allEpisodes[0];
+      const currentIndex = allEpisodes.indexOf(currentEpisode);
+      nextEpisode = allEpisodes[currentIndex + 1] || null;
     }
-    // Save it in the session and persist
+     // Save it in the session and persist
     req.session.user.contentId = content.id;
+    let nextEpisodeId = nextEpisode ? nextEpisode._id : null;
+    req.session.user.currentEpisodeId = nextEpisodeId;
+    
     await new Promise((resolve, reject) => {
       req.session.save(err => (err ? reject(err) : resolve()));
     });
-    res.json({ content, currentEpisode, nextEpisode });
+
+    res.json({ "contentId": contentId, "nextEpisodeId": nextEpisodeId });
   }
+
+
+// helper function
+function _getSortedEpisodes(content) {
+  if (!content?.seasons || !Array.isArray(content.seasons)) return [];
+
+  const episodes = [];
+  for (const season of content.seasons) {
+    if (!season?.episodes) continue;
+    for (const ep of season.episodes) {
+      episodes.push({
+        ...ep.toObject?.() ?? ep,
+        seasonNumber: season.seasonNumber ?? 1,
+      });
+    }
+  }
+
+  return episodes.sort((a, b) =>
+    a.seasonNumber === b.seasonNumber
+      ? a.episodeNumber - b.episodeNumber
+      : a.seasonNumber - b.seasonNumber
+  );
+}
+
+
+exports.getSeasonEpisodeById = async (req, res) => {
+  const contentId = req.params.id;
+  const episodeId = req.params.episodeId;
+
+  const content = await Content.findById(contentId);
+
+  if (!content || content.type !== 'series' || !Array.isArray(content.seasons)) return null;
+
+  for (const season of content.seasons) {
+    const ep = season.episodes.find(e => e._id.toString() === episodeId.toString());
+    if (ep) {
+      return res.json({ episode: ep, seasonNumber: season.seasonNumber, episodeNumber: ep.episodeNumber });
+    }
+  }
+}
+
+// Get all episodes of a certain sereis
+exports.getEpisodesForSeries = async (req, res) => {
+
+  const content = await Content.findById(req.params.id);
+  if (!content) return res.status(404).json({ error: 'Content not found' });
+
+  if (!req.session?.user?.id) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  if (!req.session?.user?.profileId) {
+    return res.status(401).json({ error: 'No profile selected' });
+  }
+
+  if (content.type !== 'series') return res.json({ episodes: [] });
+
+  const episodes = _getSortedEpisodes(content);
+  
+  // Determine current episode from session
+  const currentEpisodeId = req.session.user.currentEpisodeId;
+  const currentEpisodeIndex = episodes.findIndex(ep => ep._id.toString() === currentEpisodeId);
+
+  res.json({
+    episodes,
+    currentEpisodeIndex,
+    totalSeasons: content.seasons.length
+  });
+};
+
+
+exports._getSortedEpisodes = _getSortedEpisodes;
+
+const DEFAULT_GENRE_LIMIT = Number(process.env.DEFAULT_GENRE_LIMIT) || 10;
+const GENRE_FETCH_LIMIT_MULTIPLIER = Number(process.env.GENRE_FETCH_LIMIT_MULTIPLIER) || 25;
+const GRID_CONTENT_LIMIT = Number(process.env.GRID_CONTENT_LIMIT) || 36;
+
+exports.getGenreSections = async (limit = DEFAULT_GENRE_LIMIT) => {
+  const contents = await Content.find({})
+    .sort({ createdAt: -1 })
+    .limit(limit * GENRE_FETCH_LIMIT_MULTIPLIER)
+    .lean();
+
+  const genreMap = new Map();
+  for (const content of contents) {
+    const genres = Array.isArray(content.genres) ? content.genres : [];
+    for (const rawGenre of genres) {
+      const genre = String(rawGenre || '').trim();
+      if (!genre) continue;
+      const bucket = genreMap.get(genre) || [];
+      if (bucket.length >= limit) continue;
+      bucket.push({
+        id: String(content._id),
+        title: content.title || 'Untitled',
+        posterUrl: content.posterUrl || '/adorastream.png',
+        type: content.type || 'Unknown'
+      });
+      genreMap.set(genre, bucket);
+    }
+  }
+
+  return Array.from(genreMap.entries())
+    .map(([genre, items]) => ({ genre, items }))
+    .filter(section => section.items.length > 0)
+    .sort((a, b) => a.genre.localeCompare(b.genre));
+};
+
+exports.getContentGrid = async (typeFilter, limit = GRID_CONTENT_LIMIT) => {
+  const filter = {};
+  if (typeFilter) {
+    filter.type = typeFilter;
+  }
+  return Content.find(filter)
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .lean();
+};
+
+exports.fetchRandomizedContents = fetchRandomizedContents;
