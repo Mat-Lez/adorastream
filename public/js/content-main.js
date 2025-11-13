@@ -3,8 +3,9 @@ import { logoutEventListener } from '../utils/reuseableEventListeners.js';
 import { switchProfile } from '/utils/profilesManagement.js';
 import { fetchPage } from '../utils/pageManagement.js';
 import { animateOut } from "../utils/reuseableAnimations.js";
-import { openPreview } from "./media-preview.js"
+import { openPreview } from "./media-preview.js";
 
+const NO_POSTER_IMAGE = '/assets/no_poster.svg';
 const SEARCH_RESULTS_LIMIT = 50;
 
 // init functions
@@ -178,11 +179,11 @@ function escapeHtml(value = '') {
 function buildCardMarkup(item = {}) {
   const id = item.id || item._id || '';
   const title = escapeHtml(item.title || 'Untitled');
-  const posterUrl = item.posterUrl || '/assets/no_poster.svg';
+  const posterUrl = item.posterUrl || NO_POSTER_IMAGE;
   return `
     <div class="card" data-id="${id}">
       <div class="card-media">
-        <img src="${posterUrl}" alt="${title}" onerror="this.src='/assets/no_poster.svg';">
+        <img src="${posterUrl}" alt="${title}" onerror="this.onerror=null;this.src='${NO_POSTER_IMAGE}';">
         <div class="play-overlay">▶</div>
       </div>
       <div class="card-title">${title}</div>
